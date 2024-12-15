@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PayUMoneyController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -21,5 +22,13 @@ Route::get('/api/data', [UserController::class, 'index']);
 
 
 Route::post('/api/user/store', [UserController::class, 'store']);
+Route::get('pay-u-money-view',[PayUMoneyController::class,'payUMoneyView']);
+Route::get('pay-u-response',[PayUMoneyController::class,'payUResponse'])->name('pay.u.response');
 
+// Route::get('pay-u-cancel',[PayUMoneyController::class,'payUCancel'])->name('pay.u.cancel');
+// Route::get('/payu-payment', [PayUMoneyController::class, 'initiatePayment'])->name('payu.initiate');
+
+
+Route::post('/api/payu-payment', [PayUMoneyController::class, 'initiatePayment'])->name('payu.initiate');
+Route::post('/api/payu-callback', [PayUMoneyController::class, 'handleCallback'])->name('payu.callback');
 
