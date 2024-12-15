@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<style>
+    input,
+    select {
+        box-shadow: none !important;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #044F60;
+    }
+
+    .btn-primary {
+        background-color: #044F60 !important;
+        border-color: #044F60 !important;
+    }
+
+    .form-check-input:checked {
+        background-color: #044F60;
+        border-color: #044F60;
+    }
+</style>
+<body>
+    <div class="container">
+        <form id="loadDataBtn" method="POST">
+            <div class="mb-3">
+                <h2>Schedule Call</h2>
+            </div>
+            <div class="mb-3">
+                <label for="exampleInputEmail1" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="exampleInputEmail1" name="email" aria-describedby="">
+            </div>
+            <!-- <div class="mb-3">
+                <label for="exampleInputPassword1" class="form-label">Password</label>
+                <input type="password" class="form-control" name="password" id="exampleInputPassword1">
+            </div> -->
+            <div class="mb-3">
+                <label for="amount" class="form-label">Amount</label>
+                <input type="number" class="form-control" id="amount" name="amount" aria-describedby="">
+            </div>
+            <div class="mb-3">
+                <label for="mobile" class="form-label">Mobile</label>
+                <input type="mobile" class="form-control" id="mobile" name="mobile" aria-describedby="">
+            </div>
+            <!-- <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="exampleCheck1" name="check_me_out">
+                <label class="form-check-label" for="exampleCheck1">Check me out</label>
+            </div>
+            <div class="mb-3">
+                <select class="form-select" aria-label="Default select example" name="menu">
+                    <option selected>Open this select menu</option>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                </select>
+            </div>
+            <div class="mb-3 form-check">
+                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                <label class="form-check-label" for="flexRadioDefault1">
+                  Default radio
+                </label>
+            </div> -->
+            
+            <div>
+                <button type="submit" class="btn btn-primary" >Submit</button>
+            </div>
+        </form>
+
+        <form action="asdasdasd/asdasd/asdas" method="POST" name="payuForm">
+            <!-- @foreach ($data as $key => $value)
+                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+            @endforeach -->
+            <!-- <button type="submit">Redirecting to PayU</button> -->
+        </form>
+    </div>
+    <div id="response"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+
+$(document).ready(() => {
+    $('#loadDataBtn').on('submit', async (e) => {
+        e.preventDefault(); // Prevent default form submission
+
+        try {
+            const formElement = document.querySelector('#loadDataBtn');
+            const formData = new FormData(formElement);
+
+            // Convert formData to a plain object
+            const formObject = Object.fromEntries(formData.entries());
+
+            // Send the POST request
+            const response = await fetch('http://127.0.0.1:8000/api/payu-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // CSRF token
+                },
+                body: JSON.stringify(formObject),
+            });
+
+            
+            // Parse the JSON response
+            const data = await response.json();
+
+            // Render the response for debugging
+            document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
+
+            // Select the form and set the action
+            const payuForm = document.forms['payuForm'];
+            payuForm.action = data?.url || ''; // Ensure the URL is set
+
+            // Add hidden inputs dynamically
+            if (data.data) {
+                for (const [key, value] of Object.entries(data.data)) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = key;
+                    hiddenInput.value = value;
+                    payuForm.appendChild(hiddenInput);
+                }
+            }
+
+            // Submit the form
+            payuForm.submit();
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    });
+});
+
+</script>
+
+</body>
+</html>
