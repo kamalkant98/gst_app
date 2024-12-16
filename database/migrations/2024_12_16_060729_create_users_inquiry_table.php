@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('form_type');
             $table->text('message')->nullable(); // Inquiry message
             $table->integer('otp')->nullable();
-            $table->timestamps("otp_expires_at");
+            $table->timestamp("otp_expires_at");
             $table->boolean('is_verified')->default(0);
             $table->timestamps(); // Created at and Updated at columns
         });

@@ -36,3 +36,4 @@ Route::Post('/api/verifyOtp',[UserController::class, 'verifyOtp']);
 Route::post('/api/payu-payment', [PayUMoneyController::class, 'initiatePayment'])->name('payu.initiate');
 Route::post('/api/payu-callback', [PayUMoneyController::class, 'handleCallback'])->name('payu.callback');
 
+Route::Post('/api/user/store',[UserController::class, 'store']);
