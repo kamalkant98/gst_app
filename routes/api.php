@@ -18,6 +18,7 @@ use App\Http\Controllers\PayUMoneyController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
 Route::get('/api/data', [UserController::class, 'index']);
 
 Route::Post('/api/generate_otp',[UserController::class, 'generate_otp']);
