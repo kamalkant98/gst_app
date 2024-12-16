@@ -20,10 +20,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 Route::get('/api/data', [UserController::class, 'index']);
 
+Route::Post('/api/generate_otp',[UserController::class, 'generate_otp']);
+Route::Post('/api/verifyOtp',[UserController::class, 'verifyOtp']);
 
-Route::post('/api/user/store', [UserController::class, 'store']);
-Route::get('pay-u-money-view',[PayUMoneyController::class,'payUMoneyView']);
-Route::get('pay-u-response',[PayUMoneyController::class,'payUResponse'])->name('pay.u.response');
+
+// Route::post('/api/user/store', [UserController::class, 'store']);
+// Route::get('pay-u-money-view',[PayUMoneyController::class,'payUMoneyView']);
+// Route::get('pay-u-response',[PayUMoneyController::class,'payUResponse'])->name('pay.u.response');
 
 // Route::get('pay-u-cancel',[PayUMoneyController::class,'payUCancel'])->name('pay.u.cancel');
 // Route::get('/payu-payment', [PayUMoneyController::class, 'initiatePayment'])->name('payu.initiate');
