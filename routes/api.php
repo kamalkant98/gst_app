@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PayUMoneyController;
+use App\Http\Controllers\BusinessRegistrationController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -37,3 +38,5 @@ Route::post('/api/payu-payment', [PayUMoneyController::class, 'initiatePayment']
 Route::post('/api/payu-callback', [PayUMoneyController::class, 'handleCallback'])->name('payu.callback');
 
 Route::Post('/api/user/store',[UserController::class, 'store']);
+
+Route::post('/api/business-registration/store', [BusinessRegistrationController::class, 'businessStore'])->name('business-registration-store');
