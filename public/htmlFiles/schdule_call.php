@@ -9,53 +9,97 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+
+    <style>
+        /* input,
+        select {
+            box-shadow: none !important;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #044F60;
+        }
+
+        .btn-primary {
+            background-color: #044F60 !important;
+            border-color: #044F60 !important;
+        }
+
+        .form-check-input:checked {
+            background-color: #044F60;
+            border-color: #044F60;
+        } */
+
+        .pad-bg {
+            background: #f8f8f8;
+            padding: 40px 20px;
+            border-radius: 5px;
+            margin-top: 50px;
+            margin-bottom: 50px;
+            border: 1px solid #e5e5e5;
+        }
+
+        h1 {
+            padding-bottom: 30px;
+            margin-top: 0;
+            margin-bottom: 30px;
+            border-bottom: 1px dashed #ccc;
+        }
+        .error{
+            color: red;
+        }
+        .otp-box{
+            display: none;
+        }
+        .hidden-box-1 {
+            display: none;
+        }
+        .hidden-box-2 {
+            display: none;
+        }
+        #multi-select{
+            height: 26px;
+            display: flex;
+            flex-direction: column;
+        }
+        .select2-container--default .select2-search--inline .select2-search__field {
+            height: 25px !important;
+        }
+        .m-select{
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+    </style>
+
+
 </head>
-<style>
-    /* input,
-    select {
-        box-shadow: none !important;
-    }
+<?php
 
-    .form-control:focus,
-    .form-select:focus {
-        border-color: #044F60;
-    }
+    $query_types = [
+        ['value'=>'1','label' => 'Income Tax Returns'],
+        ['value'=>'2','label' => 'TDS Returns'],
+        ['value'=>'3','label' => 'GST Returns'],
+        ['value'=>'4','label' => 'Business Registration And Licenses'],
+        ['value'=>'5','label' => 'NRI Taxation'],
+        ['value'=>'6','label' => 'Consultancy Services'],
+        ['value'=>'7','label' => 'Other Query']
+    ];
 
-    .btn-primary {
-        background-color: #044F60 !important;
-        border-color: #044F60 !important;
-    }
+    $plan_types = [
+        ['value'=>'1','label' => '10 minutes plan'],
+        ['value'=>'2','label' => '20 minutes plan'],
+        ['value'=>'3','label' => '30 minutes plan'],
 
-    .form-check-input:checked {
-        background-color: #044F60;
-        border-color: #044F60;
-    } */
+    ];
+    $language = [
+        ['value'=>'1','label' => 'Hindi'],
+        ['value'=>'2','label' => 'English'],
 
-    .pad-bg {
-        background: #f8f8f8;
-        padding: 40px 20px;
-        border-radius: 5px;
-        margin-top: 50px;
-        margin-bottom: 50px;
-        border: 1px solid #e5e5e5;
-    }
-
-    h1 {
-        padding-bottom: 30px;
-        margin-top: 0;
-        margin-bottom: 30px;
-        border-bottom: 1px dashed #ccc;
-    }
-    .error{
-        color: red;
-    }
-    .otp-box{
-        display: none;
-    }
-    .hidden-box {
-        display: none;
-    }
-</style>
+    ];
+?>
 
 <body>
     <div class="container">
@@ -72,12 +116,12 @@
                     </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control " id="name" name="name" requiredInput>
+                        <input type="text" class="form-control " id="name" name="name" requiredInput placeholder="Fullname">
 
                     </div>
                     <div class="mb-3">
                         <label for="exampleInputEmail1" class="form-label">Email address</label>
-                        <input type="text" class="form-control " id="exampleInputEmail1" name="email" requiredInput>
+                        <input type="text" class="form-control " id="exampleInputEmail1" name="email" requiredInput placeholder="Email">
                     </div>
                     <!-- <div class="mb-3">
                         <label for="amount" class="form-label">Amount</label>
@@ -85,35 +129,52 @@
                     </div> -->
                     <div class="mb-3">
                         <label for="mobile" class="form-label">Mobile</label>
-                        <input type="mobile" class="form-control" id="mobile" name="mobile" requiredInput>
+                        <input type="mobile" class="form-control" id="mobile" name="mobile" requiredInput placeholder="Mobile">
                     </div>
 
-                    <div class="mb-3 otp-box hidden-box">
+                    <div class="mb-3 hidden-box-1">
                         <label for="otp" class="form-label">Otp</label>
                         <input type="text" class="form-control hide-input" id="otp" name="otp" maxlength="6" requiredInput pattern="\d{6}" placeholder="******" title="OTP must be exactly 6 digits">
                         <!-- <input type="number" class="form-control hide" id="otp" name="otp" requiredInput pattern="\d{6}" placeholder="******" title="OTP must be 6 digits."> -->
                     </div>
 
-                    <div class="mb-3 hidden-box-2">
-                        <select class="form-select" name="typeselect" aria-label="Default select example">
-                            <option selected>Open this select menu</option>
-                            <option value="1">One</option>
-                            <option value="2">Two</option>
-                            <option value="3">Three</option>
+                    <div class="mb-3 hidden-box-2 m-select-check">
+                        <label for="multi-select" class="form-label">Select Your Query</label>
+                        <select id="multi-select" class="form-control hide-input" name="queryType" requiredInput  multiple="multiple">
+                            <?php foreach ($query_types as $type): ?>
+                                <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
 
                     <div class="mb-3 hidden-box-2">
-                    <input type="text" id="datepicker" name="datetime" class="form-control" placeholder="Y-m-d H:i"> 
+                    <label for="datepicker" class="form-label">Select Date & Time</label>
+                    <input type="text" id="datepicker" name="datetime" class="form-control hide-input" requiredInput placeholder="Y-m-d H:i">
                     </div>
-                    <!-- <div class="mb-3 otp-box hidden-box" >
-                        <label for="otp" class="form-label">Otp</label>
-                        <input type="text" class="form-control hidden-input" id="otp" name="otp" maxlength="6" requiredInput pattern="\d{6}" placeholder="******" title="OTP must be exactly 6 digits">
-                         <input type="number" class="form-control hide" id="otp" name="otp" requiredInput pattern="\d{6}" placeholder="******" title="OTP must be 6 digits.">
-                    </div> -->
+
+                    <div class="mb-3 hidden-box-2 ">
+                        <label for="multi-select" class="form-label">Choose Plan</label>
+                        <select id="plan" class="form-control hide-input" requiredInput name="plan">
+                        <option  value="">select value</option>
+                            <?php foreach ($plan_types as $type): ?>
+
+                                <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3 hidden-box-2">
+                        <label for="multi-select" class="form-label">Choose Language</label>
+                        <select id="plan" class="form-control hide-input" requiredInput name="plan">
+                        <option value="">select value</option>
+                            <?php foreach ($language as $type): ?>
+
+                                <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
 
                     <div>
-                        <button type="submit" id="submit_button" class="btn btn-primary">Submit</button>
+                        <button type="submit" id="submit_button" class="btn btn-primary">veryify Your Number</button>
                     </div>
 
 
@@ -130,51 +191,18 @@
 
 
     <div id="response"></div>
+
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-        
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-
-
-        // async function getPublicHolidays(year) {
-        //     const response = await fetch(`https://holidayapi.com/v1/holidays?pretty&key=add32bae-dd85-48bf-b707-9bb08892b631&country=IN&year=2023`);
-        //     const data = await response.json();
-        //     let jk = data.holidays
-        //     return jk.map(holiday => holiday.date); // Return array of holiday dates (YYYY-MM-DD)
-        // }
-
-        // // Disable weekends and public holidays
-        // async function initDatePicker() {
-        //     const today = new Date();
-        //     const nextMonth = new Date();
-        //     nextMonth.setMonth(today.getMonth() + 1); // Get the date next month
-
-        //     const publicHolidays = await getPublicHolidays(today.getFullYear());
-
-        //     flatpickr("#datepicker", {
-        //         minDate: today, // Allow dates starting from today
-        //         maxDate: nextMonth, // Allow dates until the end of next month
-        //         disable: [
-        //             // Disable weekends (Saturday and Sunday)
-        //             function(date) {
-        //                 return date.getDay() === 0 || date.getDay() === 6; // 0 is Sunday, 6 is Saturday
-        //             },
-        //             // Disable public holidays
-        //             function(date) {
-        //                 const dateStr = date.toISOString().split('T')[0]; // Convert date to YYYY-MM-DD format
-        //                 return publicHolidays.includes(dateStr); // If the date is a holiday, disable it
-        //             }
-        //         ],
-        //         dateFormat: "Y-m-d", // Format the date as YYYY-MM-DD
-        //     });
-        // }
-
-        // // Initialize the date picker
-        // initDatePicker();
 
 
 
@@ -186,8 +214,46 @@
             const data = await response.json();
             let holidays = data?.response?.holidays;
             // console.log(holidays);
-            
+
             return holidays.map(holiday => holiday.date.iso); // Return array of holiday dates (YYYY-MM-DD)
+        }
+
+
+        async function fetchPublicHolidays() {
+            try {
+
+                    const API_KEY = 'AIzaSyD5_j5XtDqu_IBjkAOu8w_FraLVQcDCeKk';
+                    const CALENDAR_ID = 'en.indian%23holiday@group.v.calendar.google.com'; // URL-encoded Calendar ID
+
+                    // Set year dynamically
+                    const year = 2024; // Change the year as needed
+                    const timeMin = `${year}-01-01T00:00:00Z`; // Start of the year
+                    const timeMax = `${year}-12-31T23:59:59Z`; // End of the year
+
+                    const URL = `https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}`;
+
+                const response = await fetch(URL);
+
+                // Check if the response is OK
+                if (!response.ok) {
+                throw new Error(`HTTP Error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log(`Public Holidays for ${year}:`, data);
+
+                // Display the events in the console
+                if (data.items && data.items.length > 0) {
+                    data.items.forEach((event) => {
+                        const start = event.start.date || event.start.dateTime;
+                        console.log(`${start} - ${event.summary}`);
+                    });
+                } else {
+                    console.log(`No public holidays found for ${year}.`);
+                }
+            } catch (error) {
+                console.error('Error fetching public holidays:', error.message);
+            }
         }
 
         // Disable weekends and public holidays
@@ -197,28 +263,7 @@
             nextMonth.setMonth(today.getMonth() + 1); // Get the date next month
 
             const publicHolidays = await getPublicHolidays(today.getFullYear());
-
-            // flatpickr("#datepicker", {
-            //     minDate: today, // Allow dates starting from today
-            //     maxDate: nextMonth, // Allow dates until the end of next month
-            //     enableTime: true, // Enable time selection
-            //     noCalendar: false, // Show calendar for date selection
-            //     dateFormat: "Y-m-d H:i", // Format the date and time (YYYY-MM-DD HH:mm)
-            //     time_24hr: true, // 24-hour time format
-            //     disable: [
-            //         // Disable weekends (Saturday and Sunday)
-            //         function(date) {
-            //             return date.getDay() === 0 //|| date.getDay() === 6; // 0 is Sunday, 6 is Saturday
-            //         },
-            //         // Disable public holidays
-            //         function(date) {
-            //             const dateStr = date.toISOString().split('T')[0]; // Convert date to YYYY-MM-DD format
-            //             return publicHolidays.includes(dateStr); // If the date is a holiday, disable it
-            //         }
-            //     ],  
-            // });
-
-
+            console.log(publicHolidays,'publicHolidays');
             flatpickr("#datepicker", {
                 minDate: today, // Allow dates starting from today
                 maxDate: nextMonth, // Allow dates until the end of next month
@@ -256,7 +301,7 @@
 
         // Initialize the date picker
         initDatePicker();
-
+        fetchPublicHolidays();
 
 
 
@@ -282,14 +327,79 @@
         }
 
 
-        
+
         $(document).ready(() => {
-            
+
+            // Initialize Select2
+            $('#multi-select').select2({
+                placeholder: "Select options",
+                closeOnSelect: false, // Prevent dropdown from closing on selection
+                templateResult: formatOption, // Custom rendering for dropdown options
+                templateSelection: formatSelection // Custom rendering for selected options
+            });
+
+            // Function to render checkboxes in options
+            function formatOption(option) {
+                if (!option.id) {
+                return option.text; // For the placeholder
+                }
+                const isChecked = option.selected ? "checked" : "";
+                const $option = $(
+                `<span>
+                    <input type="checkbox" class="option-checkbox" style="margin-right: 10px;" ${isChecked} />
+                    ${option.text}
+                </span>`
+                );
+                return $option;
+            }
+
+            // Function to customize the selected option display
+            function formatSelection(option) {
+                return option.text;
+            }
+
+            // Handle clicks on checkboxes or options
+            $(document).on('click', '.select2-results__option', function (e) {
+                e.preventDefault(); // Prevent default Select2 behavior
+
+                const $checkbox = $(this).find('input[type="checkbox"]');
+                const isChecked = $checkbox.prop('checked');
+                const value = $(this).data('select2Id');
+
+                // Toggle checkbox state
+                $checkbox.prop('checked', !isChecked);
+
+                // Update the Select2 value
+                const selectedValues = $('#multi-select').val() || [];
+                if (!isChecked) {
+                    selectedValues.push(value);
+                } else {
+                    const index = selectedValues.indexOf(value);
+                    if (index > -1) {
+                        selectedValues.splice(index, 1);
+                    }
+                }
+                $('#multi-select').val(selectedValues).trigger('change');
+            });
+
+            // Sync checkboxes with the default behavior
+            $('#multi-select').on('change', function () {
+                $('.select2-results__option').each(function () {
+                const $checkbox = $(this).find('input[type="checkbox"]');
+                const value = $(this).data('data')?.id;
+                if (value) {
+                    const isSelected = $('#multi-select').val().includes(value);
+                    $checkbox.prop('checked', isSelected);
+                }
+                });
+            });
+
+
             $('#mobile').on('change', async (e) => {
                 let steps =  document.getElementById('steps');
                 let otp =  document.getElementById('otp');
                 steps.value = 1
-                document.querySelector('.hidden-box').style.display = 'none';
+                document.querySelector('.hidden-box-1').style.display = 'none';
                 let inputs = document.querySelectorAll('.show-input');
                 inputs.forEach(input => {
                     input.value = ''
@@ -304,8 +414,9 @@
 
                 try {
                     let steps =  document.getElementById('steps');
+                    const inputsww = document.getElementById('submit_button');
                     console.log("steps",steps.value);
-                    
+
                     const errorElements = document.querySelectorAll('.error');
                     // Loop through and remove each element
                     errorElements.forEach(element => {
@@ -323,45 +434,36 @@
                             errorElement.className = 'error'; // Add error class for styling
                             errorElement.textContent = `${input.name.charAt(0).toUpperCase() + input.name.slice(1)} is required.`;
 
-                            // Insert the error message after the input field
                             input.after(errorElement);
                             input.classList.add('is-invalid');
                             isValid = false;
-                            
-                        } 
-                        
+
+                        }
+
                         if(input.name == 'email' && input.value != '' ){
                             let checkEmail = isValidEmail(input.value)
                                 if(isValidEmail(input.value) == false ){
-                                    
+
                                     let errorElement = document.createElement('span');
                                     errorElement.className = 'error'; // Add error class for styling
                                     errorElement.textContent = `Please enter a valid email address.`;
                                     input.after(errorElement);
                                     input.classList.add('is-invalid');
                                     isValid = false;
-                                }else{
-                                    // input.classList.add('is-valid');
                                 }
                         }
-                        
+
                         if(input.name == 'mobile' && input.value != '' ){
                             // let checkMobile = isValidIndianMobileNumber(input.value)
                                 if(isValidIndianMobileNumber(input.value) == false ){
-                                    
+
                                     let errorElement = document.createElement('span');
                                     errorElement.className = 'error'; // Add error class for styling
                                     errorElement.textContent = `Please enter a valid mobile Number.`;
                                     input.after(errorElement);
                                     input.classList.add('is-invalid');
                                     isValid = false;
-                                }else{
-                                    // input.classList.add('is-valid');
                                 }
-                        }else{
-                            // if( !input.classList.contains('hide')){
-                            //     input.classList.add('is-valid');
-                            // }
                         }
                     });
 
@@ -373,8 +475,6 @@
                         const formData = new FormData(formElement);
 
                         const formObject = Object.fromEntries(formData.entries());
-                        console.log("formObject",formObject);
-                        
                         // Send the POST request
                         const response = await fetch('http://127.0.0.1:8000/api/generate_otp', {
                             method: 'POST',
@@ -388,7 +488,7 @@
 
                         // Parse the JSON response
                         const data = await response.json();
-                        
+
                         if(data && data.data > 0){
                             let checkIdinput =  document.querySelector('#id');
                             if(!checkIdinput){
@@ -400,19 +500,17 @@
                                 formElement.appendChild(hiddenInput);
                             }
 
-                            document.querySelector('.otp-box').style.display = 'block';
+                            document.querySelector('.hidden-box-1').style.display = 'block';
                             document.querySelector('#otp').classList.remove('hide-input');
                             document.querySelector('#otp').classList.add('show-input');
-                            const inputsww = document.getElementById('submit_button');
+
                             steps.value = '2'
                             inputsww.textContent = 'Veryfy OTP'
                         }
-                        // Render the response for debugging
-                        document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
+                       document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
                     }
 
 
-                    //verify Otp
                     let otp =  document.getElementById('otp');
                     let id =  document.getElementById('id');
                     if(isValid && steps.value == 2 && otp.value > 0 &&  id.value > 0){
@@ -434,27 +532,75 @@
                             errorElement.textContent = `${data.error}`;
 
                             // Insert the error message after the input field
-                            otp.after(errorElement);  
+                            otp.after(errorElement);
                             otp.classList.add('is-invalid');
                             isValid = false;
                         }else{
                             otp.classList.add('is-valid');
+                            // document.getElementById('mobile').classList.add('is-valid')
+                            // document.querySelector('.hidden-box-1').style.display = 'none';
+
+                            let allbox  = document.querySelectorAll('.hidden-box-2');
+                            allbox.forEach(box => {
+                                if(box.classList.contains('m-select-check')){
+
+                                    box.classList.add('m-select');
+                                }else{
+                                    box.style.display = 'block';
+                                }
+
+                            })
+
+                            let inputs  = document.querySelectorAll('.hide-input');
+                            inputs.forEach(input => {
+                                input.classList.remove('hide-input');
+                                input.classList.add('show-input');
+
+                            })
+
                             steps.value = '3'
+                            inputsww.textContent = 'Schedule Your Call'
+                            isValid = false
+
                         }
                         document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
 
                     }
 
+                    if(isValid && steps.value == 3){
+                        const formElement = document.querySelector('#scheduleform');
+                        const formData = new FormData(formElement);
+                        const formObject = Object.fromEntries(formData.entries());
+                        const selectedValues = $('#multi-select').val() || [];
+                        formObject.QueryType = selectedValues
+                        console.log(selectedValues,"====selectedValues",formObject);
+                        const response = await fetch('http://127.0.0.1:8000/api/payu-paymentss', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // CSRF token
+                            },
+                            body: JSON.stringify(formObject),
+                        });
 
+                        // Parse the JSON response
+                        const data = await response.json();
+
+                        // Render the response for debugging
+                        document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
+                    }
 
                     let jk = 1;
-                    if (isValid && steps.value == 3) {
+                    if (isValid && steps.value == 10) {
                         const formElement = document.querySelector('#scheduleform');
                         const formData = new FormData(formElement);
 
 
                         // Convert formData to a plain object
                         const formObject = Object.fromEntries(formData.entries());
+
+
 
                         // Send the POST request
                         const response = await fetch('http://127.0.0.1:8000/api/payu-payment', {
