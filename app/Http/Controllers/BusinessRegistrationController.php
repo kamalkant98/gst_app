@@ -47,7 +47,7 @@ class BusinessRegistrationController extends Controller
 
         // Here you can save the data to the database if needed
         // Example of saving to the database (assuming a 'business_registrations' table exists):
-        
+
         BusinessRegistration::create([
             'registration_type' => $registrationType,
             'documents' => json_encode($uploadedFiles), // Store files as JSON
@@ -68,9 +68,9 @@ class BusinessRegistrationController extends Controller
 
         //  // Send OTP to the provided phone number
          $this->otpService->sendOtp($phone, $otp);
- 
+
          return response()->json(['message' => 'OTP sent successfully']);
-       
+
         // phone send otp end
 
 
@@ -89,19 +89,20 @@ class BusinessRegistrationController extends Controller
         //Send whatsapp message end
 
         //Send email start
-        
+
 
         $data = [
             'email' => $request['email'],
             'title' => 'Welcome to our App',
             'message' => 'Thank you for registering with us!',
         ];
-    
+
         // // Dispatch the job
         SendEmailJob::dispatch($data);
 
         //Send email end
-        
+
     }
+
 
 }

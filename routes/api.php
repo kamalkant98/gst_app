@@ -24,6 +24,8 @@ Route::get('/api/data', [UserController::class, 'index']);
 
 Route::Post('/api/generate_otp',[UserController::class, 'generate_otp']);
 Route::Post('/api/verifyOtp',[UserController::class, 'verifyOtp']);
+Route::Post('/api/calculatePlan',[UserController::class, 'saveAndCalculatePlan']);
+
 
 
 // Route::post('/api/user/store', [UserController::class, 'store']);

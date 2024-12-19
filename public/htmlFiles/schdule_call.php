@@ -304,16 +304,6 @@
         fetchPublicHolidays();
 
 
-
-
-
-
-
-
-
-
-
-
         function isValidEmail(email) {
             // Regular expression for validating email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

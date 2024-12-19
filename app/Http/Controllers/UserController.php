@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Jobs\SendEmailJob;
 use App\Services\WhatsAppService;
 use App\Services\OtpService;
-
+use App\Models\ScheduleCall;
+use App\Models\Coupon;
 
 class UserController extends Controller
 {
@@ -19,11 +20,11 @@ class UserController extends Controller
     protected $otpService;
 
 
-    public function __construct(WhatsAppService $whatsAppService,OtpService $otpService)
-    {
-        $this->whatsAppService = $whatsAppService;
-        $this->otpService = $otpService;
-    }
+    // public function __construct(WhatsAppService $whatsAppService,OtpService $otpService)
+    // {
+    //     $this->whatsAppService = $whatsAppService;
+    //     $this->otpService = $otpService;
+    // }
 
     public function index(){
 
@@ -46,9 +47,9 @@ class UserController extends Controller
 
         //  // Send OTP to the provided phone number
         //  $this->otpService->sendOtp($phone, $otp);
- 
+
         //  return response()->json(['message' => 'OTP sent successfully']);
-       
+
         // phone send otp end
 
 
@@ -67,14 +68,14 @@ class UserController extends Controller
         //Send whatsapp message end
 
         //Send email start
-        
+
 
         // $data = [
         //     'email' => $request['email'],
         //     'title' => 'Welcome to our App',
         //     'message' => 'Thank you for registering with us!',
         // ];
-    
+
         // // Dispatch the job
         // SendEmailJob::dispatch($data);
 
@@ -172,6 +173,70 @@ class UserController extends Controller
             return response()->json(['error' => 'Invalid OTP.'], 400);
         }
     }
+
+
+    public function saveAndCalculatePlan(Request $request){
+
+        $data = $request->all();
+
+
+
+
+        // if($data->formType == 'schedule_call'){
+
+        // }
+        $getPlan = getCallPlanAmount($data['plan']);
+        $amount =$getPlan['value'];
+        $coupon=null;
+        $coupon_id = null;
+        $lessAmount=0;
+        $inputCoupon ='';
+        // $data['coupon'] = 'FIRST20%';
+        if(isset($data['coupon'])){
+        $inputCoupon = $data['coupon'];
+
+        $CalculateCoupon = CalculateCoupon($data['coupon'],$amount);
+
+            if(isset($CalculateCoupon['finalAmount']) && isset($CalculateCoupon['getCoupon'])){
+                $lessAmount = floor(($amount - $CalculateCoupon['finalAmount']) * 100) / 100;
+                $amount = floor($CalculateCoupon['finalAmount'] * 100) / 100;
+                $coupon = $CalculateCoupon['getCoupon'];
+                $coupon_id= $coupon['id'];
+            }else{
+                $coupon = $CalculateCoupon;
+            }
+        }
+        // return response()->json(['coupon'=>$coupon]);
+
+        $getQuery = Call_query_type($data['QueryType']);
+
+        $QueryType = implode(', ', $data['QueryType']);
+        $QueryTypeName = implode(', ', $getQuery);
+        $setData = [
+            'user_id' => $request['id'],
+            'call_datetime' =>$request['datetime'],
+            'language' =>$request['language'],
+            'form_type' => $request['form_type'],
+            'plan' => $request['plan'],
+            'query_type'=>$QueryType,
+            'coupon_id'=>$coupon_id,
+            'total_amount'=> (float)$amount,
+        ];
+
+        $getCall;
+        if(isset($data['call_id']) && $data['call_id'] > 0){
+            $getCall = ScheduleCall::where('id', $data['call_id'])->first();
+            $getCall->update($setData);
+
+        }else{
+            $getCall = ScheduleCall::create($setData);
+        }
+
+
+
+        return response()->json(['call_id'=>$getCall->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon], 200);
+    }
+
 
 }
 
