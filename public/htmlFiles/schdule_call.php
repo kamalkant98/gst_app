@@ -71,6 +71,15 @@
             display: flex !important;
             flex-direction: column !important;
         }
+        .payment-summary {
+            display: none;
+        }
+        #remove-coupon{
+            display: none;
+        }
+        #checkOutbtn{
+            display: none;
+        }
 
     </style>
 
@@ -95,8 +104,8 @@
 
     ];
     $language = [
-        ['value'=>'1','label' => 'Hindi'],
-        ['value'=>'2','label' => 'English'],
+        ['value'=>'Hindi','label' => 'Hindi'],
+        ['value'=>'English','label' => 'English'],
 
     ];
 ?>
@@ -107,10 +116,12 @@
 
 
         <div class="row justify-content-md-center mt-5">
-            <div class="col-8 col-offset-2 col-sm-8 col-sm-offset-2">
+            <div class="col-lg-6 col-md-8 col-offset-2 col-sm-12 col-sm-offset-2">
                 <!-- Default form -->
                 <form id="scheduleform" method="POST" name="scheduleform">
                     <input type="hidden" id="steps" name="steps" value="1">
+                    <input type="hidden" id ="form_type" name="form_type" value="schedule_call">
+
                     <div class="mb-3 text-center">
                         <h2>Schedule Call</h2>
                     </div>
@@ -164,7 +175,7 @@
                     </div>
                     <div class="mb-3 hidden-box-2">
                         <label for="multi-select" class="form-label">Choose Language</label>
-                        <select id="plan" class="form-control hide-input" requiredInput name="plan">
+                        <select id="language" class="form-control hide-input" requiredInput name="language">
                         <option value="">select value</option>
                             <?php foreach ($language as $type): ?>
 
@@ -177,11 +188,17 @@
                         <button type="submit" id="submit_button" class="btn btn-primary">veryify Your Number</button>
                     </div>
 
+                    <div class="payment-summary" id ="payment-summary">
+
+                    </div>
 
                 </form>
 
                 <form action="#" method="POST" name="payuForm">
                 </form>
+                <div class="text-center mt-4">
+                        <button class="btn btn-primary btn-lg w-100 mt-4"  id ='checkOutbtn' onclick="proceedToCheckout()">Proceed to Checkout</button>
+                </div>
             </div>
         </div>
 
@@ -304,6 +321,16 @@
         fetchPublicHolidays();
 
 
+
+
+
+
+
+
+
+
+
+
         function isValidEmail(email) {
             // Regular expression for validating email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -398,7 +425,9 @@
                 })
             });
 
-
+            let call_id=0;
+            form_type =''
+            user_id = 0
             $('#scheduleform').on('submit', async (e) => {
                 e.preventDefault(); // Prevent default form submission
 
@@ -564,7 +593,7 @@
                         const selectedValues = $('#multi-select').val() || [];
                         formObject.QueryType = selectedValues
                         console.log(selectedValues,"====selectedValues",formObject);
-                        const response = await fetch('http://127.0.0.1:8000/api/payu-paymentss', {
+                        const response = await fetch('http://127.0.0.1:8000/api/calculatePlan', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -579,34 +608,164 @@
 
                         // Render the response for debugging
                         document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
+                            let checkIdinput =  document.querySelector('#call_id');
+                            if(!checkIdinput){
+                                let hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name = 'call_id';
+                                hiddenInput.id = 'call_id';
+                                hiddenInput.value = data.call_id;
+                                formElement.appendChild(hiddenInput);
+                            }
+
+                            call_id =  data.call_id;
+                            form_type = formObject?.form_type;
+                            user_id = formObject?.id;
+
+                        let html=`<div>
+                            <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
+                            <div class="row justify-content-center">
+                            <div class="col-md-12">
+                                <!-- Subscription Items -->
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <!-- Item 1 -->
+                                        <div id='cart-details'>
+                                            <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                                            <div>
+                                                <h6>Schedule Call</h6>
+                                                <p class="text-muted mb-1">Regarding ::${data?.regarding}</p>
+
+                                            </div>
+                                            <div class="fw-bold">₹${data?.getPlan?.value}</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Coupon Code -->
+                                        <div class="mt-4 border-bottom pb-3">
+                                            <h6>Have a Coupon Code?</h6>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="coupon-code" name='coupon' placeholder="Enter coupon code" value='${data?.inputCoupon}'>
+                                                <button class="btn btn-primary" id="apply-coupon">Apply</button>
+                                                <button class="btn btn-danger" id="remove-coupon">Remove Coupon</button>
+                                            </div>
+                                                <p id="coupon-message" class="text-success mt-2 d-none">Coupon applied successfully!</p>
+                                        </div>
+                                       ${data?.coupon && data?.coupon?.id > 0 ? `
+                                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                                <h6>Coupon Code :: <strong>${data.coupon.code}</strong></h6>
+                                                <span class="fw-bold">₹${data.lessAmount}</span>
+                                            </div>
+                                        ` : `${data?.coupon != null ?`
+                                             <div class="d-flex justify-content-between align-items-center mt-3">
+                                                <h6>Coupon Code :: <strong style="color">${data.coupon}</strong></h6>
+                                            </div>`:''}
+                                        `}
+
+
+                                        <!-- Total -->
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <h6>Total:</h6>
+                                            <span class="fw-bold">$${data?.amount}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                                <!-- Checkout Button -->
+
+                            </div>
+                            </div>
+                        </div>`;
+
+
+                        document.getElementById("checkOutbtn").style.display = 'block'
+                        document.getElementById("payment-summary").innerHTML = html;
+                        document.getElementById("payment-summary").style.display = 'block'
+
+                        // if(formObject.coupon != null  && formObject.coupon != 'null')
+                        // steps.value = '4'
+
                     }
 
-                    let jk = 1;
-                    if (isValid && steps.value == 10) {
-                        const formElement = document.querySelector('#scheduleform');
-                        const formData = new FormData(formElement);
+
+                    // let jk = 1;
+                    // if (isValid && steps.value == 10) {
+                    //     const formElement = document.querySelector('#scheduleform');
+                    //     const formData = new FormData(formElement);
 
 
-                        // Convert formData to a plain object
-                        const formObject = Object.fromEntries(formData.entries());
+                    //     // Convert formData to a plain object
+                    //     const formObject = Object.fromEntries(formData.entries());
 
 
 
-                        // Send the POST request
-                        const response = await fetch('http://127.0.0.1:8000/api/payu-payment', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // CSRF token
-                            },
-                            body: JSON.stringify(formObject),
-                        });
+                    //     // Send the POST request
+                    //     const response = await fetch('http://127.0.0.1:8000/api/payu-payment', {
+                    //         method: 'POST',
+                    //         headers: {
+                    //             'Content-Type': 'application/json',
+                    //             'Accept': 'application/json',
+                    //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // CSRF token
+                    //         },
+                    //         body: JSON.stringify(formObject),
+                    //     });
 
 
-                        // Parse the JSON response
-                        const data = await response.json();
+                    //     // Parse the JSON response
+                    //     const data = await response.json();
 
+                    //     // Render the response for debugging
+                    //     document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
+
+                    //     // Select the form and set the action
+                    //     const payuForm = document.forms['payuForm'];
+                    //     payuForm.action = data?.url || ''; // Ensure the URL is set
+
+                    //     // Add hidden inputs dynamically
+                    //     if (data.data) {
+                    //         for (const [key, value] of Object.entries(data.data)) {
+                    //             const hiddenInput = document.createElement('input');
+                    //             hiddenInput.type = 'hidden';
+                    //             hiddenInput.name = key;
+                    //             hiddenInput.value = value;
+                    //             payuForm.appendChild(hiddenInput);
+                    //         }
+                    //     }
+
+                    //     // Submit the form
+                    //     payuForm.submit();
+                    // }
+
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            });
+
+            let checkOutbtn = document.getElementById('checkOutbtn');
+
+            checkOutbtn.onclick = async function(){
+                let checkIdinput =  document.querySelector('#call_id').value;
+
+                if(call_id && form_type && user_id){
+                    console.log(checkIdinput,"checkIdinput",call_id);
+
+                    let formObject = {id :call_id,form_type:form_type,user_id:user_id}
+                    const response = await fetch('http://127.0.0.1:8000/api/payu-payment', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // CSRF token
+                                },
+                                body: JSON.stringify(formObject),
+                    });
+
+                    // Parse the JSON response
+                    const data = await response.json();
+                    console.log(response.status,'response.status');
+                    if(response.status == 200){
                         // Render the response for debugging
                         document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
 
@@ -627,12 +786,15 @@
 
                         // Submit the form
                         payuForm.submit();
+                    }else{
+                        alert(data)
                     }
 
-                } catch (error) {
-                    console.error('Error:', error);
+                }else{
+                    alert("Please fill the from.")
                 }
-            });
+
+            }
         });
 
     </script>
