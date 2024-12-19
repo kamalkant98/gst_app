@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Business Registration</title>
+    <title>Gst Queries</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -61,62 +61,77 @@
             <div class="col-8 col-offset-2 col-sm-8 col-sm-offset-2">
                 <!-- Default form -->
                 <input type="hidden" id="steps" name="steps" value="1">
-                <form id="business_registration" method="POST" name="scheduleform" enctype="multipart/form-data">
+                <form id="gst_queries" method="POST" name="scheduleform" enctype="multipart/form-data">
                     <div class="mb-3 text-center">
-                        <h2>Connect us for business registration</h2>
+                        <h2>Connect us for gst queries</h2>
                     </div>
                     <input type="hidden" name='user_inquiry_id' value='1'>
-                    
                         <?php 
-                        $businessRegistration = [
-                            '1'  => 'PAN Registration',
-                            '2'  => 'TAN Registration',
-                            '3'  => 'GST Registration',
-                            '4'  => 'MSME Registration',
-                            '5'  => 'SHOP ACT Registration',
-                            '6'  => 'LLP Registration',
-                            '7'  => 'PRIVATE LIMITED COMPANY Registration',
-                            '8'  => 'PUBLIC LIMITED COMPANY Registration',
-                            '9'  => 'SECTION 8 COMPANY Registration',
-                            '10'  => 'TRADEMARK Registration',
-                            '11'  => 'COPYRIGHT Registration',
-                            '12'  => 'OPC Registration',
-                            '13'  => 'ESI Registration',
-                            '14'  => 'PF Registration',
-                            '15'  => 'FIRM Registration',
-                            '16'  => 'Start up Registration'
+                        $type = [
+                            '1' =>  'Income tax returns',
+                            '2' => 'TDS returns',
+                            '3'  => 'GST returns',
+                            '4' => 'Business registrations and
+                            licenses',
+                            '5'  => 'NRI taxation',
+                            '6'  => 'Consultancy services',
+                            '7'  =>  'Other Query',
+                            
+                            ];
+                        $planList = [
+                            '1'  => '10 min.',
+                            '2'  => '20 min.',
+                            '3'  => '30 min.',
                         ];
                         
                         ?>
-                      
+
+                    <div class="mb-3 ">
+                        <label for="type" class="form-label">GST No.</label>
+                        <input type="text" class="form-control">
+                        
+                    </div>
+
+                    <div class="mb-3 ">
+                        <label for="type" class="form-label">Type of Taxpayer</label>
+                        <select class="form-control hide-input" name='type_of_taxpayer' id = "type_of_taxpayer">
+                            <option  value="">select value</option>
+                            <option  value="1">regular</option>
+                            <option  value="2">composition</option>   
+                        </select>
+                    </div>
+
                   
 
-                    <div class="mb-3 m-select-check">
-                        <label for="multi-select" class="form-label">Choose Plan</label>
+                    <div class="mb-3 hidden-box-2 regular">
+                        <label for="type" class="form-label">Return filling frequency</label>
+                        <select class="form-control hide-input" name="return_filling_frequency" >
+                            <option  value="">select value</option>
+                            <option  value="1">Button of Quarterly</option>
+                            <option  value="2">Button of Monthly</option>   
+                        </select>
+                    </div>
+                    <div class="mb-3 hidden-box-2 regular m-select-check">
+                        <label for="multi-select" class="form-label w-100">Type of return</label>
                         <select id="multi-select" class="form-control hide-input" name="plan" requiredInput  multiple="multiple">
-                            <?php foreach ($businessRegistration as $key => $value): ?>
-                                <option value="<?= $key; ?>"><?= $value; ?></option>
-                            <?php endforeach; ?>
+                        <option  value="1">GSTR 1</option>
+                            <option  value="2">GSTR 3B</option> 
+                            <option  value="3">GSTR 9/9C</option>   
+                            <option  value="4">GSTR 8</option>   
+                            <option  value="5">TCS Return</option>
                         </select>
                     </div>
-                    <div class="mb-3 hidden-box-2 ">
-                        <label for="multi-select" class="form-label">Choose Plan</label>
-                        <select id="plan" class="form-control hide-input" requiredInput name="plan">
-                        <option  value="">select value</option>
-                            <?php foreach ($businessRegistration as $key => $value): ?>
-
-                                <option value="<?= $key; ?>"><?= $value; ?></option>
-                            <?php endforeach; ?>
+                    <div class="mb-3 hidden-box-2 regular">
+                        <label for="type" class="form-label">Service type</label>
+                        <select class="form-control hide-input" id="service-type" name="service_type">
+                            <option  value="">select value</option>
+                            <option  value="1">Prepare only</option>
+                            <option  value="2">Both Prepare and file</option>   
                         </select>
                     </div>
+                    
 
-
-
-                    <div class="mb-3">
-                        <label for="document" class="form-label">Document requirements for business registration</label>
-                        <input type="file" class="form-control " id="document" name="document" multiple="multiple" required>
-
-                    </div>
+                   
                     <div>
                         <button type="submit" id="submit_button" class="btn btn-primary">Submit</button>
                     </div>
@@ -139,22 +154,27 @@
 <script>
         $(document).ready(function (e) {
 
-            $('#business_registration').on('submit', async (e) => {
+            $('#type_of_taxpayer').on('change', function (event) {
+
+                var selectedValue = $(this).val();
+                if(selectedValue == 1){
+                    $('.regular').show();
+
+                }else{
+                    $('.regular').hide();
+
+
+                }
+                
+                
+              
+            });
+
+            $('#gst_queries').on('submit', async (e) => {
             e.preventDefault(); // Prevent the default form submit
-            let formElement = document.querySelector('#business_registration'); 
-
-            const fileInput = document.getElementById("document");
-            const files = fileInput.files;
-
-            if (files.length === 0) {
-                alert("Please select files to upload.");
-                return;
-            }
-
+            let formElement = document.querySelector('#gst_queries'); 
             const formData = new FormData(formElement);
-            for (let i = 0; i < files.length; i++) {
-                formData.append("files[]", files[i]); // Append each file to FormData
-            }
+           
 
             // Handle multi-select values
             const selectedValues = $('#multi-select').val() || [];
@@ -162,7 +182,7 @@
 
             try {
                 // Send the POST request
-                const response = await fetch('http://127.0.0.1:8000/api/business-registration/store', {
+                const response = await fetch('http://127.0.0.1:8000/api/get-queries/store', {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',

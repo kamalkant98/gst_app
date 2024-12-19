@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PayUMoneyController;
 use App\Http\Controllers\BusinessRegistrationController;
+use App\Http\Controllers\GstQuerieController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -42,3 +44,4 @@ Route::post('/api/payu-callback', [PayUMoneyController::class, 'handleCallback']
 Route::Post('/api/user/store',[UserController::class, 'store']);
 
 Route::post('/api/business-registration/store', [BusinessRegistrationController::class, 'businessStore'])->name('business-registration-store');
+Route::post('/api/get-queries/store', [GstQuerieController::class, 'gstQuerieStore'])->name('gst-querie-store');
