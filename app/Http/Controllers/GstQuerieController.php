@@ -6,10 +6,11 @@ use App\Models\BusinessRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Jobs\SendEmailJob;
+use App\Models\GstQuerie;
 use App\Services\WhatsAppService;
 use App\Services\OtpService;
 
-class BusinessRegistrationController extends Controller
+class GstQuerieController extends Controller
 {
 
     protected $whatsAppService;
@@ -22,49 +23,33 @@ class BusinessRegistrationController extends Controller
         $this->otpService = $otpService;
     }
 
-    public function businessStore(Request $request)
+    public function gstQuerieStore(Request $request)
     {
-        // Validate the form input
-        // $request->validate([
-        //     'plan' => 'required', // Assuming QueryType is an array (from the multi-select)
-        //     'files.*' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048', // Modify file types and max size as needed
+       
+
+        print_r($request->all());
+
+    
+        
+        // GstQuerie::create([
+        //     'gst_number'=> $request['user_inquiry_id'],
+        //     'type_of_taxpayer'=> $request['user_inquiry_id'],
+        //     'return_filling_frequency'=> $request['user_inquiry_id'],
+        //     'type_of_return'=> $request['user_inquiry_id'],
+        //     'service_type' => $request['user_inquiry_id'],
+        //     'user_inquiry_id' => $request['user_inquiry_id']
         // ]);
 
-        // Save the selected registration type
-        $registrationType = $request->plan;
-
-        // Handle file uploads
-        $uploadedFiles = [];
-        if ($request->hasFile('files')) {
-            
-            foreach ($request->file('files') as $file) {
-                // Store the file and get the path
-                $filePath = $file->store('business_documents', 'public');
-                $uploadedFiles[] = $filePath;
-            }
-        }
-
-        // Here you can save the data to the database if needed
-        // Example of saving to the database (assuming a 'business_registrations' table exists):
-        
-        BusinessRegistration::create([
-            'registration_type' => $registrationType,
-            'documents' => json_encode($uploadedFiles), // Store files as JSON
-            'user_inquiry_id' => $request['user_inquiry_id'],
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        $plan = explode(",",$registrationType);
+        // $plan = explode(",",$registrationType);
         $planData = [];
-        foreach($plan as $value){
+        // foreach($plan as $value){
 
-            $planData[] = [
-                'plan_id' => $value,
-                'plan' => config('global.business_registration.'.$value),
-                'price' => config('global.business_registration_price.'.$value),
-            ];
-        }
+        //     $planData[] = [
+        //         'plan_id' => $value,
+        //         'plan' => config('global.business_registration.'.$value),
+        //         'price' => config('global.business_registration_price.'.$value),
+        //     ];
+        // }
 
         return response()->json(['message' => 'Payment Success', 'status' => 'success','data' => $planData], 200);
        

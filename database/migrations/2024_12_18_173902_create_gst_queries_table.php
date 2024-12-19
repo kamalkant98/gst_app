@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('business_registrations', function (Blueprint $table) {
+        Schema::create('gst_queries', function (Blueprint $table) {
             $table->id();
-            $table->string('registration_type')->nullable();
-            $table->text('documents')->nullable();
+            $table->string('gst_number')->nullable();
+            $table->string('type_of_taxpayer')->nullable();
+            $table->string('return_filling_frequency')->nullable();
+            $table->string('type_of_return')->nullable();
+            $table->string('service_type')->nullable();
             $table->integer('user_inquiry_id'); // Store file paths as JSON
             $table->timestamps();
         });
@@ -25,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('business_registrations');
+        Schema::dropIfExists('gst_queries');
     }
 };
