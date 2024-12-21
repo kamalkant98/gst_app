@@ -12,7 +12,7 @@
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
 </head>
 <style>
-    
+
         .pad-bg {
             background: #f8f8f8;
             padding: 40px 20px;
@@ -66,8 +66,8 @@
                         <h2>Connect us for business registration</h2>
                     </div>
                     <input type="hidden" name='user_inquiry_id' value='1'>
-                    
-                        <?php 
+
+                        <?php
                         $businessRegistration = [
                             '1'  => 'PAN Registration',
                             '2'  => 'TAN Registration',
@@ -86,10 +86,10 @@
                             '15'  => 'FIRM Registration',
                             '16'  => 'Start up Registration'
                         ];
-                        
+
                         ?>
-                      
-                  
+
+
 
                     <div class="mb-3 m-select-check">
                         <label for="multi-select" class="form-label">Choose Plan</label>
@@ -125,7 +125,7 @@
         </div>
     </div>
 
-                  
+
 
 
 
@@ -139,9 +139,9 @@
 <script>
         $(document).ready(function (e) {
 
-            $('#business_registration').on('submit', async (e) => {
+        $('#business_registration').on('submit', async (e) => {
             e.preventDefault(); // Prevent the default form submit
-            let formElement = document.querySelector('#business_registration'); 
+            let formElement = document.querySelector('#business_registration');
 
             const fileInput = document.getElementById("document");
             const files = fileInput.files;
@@ -182,9 +182,9 @@
             }
         });
 
-        
-            
-       
+
+
+
 
         });
     </script>
@@ -192,7 +192,7 @@
 
 
 <script>
-    
+
     $(document).ready(() => {
 
 // Initialize Select2

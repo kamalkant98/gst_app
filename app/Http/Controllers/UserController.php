@@ -13,6 +13,7 @@ use App\Services\WhatsAppService;
 use App\Services\OtpService;
 use App\Models\ScheduleCall;
 use App\Models\Coupon;
+use App\Models\TalkToExpert;
 
 class UserController extends Controller
 {
@@ -175,16 +176,18 @@ class UserController extends Controller
     }
 
 
-    public function saveAndCalculatePlan(Request $request){
+    public function calculatePlanForCall(Request $request){
 
         $data = $request->all();
 
 
+        // return response()->json(['data'=>$hj]);
+        // $QueryType = $data['QueryType'];
+        // $queryTypeArr = explode(",",$QueryType);
+        // return response()->json(['data'=>$queryTypeArr]);
 
 
-        // if($data->formType == 'schedule_call'){
 
-        // }
         $getPlan = getCallPlanAmount($data['plan']);
         $amount =$getPlan['value'];
         $coupon=null;
@@ -194,6 +197,7 @@ class UserController extends Controller
         // $data['coupon'] = 'FIRST20%';
         if(isset($data['coupon'])){
         $inputCoupon = $data['coupon'];
+        $queryTypeArr =[];
 
         $CalculateCoupon = CalculateCoupon($data['coupon'],$amount);
 
@@ -206,11 +210,21 @@ class UserController extends Controller
                 $coupon = $CalculateCoupon;
             }
         }
+
         // return response()->json(['coupon'=>$coupon]);
+        if($data['form_type'] == 'talk_to_tax_expert'){
+            $QueryType = $data['QueryType'];
+            $queryTypeArr = explode(",",$QueryType);
 
-        $getQuery = Call_query_type($data['QueryType']);
+        }else{
+            $queryTypeArr = $data['QueryType'];
+        }
+        // return response()->json(['data'=>$queryTypeArr ]);
+        // return response()->json(['data'=>$queryTypeArr ]);
 
-        $QueryType = implode(', ', $data['QueryType']);
+        $getQuery = Call_query_type($queryTypeArr);
+
+        $QueryType = implode(', ', $queryTypeArr);
         $QueryTypeName = implode(', ', $getQuery);
         $setData = [
             'user_id' => $request['id'],
@@ -225,17 +239,57 @@ class UserController extends Controller
         ];
 
         $getCall;
-        if(isset($data['call_id']) && $data['call_id'] > 0){
-            $getCall = ScheduleCall::where('id', $data['call_id'])->first();
-            $getCall->update($setData);
 
+        if($data['form_type'] == 'talk_to_tax_expert'){
+
+            $uploadedFiles = $request->file('document'); // Get all uploaded files
+            $filePaths = []; // Array to store file paths
+
+            // Define the destination path (within the public folder)
+            $destinationPath = public_path('talk_to_TaxExpertFiles');
+
+            // Create the uploads directory if it doesn't exist
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0777, true);
+            }
+
+            // Loop through each file and move it
+            foreach ($uploadedFiles as $file) {
+                // Generate a unique filename
+                $fileName = time() . '_' . $file->getClientOriginalName();
+
+                // Move the file to the destination folder
+                $file->move($destinationPath, $fileName);
+
+                // Add the file path to the array
+                $filePaths[] = asset('talk_to_TaxExpertFiles/' . $fileName);
+            }
+
+            if(isset($data['call_id']) && $data['call_id'] !='undefined' && $data['call_id'] > 0){
+                $getCall = TalkToExpert::where('id', $data['call_id'])->first();
+                $getCall->update($setData);
+
+            }else{
+                $getCall = TalkToExpert::create($setData);
+            }
+
+            return response()->json(['call_id'=>$getCall->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon], 200);
         }else{
-            $getCall = ScheduleCall::create($setData);
+            if(isset($data['call_id']) && $data['call_id'] > 0){
+                $getCall = ScheduleCall::where('id', $data['call_id'])->first();
+                $getCall->update($setData);
+
+            }else{
+                $getCall = ScheduleCall::create($setData);
+            }
+
+            return response()->json(['call_id'=>$getCall->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon], 200);
+
         }
 
+        return response()->json(['message'=>'Something went wrong.' ],422);
 
 
-        return response()->json(['call_id'=>$getCall->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon], 200);
     }
 
 

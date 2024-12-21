@@ -26,7 +26,7 @@ Route::get('/api/data', [UserController::class, 'index']);
 
 Route::Post('/api/generate_otp',[UserController::class, 'generate_otp']);
 Route::Post('/api/verifyOtp',[UserController::class, 'verifyOtp']);
-Route::Post('/api/calculatePlan',[UserController::class, 'saveAndCalculatePlan']);
+Route::Post('/api/calculatePlanForCall',[UserController::class, 'calculatePlanForCall']);
 
 
 
@@ -39,7 +39,7 @@ Route::Post('/api/calculatePlan',[UserController::class, 'saveAndCalculatePlan']
 
 
 Route::post('/api/payu-payment', [PayUMoneyController::class, 'initiatePayment'])->name('payu.initiate');
-Route::post('/api/payu-callback', [PayUMoneyController::class, 'handleCallback'])->name('payu.callback');
+Route::any('/api/payu-callback', [PayUMoneyController::class, 'handleCallback'])->name('payu.callback');
 
 Route::Post('/api/user/store',[UserController::class, 'store']);
 
