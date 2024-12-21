@@ -13,6 +13,10 @@ use App\Models\TalkToExpert;
 class PayUMoneyController extends Controller
 {
 
+    function formatNumber($number) {
+        return number_format($number, 2, '.', '');
+    }
+
     public function initiatePayment(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -45,14 +49,14 @@ class PayUMoneyController extends Controller
 
             $data = [
                 'key' => env('PAYU_MERCHANT_KEY'),
-                'txnid' => uniqid(),
-                'amount' => 1,//$planDetails->total_amount,
+                'txnid' =>  uniqid(),
+                'amount' => '1.00',//$planDetails->total_amount,
                 'productinfo' => 'API Product', // Example: Replace with actual product info
                 'firstname' => $userDetails->name,
                 'email' => $userDetails->email,
                 'phone' => $userDetails->mobile,
-                'surl' => route('payu.callback'), // Success URL
-                'furl' => route('payu.callback'), // Failure URL
+                'surl' => route('payu.callback_success'), // Success URL
+                'furl' => route('payu.callback_failed'), // Failure URL
             ];
 
 
@@ -63,7 +67,6 @@ class PayUMoneyController extends Controller
         }
 
         $data['hash'] = $this->generateHash($data);
-
         $setData = [
             "txnid"=>$data['txnid'],
             "hash"=>$data['hash'],
@@ -71,7 +74,6 @@ class PayUMoneyController extends Controller
             "form_type"=>$request->form_type,
             "order_id"=>$request->id,
             "user_id"=>$request->user_id
-
         ];
 
         Transactions::create($setData);
@@ -89,41 +91,40 @@ class PayUMoneyController extends Controller
             $data['productinfo'] . '|' . $data['firstname'] . '|' . $data['email'] . '|||||||||||' . env('PAYU_MERCHANT_SALT');
 
         return strtolower(hash('sha512', $hashString));
+
     }
 
 
 
-    public function handleCallback(Request $request)
+    public function handleCallbackSuccess(Request $request)
     {
 
 
         $postedHash = $request->hash;
         $status = $request->status;
-        // $hashString = env('PAYU_MERCHANT_SALT') . '|' . $status . '|' . $request->email . '|' .
-        //     $request->firstname . '|' . $request->productinfo . '|' . $request->amount . '|' .
-        //     $request->txnid . '|' . env('PAYU_MERCHANT_KEY');
-        // $data = [
-        //     'key' => $request->key,
-        //     'txnid' => $request->txnid,
-        //     'amount' => 1,//$planDetails->total_amount,
-        //     'productinfo' => 'API Product', // Example: Replace with actual product info
-        //     'firstname' => $userDetails->name,
-        //     'email' => $userDetails->email,
-        //     'phone' => $userDetails->mobile,
-        //     'surl' => route('payu.callback'), // Success URL
-        //     'furl' => route('payu.callback'), // Failure URL
-        // ];
 
         $generatedHash  = $this->generateHash($request);
 
-        if ($postedHash === $generatedHash && $status == 200) {
-            // Redirect to success page
-            $updateData  =  Transactions::where('hash',$postedHash)->first();
+        if ($status == 'success') {
+            $updateData  =  Transactions::where('txnid',$request['txnid'])->first();
             $updateData->update(["status"=>'completed']);
             return redirect(env('CALL_BACK_URL'));
         }
-        dd($request,$postedHash,$status,$generatedHash);
-        // Redirect to failure page
+
+        return redirect(env('CALL_BACK_ERROR_URL'));
+    }
+
+    public function handleCallbackFailed(Request $request)
+    {
+
+
+        $postedHash = $request->hash;
+        $status = $request->status;
+
+        $generatedHash  = $this->generateHash($request);
+        $updateData  =  Transactions::where('txnid',$request['txnid'])->first();
+        $updateData->update(["status"=>'failed']);
+
         return redirect(env('CALL_BACK_ERROR_URL'));
     }
 
