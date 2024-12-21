@@ -221,6 +221,7 @@ class UserController extends Controller
             'query_type'=>$QueryType,
             'coupon_id'=>$coupon_id,
             'total_amount'=> (float)$amount,
+            'message'=> $request['other_query_message'],
         ];
 
         $getCall;

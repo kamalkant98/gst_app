@@ -107,7 +107,7 @@ class PayUMoneyController extends Controller
         }
 
         // Redirect to failure page
-        return redirect(env('CALL_BACK_URL'));
+        return redirect(env('CALL_BACK_ERROR_URL'));
     }
 
 
