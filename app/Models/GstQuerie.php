@@ -17,7 +17,10 @@ class GstQuerie extends Model
         'return_filling_frequency',
         'type_of_return',
         'service_type',
-        'user_inquiry_id'
+        'user_id',
+        'status',
+        'coupon_id',
+        'total_amount',
     ];
 }
 

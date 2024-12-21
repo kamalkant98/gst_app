@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BusinessRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ScheduleCall;
 use App\Models\Coupon;
+use App\Models\GstQuerie;
 use App\Models\UserInquiry;
 use App\Models\Transactions;
 use App\Models\TalkToExpert;
@@ -38,6 +40,10 @@ class PayUMoneyController extends Controller
 
         }else if($request->form_type == 'talk_to_tax_expert'){
             $planDetails = TalkToExpert::where('id',$request->id)->first();
+        }else if($request->form_type == 'business_registration'){
+            $planDetails = BusinessRegistration::where('id',$request->id)->first();
+        }else if($request->form_type == 'gst_queries'){
+            $planDetails = GstQuerie::where('id',$request->id)->first();
         }
 
         if($userDetails && $planDetails){

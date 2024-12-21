@@ -12,8 +12,11 @@ class BusinessRegistration extends Model
     protected $table = 'business_registrations';
 
     protected $fillable = [
-        'registration_type',
+        'plan',
         'documents',
-        'user_inquiry_id'
+        'user_id',
+        'status',
+        'coupon_id',
+        'total_amount',
     ];
 }

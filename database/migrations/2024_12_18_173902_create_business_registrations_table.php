@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('business_registrations', function (Blueprint $table) {
             $table->id();
-            $table->string('registration_type')->nullable();
+            $table->string('plan')->nullable();
             $table->text('documents')->nullable();
-            $table->integer('user_inquiry_id'); // Store file paths as JSON
+            $table->integer('user_id')->after('documents'); // Store file paths as JSON
+            $table->enum('status', ['pending', 'done'])->default('pending')->after('documents');
+            $table->string('coupon_id')->nullable()->after('documents');
+            $table->decimal('total_amount', 10, 2)->after('documents');
             $table->timestamps();
         });
     }

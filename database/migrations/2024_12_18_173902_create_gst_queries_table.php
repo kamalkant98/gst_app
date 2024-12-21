@@ -18,7 +18,10 @@ return new class extends Migration
             $table->string('return_filling_frequency')->nullable();
             $table->string('type_of_return')->nullable();
             $table->string('service_type')->nullable();
-            $table->integer('user_inquiry_id'); // Store file paths as JSON
+            $table->integer('user_id'); // Store file paths as JSON
+            $table->enum('status', ['pending', 'done'])->default('pending');
+            $table->string('coupon_id')->nullable();
+            $table->decimal('total_amount', 10, 2);
             $table->timestamps();
         });
     }
