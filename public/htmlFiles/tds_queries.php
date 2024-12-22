@@ -253,7 +253,7 @@
                     
                     const formData = new FormData(formElement);
 
-                    if (isValid) {
+                if (isValid) {
                     // Send the POST request
                     const response = await fetch('http://127.0.0.1:8000/api/tds-queries/store', {
                         method: 'POST',
@@ -269,24 +269,22 @@
 
                           // Render the response for debugging
                 // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
-                            let checkIdinput =  document.querySelector('#call_id');
-                         
-                            
-                            if(!checkIdinput){
-                                let hiddenInput = document.createElement('input');
-                                hiddenInput.type = 'hidden';
-                                hiddenInput.name = 'call_id';
-                                hiddenInput.id = 'call_id';
-                                hiddenInput.value = data.call_id;
-                                formElement.appendChild(hiddenInput);
-                            }
-
-                          
-                            call_id =  data.call_id;
-                            form_type = formData?.form_type;
-                            user_id = formData?.id;
-
-                            
+                    if(data?.amount > 0){
+                    
+                        let checkIdinput =  document.querySelector('#call_id');
+                    
+                        if(!checkIdinput){
+                            let hiddenInput = document.createElement('input');
+                            hiddenInput.type = 'hidden';
+                            hiddenInput.name = 'call_id';
+                            hiddenInput.id = 'call_id';
+                            hiddenInput.value = data.call_id;
+                            formElement.appendChild(hiddenInput);
+                        }
+                        
+                        call_id =  data.call_id;
+                        form_type = formData?.form_type;
+                        user_id = formData?.id;
 
                         let html=`<div>
                             <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
@@ -296,7 +294,7 @@
                                 <div class="card shadow-sm">
                                     <div class="card-body">
                                         <!-- Item 1 -->
-                                      <div id='cart-details'>
+                                    <div id='cart-details'>
                                             <div class="d-flex justify-content-between align-items-center border-bottom py-3">
                                             <div>
                                                 <h6>Schedule Call</h6>
@@ -317,13 +315,13 @@
                                             </div>
                                                 <p id="coupon-message" class="text-success mt-2 d-none">Coupon applied successfully!</p>
                                         </div>
-                                       ${data?.coupon && data?.coupon?.id > 0 ? `
+                                    ${data?.coupon && data?.coupon?.id > 0 ? `
                                             <div class="d-flex justify-content-between align-items-center mt-3">
                                                 <h6>Coupon Code :: <strong>${data.coupon.code}</strong></h6>
                                                 <span class="fw-bold">₹${data.lessAmount}</span>
                                             </div>
                                         ` : `${data?.coupon != null ?`
-                                             <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div class="d-flex justify-content-between align-items-center mt-3">
                                                 <h6>Coupon Code :: <strong style="color">${data.coupon}</strong></h6>
                                             </div>`:''}
                                         `}
@@ -345,13 +343,15 @@
                             </div>
                         </div>`;
 
-
-
                         document.getElementById("checkOutbtn").style.display = 'block'
                         document.getElementById("payment-summary").innerHTML = html;
                         document.getElementById("payment-summary").style.display = 'block'
+                    }else{
+                        document.getElementById("tds_queries").reset();
+                        alert('Form create successfully');
 
-                        }
+                    }
+                }
                     
                 } catch (error) {
                     console.error('Error:', error);
