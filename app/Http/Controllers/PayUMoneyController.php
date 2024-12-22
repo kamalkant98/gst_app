@@ -2,18 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendEmailJob;
 use App\Models\BusinessRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ScheduleCall;
 use App\Models\Coupon;
+use App\Models\EmailTemplate;
 use App\Models\GstQuerie;
 use App\Models\UserInquiry;
 use App\Models\Transactions;
 use App\Models\TalkToExpert;
+use App\Models\TdsQuerie;
+use App\Services\WhatsAppService;
+use App\Services\OtpService;
 
 class PayUMoneyController extends Controller
 {
+    protected $whatsAppService;
+    protected $otpService;
+
+
+    public function __construct(WhatsAppService $whatsAppService,OtpService $otpService)
+    {
+        $this->whatsAppService = $whatsAppService;
+        $this->otpService = $otpService;
+    }
 
     function formatNumber($number) {
         return number_format($number, 2, '.', '');
@@ -48,6 +62,8 @@ class PayUMoneyController extends Controller
             $planDetails = BusinessRegistration::where('id',$request->id)->first();
         }else if($request->form_type == 'gst_queries'){
             $planDetails = GstQuerie::where('id',$request->id)->first();
+        }else if($request->form_type == 'tds_queries'){
+            $planDetails = TdsQuerie::where('id',$request->id)->first();
         }
 
         if($userDetails && $planDetails){
@@ -104,8 +120,6 @@ class PayUMoneyController extends Controller
 
     public function handleCallbackSuccess(Request $request)
     {
-
-
         $postedHash = $request->hash;
         $status = $request->status;
 
@@ -113,11 +127,59 @@ class PayUMoneyController extends Controller
 
         if ($status == 'success') {
             $updateData  =  Transactions::where('txnid',$request['txnid'])->first();
+            $this->sendMeassage($updateData->user_id, $updateData->form_type);
             $updateData->update(["status"=>'completed']);
             return redirect(env('CALL_BACK_URL'));
         }
 
         return redirect(env('CALL_BACK_ERROR_URL'));
+    }
+
+    public function sendMeassage($userId,$formType){
+
+        $userData = UserInquiry::where('id',$userId)->first();
+
+        $template = EmailTemplate::whereIn('type',[1,2,3])->get();
+
+        foreach ($template as $key => $value) {
+
+            $message = str_replace("{client_name}","Sumit poonia",$value->description);
+
+            if($value->type == 1){
+
+            // Send OTP to the provided phone number
+        
+                $phone = '+91'.$userData->mobile;
+                $this->otpService->sendOtp($phone, $message);
+
+            }elseif($value->type == 2){
+
+                $to = '+91'.$userData->mobile; // Recipient's WhatsApp number
+                $message = $message; // The message content
+        
+                try {
+                    $this->whatsAppService->sendMessage($to, $message);
+                    // return response()->json(['status' => 'Message sent successfully!'], 200);
+                } catch (\Exception $e) {
+                    // return response()->json(['error' => $e->getMessage()], 500);
+                }
+                
+            }elseif($value->type == 3){
+
+                $data = [
+                    'email' => $userData->email,
+                    'title' => $value->subject,
+                    'message' => $message,
+                ];
+                  // Dispatch the job
+                SendEmailJob::dispatch($data);
+
+            }
+        }
+        
+
+        return '';
+ 
     }
 
     public function handleCallbackFailed(Request $request)

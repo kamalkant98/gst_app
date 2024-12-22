@@ -2,26 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BusinessRegistration;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use App\Jobs\SendEmailJob;
 use App\Models\GstQuerie;
-use App\Services\WhatsAppService;
-use App\Services\OtpService;
+
 
 class GstQuerieController extends Controller
 {
 
-    protected $whatsAppService;
-    protected $otpService;
-
-
-    public function __construct(WhatsAppService $whatsAppService,OtpService $otpService)
-    {
-        $this->whatsAppService = $whatsAppService;
-        $this->otpService = $otpService;
-    }
 
     public function getCallPlanAmount($value){
 
@@ -160,51 +148,6 @@ class GstQuerieController extends Controller
 
         return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon], 200);
        
-    }
-
-    public function handlePaySuccess(Request $request)
-    {
-         // phone send otp start
-         // Generate a random 6-digit OTP
-        $otp = rand(100000, 999999);
-        $phone = '+918890889144';
-
-        //  // Send OTP to the provided phone number
-         $this->otpService->sendOtp($phone, $otp);
- 
-         return response()->json(['message' => 'OTP sent successfully']);
-       
-        // phone send otp end
-
-
-        //Send whatsapp message start
-
-        $to = '+91'; // Recipient's WhatsApp number
-        $message = 'Hello Sumit how are you'; // The message content
-
-        try {
-            $this->whatsAppService->sendMessage($to, $message);
-            return response()->json(['status' => 'Message sent successfully!'], 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-
-        //Send whatsapp message end
-
-        //Send email start
-        
-
-        $data = [
-            'email' => $request['email'],
-            'title' => 'Welcome to our App',
-            'message' => 'Thank you for registering with us!',
-        ];
-    
-        // // Dispatch the job
-        SendEmailJob::dispatch($data);
-
-        //Send email end
-        
     }
 
 }

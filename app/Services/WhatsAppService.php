@@ -19,7 +19,7 @@ class WhatsAppService
             'whatsapp:' . $to, // Recipient WhatsApp number with whatsapp: prefix
             [
                 'from' => "whatsapp:".env('TWILIO_WHATSAPP_FROM'), // Your Twilio WhatsApp number
-                'body' => $message, // Message content
+                'body' => strip_tags($message), // Message content
             ]
         );
     }

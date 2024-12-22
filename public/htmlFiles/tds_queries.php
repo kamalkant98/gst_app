@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Gst Queries</title>
+    <title>TDS/TCS Queries</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -70,59 +70,74 @@
         <div class="row justify-content-md-center mt-5">
             <div class="col-lg-6 col-md-8 col-offset-2 col-sm-12 col-sm-offset-2">
                 <!-- Default form -->
-                <form id="gst_queries" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" id ="form_type" name="form_type" value="gst_queries">
+                <form id="tds_queries" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" id ="form_type" name="form_type" value="tds_queries">
                     <input type="hidden" id ="user_id" name="user_id" value="<?= !empty($_GET['user_id']?$_GET['user_id']:1); ?>">
                     <div class="mb-3 text-center">
-                        <h2>CONNECT US FOR GST QUERIES</h2>
+                        <h2>CONNECT US FOR TDS/TCS QUERIES</h2>
+                    </div>
+                        <?php 
+                       
+                        
+                        ?>
+
+                    <div class="mb-3 ">
+                        <label for="type" class="form-label">Tan No.</label>
+                        <input type="text" class="form-control " id="tan_number" name="tan_number" requiredInput placeholder="TAN No.">
+
+                        
                     </div>
                     <div class="mb-3 ">
-                        <label for="type" class="form-label">GST No.</label>
-                        <input type="text" class="form-control " id="gst_number" name="gst_number" requiredInput placeholder="GST No.">
-                    </div>
-                    <div class="mb-3">
-                        <label for="multi-select" class="form-label">Type of Taxpayer</label>
-                        <select id="type_of_taxpayer" class="form-control" requiredInput name="type_of_taxpayer">
-                            <option></option>
-                            <option  value="1">regular</option>
-                            <option  value="2">composition</option>
+                        <label for="type_of_return" class="form-label w-100">Type of return</label>
+                        <select id="type_of_return" class="form-control" name="type_of_return" requiredInput>
+                            <option  value="">select value</option>
+                            <option  value="1">24Q</option>
+                            <option  value="2">26Q</option> 
+                            <option  value="3">27Q</option>   
+                            <option  value="4">24QB</option>   
                         </select>
                     </div>
 
-                    <div class="mb-3 hidden-box-2 composition">
-                        <label for="type" class="form-label">Plan</label>
-                        <select class="form-control composition" id="plan_name" name="plan_name" requiredInput>
+                    <div class="mb-3 first_select hidden-box-2">
+                        <label for="no_of_employees" class="form-label w-100">No of employees</label>
+                        <select id="no_of_employees" class="form-control first_select hide-input" name="no_of_employees" requiredInput>
                             <option  value="">select value</option>
-                            <option  value="1">Quarterly</option>
-                            <option  value="2">Monthly</option>   
+                            <option  value="1">1 to 10</option>
+                            <option  value="2">10 to 50</option> 
+                            <option  value="3">50 to 100</option>   
+                            <option  value="4">More than 100</option>   
                         </select>
                     </div>
 
-                    <div class="mb-3 hidden-box-2 regular">
-                        <label for="type" class="form-label">Return filling frequency</label>
-                        <select class="form-control regular" id="return_filling_frequency" name="return_filling_frequency" requiredInput>
+                    <div class="mb-3 first_select hidden-box-2">
+                        <label for="tax_planning" class="form-label w-100">Computation/Tax Planning of Employees</label>
+                        <select id="tax_planning" class="form-control first_select hide-input" name="tax_planning" requiredInput>
                             <option  value="">select value</option>
-                            <option  value="1">Button of Quarterly</option>
-                            <option  value="2">Button of Monthly</option>   
+                            <option  value="1">Yes</option>
+                            <option  value="2">No</option>   
                         </select>
                     </div>
-                    <div class="mb-3 hidden-box-2 regular m-select-check">
-                        <label for="multi-select" class="form-label w-100">Type of return</label>
-                        <select id="multi-select" class="form-control regular" name="plan" requiredInput  multiple="multiple">
-                            <option  value="1">GSTR 1</option>
-                            <option  value="2">GSTR 3B</option> 
-                            <option  value="3">GSTR 9/9C</option>   
-                            <option  value="4">GSTR 8</option>   
-                            <option  value="5">TCS Return</option>
+
+
+                    <div class="mb-3 secend_select hidden-box-2">
+                        <label for="no_of_entries" class="form-label w-100">No of entries</label>
+                        <select id="no_of_entries" class="form-control secend_select hide-input" name="no_of_entries" requiredInput>
+                            <option  value="">select value</option>
+                            <option  value="1">Up to 100</option>
+                            <option  value="2">100 to 250</option> 
+                            <option  value="3">250 to 500</option>   
+                            <option  value="4">More than 500</option>   
                         </select>
                     </div>
-                    <div class="mb-3 hidden-box-2 regular">
-                        <label for="type" class="form-label">Service type</label>
-                        <select class="form-control regular" id="service_type" name="service_type" requiredInput>
+
+                    <div class="mb-3 third_select hidden-box-2">
+                        <label for="no_of_entries_27" class="form-label w-100">No of entries</label>
+                        <select id="no_of_entries_27" class="form-control third_select hide-input" name="no_of_entries_27" requiredInput>
                             <option  value="">select value</option>
-                            <option  value="1">Prepare only</option>
-                            <option  value="1">File only</option>
-                            <option  value="2">Both Prepare and file</option>   
+                            <option  value="1">Up to 50</option>
+                            <option  value="2">50 to 100</option> 
+                            <option  value="3">100 to 200</option>   
+                            <option  value="4">More than 200</option>   
                         </select>
                     </div>
                     <div>
@@ -143,6 +158,10 @@
 
     <div id="response"></div>
 
+                  
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
@@ -153,24 +172,33 @@
 <script>
         $(document).ready(function (e) {
 
-            function isValidGST(gst) {
-                // Regular expression to validate GST number format (15 characters: alphanumeric)
-                const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[Z]{1}[0-9A-Z]{1}$/;
-                return gstRegex.test(gst);
+            function isValidTAN(tan) {
+                // Regular expression to validate TAN number format (4 letters, 5 digits, 1 letter)
+                const tanRegex = /^[A-Z]{4}[0-9]{5}[A-Z]{1}$/;
+                return tanRegex.test(tan);
             }
 
-            $('#type_of_taxpayer').on('change', function (event) {
+            $('#type_of_return').on('change', function (event) {
 
                 var selectedValue = $(this).val();
                 if(selectedValue == 1){
-                    $('.regular').show().removeClass('hide-input');
-                    $('.composition').hide().addClass('hide-input');
+                    $('.first_select').show().removeClass('hide-input');
+                    $('.secend_select').hide().addClass('hide-input');
+                    $('.third_select').hide().addClass('hide-input');
+                }else if(selectedValue == 2){
+                    $('.first_select').hide();
+                    $('.secend_select').show().removeClass('hide-input');
+                    $('.third_select').hide();
+
+                }else if(selectedValue == 3){
+                    $('.first_select').hide().addClass('hide-input');
+                    $('.secend_select').hide().addClass('hide-input');
+                    $('.third_select').show().removeClass('hide-input');
 
                 }else{
-                    $('.regular').hide().addClass('hide-input');
-                    $('.composition').show().removeClass('hide-input');
-
-
+                    $('.first_select').hide().addClass('hide-input');
+                    $('.secend_select').hide().addClass('hide-input');
+                    $('.third_select').hide().addClass('hide-input');
                 }
             });
 
@@ -178,12 +206,12 @@
             form_type =''
             user_id = 0
 
-            $('#gst_queries').on('submit', async (e) => {
+            $('#tds_queries').on('submit', async (e) => {
 
-                // try {
+                try {
 
                     e.preventDefault(); // Prevent the default form submit
-                    let formElement = document.querySelector('#gst_queries'); 
+                    let formElement = document.querySelector('#tds_queries'); 
 
                     const errorElements = document.querySelectorAll('.error');
                     // Loop through and remove each element
@@ -209,13 +237,12 @@
 
                         }
 
-                        if (input.name == 'gst_number' && input.value != '') {
-                            let checkGST = isValidGST(input.value);
-                           
-                            if (checkGST == false) {
+                        if (input.name == 'tan_number' && input.value != '') {
+                            let checkTAN = isValidTAN(input.value);
+                            if (checkTAN == false) {
                                 let errorElement = document.createElement('span');
                                 errorElement.className = 'error'; // Add error class for styling
-                                errorElement.textContent = `Please enter a valid GST number.`;
+                                errorElement.textContent = `Please enter a valid TAN number.`;
                                 input.after(errorElement);
                                 input.classList.add('is-invalid');
                                 isValid = false;
@@ -223,16 +250,12 @@
                         }
 
                     });
-                    if(isValid){
                     
                     const formData = new FormData(formElement);
-                    // Handle multi-select values
-                    const selectedValues = $('#multi-select').val() || [];
-                    formData.append("plan", selectedValues);
 
-           
+                    if (isValid) {
                     // Send the POST request
-                    const response = await fetch('http://127.0.0.1:8000/api/get-queries/store', {
+                    const response = await fetch('http://127.0.0.1:8000/api/tds-queries/store', {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
@@ -245,23 +268,23 @@
                     const data = await response.json();
 
                           // Render the response for debugging
-                    //  document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
+                // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
                             let checkIdinput =  document.querySelector('#call_id');
                          
                             
-                        if(!checkIdinput){
-                            let hiddenInput = document.createElement('input');
-                            hiddenInput.type = 'hidden';
-                            hiddenInput.name = 'call_id';
-                            hiddenInput.id = 'call_id';
-                            hiddenInput.value = data.call_id;
-                            formElement.appendChild(hiddenInput);
-                        }
+                            if(!checkIdinput){
+                                let hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name = 'call_id';
+                                hiddenInput.id = 'call_id';
+                                hiddenInput.value = data.call_id;
+                                formElement.appendChild(hiddenInput);
+                            }
 
-                        
-                        call_id =  data.call_id;
-                        form_type = formData?.form_type;
-                        user_id = formData?.id;
+                          
+                            call_id =  data.call_id;
+                            form_type = formData?.form_type;
+                            user_id = formData?.id;
 
                             
 
@@ -322,17 +345,17 @@
                             </div>
                         </div>`;
 
+
+
                         document.getElementById("checkOutbtn").style.display = 'block'
                         document.getElementById("payment-summary").innerHTML = html;
                         document.getElementById("payment-summary").style.display = 'block'
 
-                    }
-
-
+                        }
                     
-                // } catch (error) {
-                //     console.error('Error:', error);
-                // }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
 
                 let checkOutbtn = document.getElementById('checkOutbtn');
 
@@ -341,8 +364,6 @@
                     let form_type =  document.querySelector('#form_type').value;
                     let user_id =  document.querySelector('#user_id').value;
 
-
-                    console.log(call_id,form_type,user_id);
                     
                     if(call_id && form_type && user_id){
                         console.log(checkIdinput,"checkIdinput",call_id);
@@ -399,12 +420,8 @@
 
 
 <script>
-
-
     
     $(document).ready(() => {
-
-       
 
 // Initialize Select2
 $('#multi-select').select2({
