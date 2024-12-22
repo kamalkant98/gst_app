@@ -148,7 +148,7 @@ class PayUMoneyController extends Controller
             if($value->type == 1){
 
             // Send OTP to the provided phone number
-        
+
                 $phone = '+91'.$userData->mobile;
                 $this->otpService->sendOtp($phone, $message);
 
@@ -156,14 +156,14 @@ class PayUMoneyController extends Controller
 
                 $to = '+91'.$userData->mobile; // Recipient's WhatsApp number
                 $message = $message; // The message content
-        
+
                 try {
                     $this->whatsAppService->sendMessage($to, $message);
                     // return response()->json(['status' => 'Message sent successfully!'], 200);
                 } catch (\Exception $e) {
                     // return response()->json(['error' => $e->getMessage()], 500);
                 }
-                
+
             }elseif($value->type == 3){
 
                 $data = [
@@ -176,10 +176,10 @@ class PayUMoneyController extends Controller
 
             }
         }
-        
+
 
         return '';
- 
+
     }
 
     public function handleCallbackFailed(Request $request)

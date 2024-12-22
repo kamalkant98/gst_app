@@ -14,6 +14,7 @@ use App\Services\OtpService;
 use App\Models\ScheduleCall;
 use App\Models\Coupon;
 use App\Models\TalkToExpert;
+use App\Models\EmailTemplate;
 
 class UserController extends Controller
 {
@@ -21,11 +22,11 @@ class UserController extends Controller
     protected $otpService;
 
 
-    // public function __construct(WhatsAppService $whatsAppService,OtpService $otpService)
-    // {
-    //     $this->whatsAppService = $whatsAppService;
-    //     $this->otpService = $otpService;
-    // }
+    public function __construct(WhatsAppService $whatsAppService,OtpService $otpService)
+    {
+        $this->whatsAppService = $whatsAppService;
+        $this->otpService = $otpService;
+    }
 
     public function index(){
 
@@ -127,14 +128,62 @@ class UserController extends Controller
             'otp' => $otp
         ];
 
+
+
+        $template = EmailTemplate::whereIn('type',[1,3])->where('form_type','otp')->get();
+
+        foreach ($template as $key => $value) {
+
+            $message = str_replace("{client_name}", $data['name'],$value->description);
+            $message = str_replace("{otp}", $data['otp'], $message);
+
+            if($value->type == 1){
+
+            // Send OTP to the provided phone number
+
+                $phone = '+91'.$data['mobile'];
+                $this->otpService->sendOtp($phone, $message);
+
+
+                $to = '+91'.$data['mobile']; // Recipient's WhatsApp number
+                $message = $message; // The message content
+
+                try {
+                    $this->whatsAppService->sendMessage($to, $message);
+                    // return response()->json(['status' => 'Message sent successfully!'], 200);
+                } catch (\Exception $e) {
+                    // return response()->json(['error' => $e->getMessage()], 500);
+                }
+
+            }elseif($value->type == 3){
+
+                $data2 = [
+                    'email' => $data['email'],
+                    'title' => $value->subject,
+                    'message' => $message,
+                ];
+                  // Dispatch the job
+                SendEmailJob::dispatch($data2);
+
+            }
+        }
+        $insData;
         if($request->id > 0){
             $inquiry = UserInquiry::where('id', $request->id)->first();
             $inquiry->update($data);
+
+
+
+
             return response()->json(['message' => 'OTP generated successfully!','data'=> $inquiry->id,'insertData'=>$data]);
         }else{
             $insertData = UserInquiry::create($data);
             return response()->json(['message' => 'OTP generated successfully!','data'=> $insertData->id,"insertData" => $insertData]);
         }
+
+
+
+
     }
 
     public function verifyOtp(Request $request)
