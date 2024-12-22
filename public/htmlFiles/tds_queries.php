@@ -72,7 +72,7 @@
                 <!-- Default form -->
                 <form id="tds_queries" method="POST" enctype="multipart/form-data">
                     <input type="hidden" id ="form_type" name="form_type" value="tds_queries">
-                    <input type="hidden" id ="user_id" name="user_id" value="<?= !empty($_GET['user_id']?$_GET['user_id']:1); ?>">
+                    <input type="hidden" id ="user_id" name="user_id" value="<?= !empty($_GET['user_id'])?$_GET['user_id']:1; ?>">
                     <div class="mb-3 text-center">
                         <h2>CONNECT US FOR TDS/TCS QUERIES</h2>
                     </div>

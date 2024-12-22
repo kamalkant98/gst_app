@@ -73,7 +73,7 @@
                         <h2>CONNECT US FOR BUSINESS REDISTRATION</h2>
                     </div>
                     <input type="hidden" id ="form_type" name="form_type" value="business_registration">
-                    <input type="hidden" id ="user_id" name="user_id" value="<?= !empty($_GET['user_id']?$_GET['user_id']:1); ?>">
+                    <input type="hidden" id ="user_id" name="user_id" value="<?= !empty($_GET['user_id'])?$_GET['user_id']:1; ?>">
                         <?php 
                         $businessRegistration = [
                             '1'  => 'PAN Registration',
