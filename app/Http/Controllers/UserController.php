@@ -137,25 +137,27 @@ class UserController extends Controller
             $message = str_replace("{client_name}", $data['name'],$value->description);
             $message = str_replace("{otp}", $data['otp'], $message);
 
-            if($value->type == 1){
+            // if($value->type == 1){
 
-            // Send OTP to the provided phone number
+            // // Send OTP to the provided phone number
 
-                $phone = '+91'.$data['mobile'];
-                $this->otpService->sendOtp($phone, $message);
+            //     $phone = '+91'.$data['mobile'];
+            //     $this->otpService->sendOtp($phone, $message);
 
 
-                $to = '+91'.$data['mobile']; // Recipient's WhatsApp number
-                $message = $message; // The message content
+            //     $to = '+91'.$data['mobile']; // Recipient's WhatsApp number
+            //     $message = $message; // The message content
 
-                try {
-                    $this->whatsAppService->sendMessage($to, $message);
-                    // return response()->json(['status' => 'Message sent successfully!'], 200);
-                } catch (\Exception $e) {
-                    // return response()->json(['error' => $e->getMessage()], 500);
-                }
+            //     try {
+            //         $this->whatsAppService->sendMessage($to, $message);
+            //         // return response()->json(['status' => 'Message sent successfully!'], 200);
+            //     } catch (\Exception $e) {
+            //         // return response()->json(['error' => $e->getMessage()], 500);
+            //     }
 
-            }elseif($value->type == 3){
+            // }else
+
+            if($value->type == 3){
 
                 $data2 = [
                     'email' => $data['email'],
