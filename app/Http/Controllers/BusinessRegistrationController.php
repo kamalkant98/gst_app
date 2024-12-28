@@ -30,7 +30,7 @@ class BusinessRegistrationController extends Controller
             '15' => ['value'=>'5000','label' => 'FIRM Registration'],
             '16' => ['value'=>'20000','label' => 'Start up Registration']
         ];
-    
+
         return $callPlan[$value];
     }
     public function Call_query_type($arr){
@@ -52,10 +52,10 @@ class BusinessRegistrationController extends Controller
             ['value'=>'15','label' => 'FIRM Registration'],
             ['value'=>'16','label' => 'Start up Registration']
         ];
-    
-    
+
+
         $labels = [];
-    
+
         // Check if $values is an array
         if (is_array($arr)) {
             foreach ($arr as $value) {
@@ -68,21 +68,21 @@ class BusinessRegistrationController extends Controller
                         break;
                     }
                 }
-    
+
                 // If no label found, add a default message
                 if (!$found) {
                     $labels[] = 'Unknown value';
                 }
             }
         }
-    
+
         return $labels;
     }
 
 
     public function businessStore(Request $request)
     {
-    
+
         $data = $request->all();
 
         $plan = explode(",",$data['plan']);
@@ -102,9 +102,9 @@ class BusinessRegistrationController extends Controller
         if(isset($data['coupon'])){
             $inputCoupon = $data['coupon'];
             $queryTypeArr =[];
-    
+
             $CalculateCoupon = CalculateCoupon($data['coupon'],$amount);
-    
+
                 if(isset($CalculateCoupon['finalAmount']) && isset($CalculateCoupon['getCoupon'])){
                     $lessAmount = floor(($amount - $CalculateCoupon['finalAmount']) * 100) / 100;
                     $amount = floor($CalculateCoupon['finalAmount'] * 100) / 100;
@@ -118,17 +118,17 @@ class BusinessRegistrationController extends Controller
         $QueryType = $data['plan'];
         $queryTypeArr = explode(",",$QueryType);
 
- 
+
         $getQuery = $this->Call_query_type($queryTypeArr);
 
-    
+
         $QueryType = implode(', ', $queryTypeArr);
         $QueryTypeName = implode(', ', $getQuery);
 
         // Handle file uploads
         $uploadedFiles = [];
         if ($request->hasFile('files')) {
-            
+
             foreach ($request->file('files') as $file) {
                 // Store the file and get the path
                 $filePath = $file->store('business_documents', 'public');
@@ -138,7 +138,7 @@ class BusinessRegistrationController extends Controller
 
         $setData = [
             'coupon_id'=>$coupon_id,
-            'total_amount'=> (float)$amount, 
+            'total_amount'=> (float)$amount,
             'plan' =>   $QueryType,
             'documents' =>  json_encode($uploadedFiles)
         ];
@@ -152,7 +152,7 @@ class BusinessRegistrationController extends Controller
         }
 
         return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon], 200);
-       
+
     }
 
     // public function handlePaySuccess(Request $request)

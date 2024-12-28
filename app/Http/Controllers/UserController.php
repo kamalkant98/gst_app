@@ -22,11 +22,11 @@ class UserController extends Controller
     protected $otpService;
 
 
-    public function __construct(WhatsAppService $whatsAppService,OtpService $otpService)
-    {
-        $this->whatsAppService = $whatsAppService;
-        $this->otpService = $otpService;
-    }
+    // public function __construct(WhatsAppService $whatsAppService,OtpService $otpService)
+    // {
+    //     $this->whatsAppService = $whatsAppService;
+    //     $this->otpService = $otpService;
+    // }
 
     public function index(){
 
@@ -177,10 +177,10 @@ class UserController extends Controller
 
 
 
-            return response()->json(['message' => 'OTP generated successfully!','data'=> $inquiry->id,'insertData'=>$data]);
+            return response()->json(['message' => 'OTP generated successfully!','data'=> $inquiry->id]); //'insertData'=>$data
         }else{
             $insertData = UserInquiry::create($data);
-            return response()->json(['message' => 'OTP generated successfully!','data'=> $insertData->id,"insertData" => $insertData]);
+            return response()->json(['message' => 'OTP generated successfully!','data'=> $insertData->id]); //"insertData" => $insertData
         }
 
 
@@ -326,7 +326,7 @@ class UserController extends Controller
 
             return response()->json(['call_id'=>$getCall->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon], 200);
         }else{
-            if(isset($data['call_id']) && $data['call_id'] > 0){
+            if(isset($data['call_id']) && $data['call_id'] > 0 && $data['call_id'] != 'undefined'){
                 $getCall = ScheduleCall::where('id', $data['call_id'])->first();
                 $getCall->update($setData);
 
