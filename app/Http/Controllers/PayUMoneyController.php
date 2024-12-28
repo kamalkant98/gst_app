@@ -23,11 +23,11 @@ class PayUMoneyController extends Controller
     protected $otpService;
 
 
-    public function __construct(WhatsAppService $whatsAppService,OtpService $otpService)
-    {
-        $this->whatsAppService = $whatsAppService;
-        $this->otpService = $otpService;
-    }
+    // public function __construct(WhatsAppService $whatsAppService,OtpService $otpService)
+    // {
+    //     $this->whatsAppService = $whatsAppService;
+    //     $this->otpService = $otpService;
+    // }
 
     function formatNumber($number) {
         return number_format($number, 2, '.', '');
@@ -139,32 +139,34 @@ class PayUMoneyController extends Controller
 
         $userData = UserInquiry::where('id',$userId)->first();
 
-        $template = EmailTemplate::whereIn('type',[1,2,3])->get();
+        $template = EmailTemplate::whereIn('type',[1,2,3])->where('form_type',$formType)->get();
 
         foreach ($template as $key => $value) {
 
-            $message = str_replace("{client_name}","Sumit poonia",$value->description);
+            $message = str_replace("{client_name}",$userData->name,$value->description);
 
-            if($value->type == 1){
+            // if($value->type == 1){
 
-            // Send OTP to the provided phone number
+            // // Send OTP to the provided phone number
 
-                $phone = '+91'.$userData->mobile;
-                $this->otpService->sendOtp($phone, $message);
+            //     $phone = '+91'.$userData->mobile;
+            //     $this->otpService->sendOtp($phone, $message);
 
-            }elseif($value->type == 2){
+            // }elseif($value->type == 2){
 
-                $to = '+91'.$userData->mobile; // Recipient's WhatsApp number
-                $message = $message; // The message content
+            //     $to = '+91'.$userData->mobile; // Recipient's WhatsApp number
+            //     $message = $message; // The message content
 
-                try {
-                    $this->whatsAppService->sendMessage($to, $message);
-                    // return response()->json(['status' => 'Message sent successfully!'], 200);
-                } catch (\Exception $e) {
-                    // return response()->json(['error' => $e->getMessage()], 500);
-                }
+            //     try {
+            //         $this->whatsAppService->sendMessage($to, $message);
+            //         // return response()->json(['status' => 'Message sent successfully!'], 200);
+            //     } catch (\Exception $e) {
+            //         // return response()->json(['error' => $e->getMessage()], 500);
+            //     }
 
-            }elseif($value->type == 3){
+            // }else
+
+            if($value->type == 3){
 
                 $data = [
                     'email' => $userData->email,
