@@ -25,10 +25,16 @@ class GstQuerieController extends Controller
                 '1_1_1'  => ['value'=>'3499','label' => 'regular_Quarterly_Prepare_only'],
                 '1_1_2'  => ['value'=>'900','label' => 'regular_Quarterly_File_only'],
                 '1_1_3'  => ['value'=>'1999','label' => 'regular_Quarterly_Both_Prepare_and _file'],
+
                 '1_2_1'  => ['value'=>'1499','label' => 'regular_Monthly_Prepare_only'],
                 '1_2_2'  => ['value'=>'2499','label' => 'regular_Monthly_File_only'],
                 '1_2_3'  => ['value'=>'4999','label' => 'regular_Monthly_Both_Prepare_and _file'],
+
+                '1_3_1'  => ['value'=>'11999','label' => 'regular_Monthly_Prepare_only'],
+                '1_3_2'  => ['value'=>'7999','label' => 'regular_Monthly_File_only'],
+                '1_3_3'  => ['value'=>'14999','label' => 'regular_Monthly_Both_Prepare_and _file'],
             ];
+
             return $callPlan[$value];
         }else{
             $fillingFrequency = $value['plan_name'];
@@ -41,7 +47,7 @@ class GstQuerieController extends Controller
             return $callPlan[$value];
 
         }
-    
+
     }
     public function Call_query_type($arr){
 
@@ -53,10 +59,10 @@ class GstQuerieController extends Controller
             ['value'=>'4','label' => 'GSTR 8'],
             ['value'=>'5','label' => 'TCS Return'],
         ];
-    
-    
+
+
         $labels = [];
-    
+
         // Check if $values is an array
         if (is_array($arr)) {
             foreach ($arr as $value) {
@@ -69,22 +75,22 @@ class GstQuerieController extends Controller
                         break;
                     }
                 }
-    
+
                 // If no label found, add a default message
                 if (!$found) {
                     $labels[] = 'Unknown value';
                 }
             }
         }
-    
+
         return $labels;
     }
 
     public function gstQuerieStore(Request $request)
-    {   
+    {
 
         $data = $request->all();
-        
+
         $getPlan = $this->getCallPlanAmount($data);
         $amount =$getPlan['value'];
         $coupon=null;
@@ -95,9 +101,9 @@ class GstQuerieController extends Controller
         if(isset($data['coupon'])){
             $inputCoupon = $data['coupon'];
             $queryTypeArr =[];
-    
+
             $CalculateCoupon = CalculateCoupon($data['coupon'],$amount);
-    
+
                 if(isset($CalculateCoupon['finalAmount']) && isset($CalculateCoupon['getCoupon'])){
                     $lessAmount = floor(($amount - $CalculateCoupon['finalAmount']) * 100) / 100;
                     $amount = floor($CalculateCoupon['finalAmount'] * 100) / 100;
@@ -133,7 +139,7 @@ class GstQuerieController extends Controller
             'type_of_return' => $QueryType,
             'service_type' =>  $data['type_of_taxpayer'] == 1?$request['service_type']:null,
             'coupon_id'=>$coupon_id,
-            'total_amount'=> (float)$amount, 
+            'total_amount'=> (float)$amount,
         ];
 
         if(isset($data['call_id']) && $data['call_id'] !='undefined' && $data['call_id'] > 0){
@@ -141,13 +147,13 @@ class GstQuerieController extends Controller
             $create->update($setData);
 
         }else{
-           
+
             $setData['user_id'] =    $data['user_id'];
             $create = GstQuerie::create($setData);
         }
 
         return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon], 200);
-       
+
     }
 
 }
