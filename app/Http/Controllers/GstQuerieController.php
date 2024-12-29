@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Jobs\SendEmailJob;
 use App\Models\GstQuerie;
-
+use Illuminate\Support\Facades\Validator;
 
 class GstQuerieController extends Controller
 {
@@ -88,6 +88,19 @@ class GstQuerieController extends Controller
 
     public function gstQuerieStore(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|string',
+             'form_type' => 'required|string',
+             'gst_number' => 'required|string',
+         ]);
+
+         // Check if validation fails
+         if($validator->fails()) {
+             return response()->json([
+                 'message' => 'Validation failed',
+                 'errors' => $validator->errors(), // Get the error messages
+             ], 422);
+         }
 
         $data = $request->all();
 
