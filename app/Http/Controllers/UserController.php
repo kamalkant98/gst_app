@@ -315,6 +315,8 @@ class UserController extends Controller
                 // Add the file path to the array
                 $filePaths[] = asset('talk_to_TaxExpertFiles/' . $fileName);
             }
+            $setData['documents'] = $filePaths;
+            // return response()->json(['data'=>$filePaths]);
 
             if(isset($data['call_id']) && $data['call_id'] !='undefined' && $data['call_id'] > 0){
                 $getCall = TalkToExpert::where('id', $data['call_id'])->first();
