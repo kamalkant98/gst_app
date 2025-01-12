@@ -138,7 +138,7 @@ class PayUMoneyController extends Controller
 
         if ($status == 'success') {
             $updateData  =  Transactions::where('txnid',$request['txnid'])->first();
-
+            $updateData->update(["status"=>'completed']);
             $setData = $updateData;
             if($updateData->form_type == 'talk_to_tax_expert'){
                 $getCall = TalkToExpert::where('id', $updateData['order_id'])->first();
@@ -223,7 +223,7 @@ class PayUMoneyController extends Controller
             }
 
             $this->sendMeassage($setData, $updateData->form_type);
-            $updateData->update(["status"=>'completed']);
+
             return redirect(env('CALL_BACK_URL'));
         }
 
