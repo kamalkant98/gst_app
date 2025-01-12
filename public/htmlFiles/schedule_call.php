@@ -13,7 +13,26 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/css/intlTelInput.css">
 
     <style>
-       
+        /* input,
+        select {
+            box-shadow: none !important;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #044F60;
+        }
+
+        .btn-primary {
+            background-color: #044F60 !important;
+            border-color: #044F60 !important;
+        }
+
+        .form-check-input:checked {
+            background-color: #044F60;
+            border-color: #044F60;
+        } */
+
         .pad-bg {
             background: #f8f8f8;
             padding: 40px 20px;
@@ -65,12 +84,17 @@
         .other_query_message_box{
             display: none;
         }
+        
         #terms-box{
+            display: none;
+        }
+        .hidden-box-3{
             display: none;
         }
         .iti {
             width:100% !important ;
         }
+        
         .loader {
             border: 2px solid #f3f3f3;
             border-top: 2px solid #3498db;
@@ -91,11 +115,15 @@
             background-color: #ccc;
             cursor: not-allowed;
         }
-        .strike {
-            color: #999;
-            text-decoration: line-through;
+
+        .selectTime-group{
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
         }
-        
+        .selectTime-group > .form-check {
+            margin-right: 10px;
+        }
     </style>
 
     
@@ -103,7 +131,6 @@
 <?php 
     
     $query_types = [
-        ['value'=>'','label' => 'Select Your Query'],
         ['value'=>'1','label' => 'Income Tax Returns'],
         ['value'=>'2','label' => 'TDS Returns'],
         ['value'=>'3','label' => 'GST Returns'],
@@ -136,10 +163,10 @@
                 <!-- Default form -->
                 <form id="scheduleform" method="POST" name="scheduleform">
                     <input type="hidden" id="steps" name="steps" value="1">
-                    <input type="hidden" id ="form_type" name="form_type" value="talk_to_tax_expert">
+                    <input type="hidden" id ="form_type" name="form_type" value="schedule_call">
 
                     <div class="mb-3 text-center">
-                        <h2>Talk To Tax Expert</h2>
+                        <h2>Schedule Call</h2>
                     </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
@@ -150,12 +177,10 @@
                         <label for="exampleInputEmail1" class="form-label">Email address</label>
                         <input type="text" class="form-control " id="exampleInputEmail1" name="email" requiredInput placeholder="Email">
                     </div>
-                   
                     <!-- <div class="mb-3">
-                        <label for="mobile" class="form-label">Mobile</label>
-                        <input type="mobile" class="form-control" id="mobile" name="mobile" requiredInput placeholder="Mobile">
+                        <label for="amount" class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="amount" name="amount" requiredInput>
                     </div> -->
-
                     <div class="mb-3">
                         <label for="mobile" class="form-label">Mobile</label>
                         <div id="mobile-box">
@@ -177,29 +202,39 @@
                                 <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
                             <?php endforeach; ?>
                         </select>
-                    </div> -->
-
-                    <div class="mb-3 hidden-box-2 m-select-check">
-                        <label for="queryType" class="form-label">Select Your Query</label>
-                        <select id="queryType" class="form-control hide-input" name="queryType" requiredInput>
-                            <?php foreach ($query_types as $type): ?>
-                                <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
-                            <?php endforeach; ?>
-                        </select>
                     </div>
-                    
-                    <div class="mb-3 other_query_message_box hidden-box-2">
-                        <label for="other_query_message" class="form-label">Description</label>
+                     -->
+                    <!-- <div class="mb-3 other_query_message_box">
+                        <label for="other_query_message" class="form-label">Other Query</label>
                         <textarea class="form-control hide-input" id="other_query_message" name="other_query_message" rows="4" placeholder="Enter your message here" requiredInput maxlength="500" title="Message should not exceed 500 characters.">
                         </textarea>
+                    </div> -->
+                    
+                   
+                    <div class="form-section hidden-box-2" id ="selectTime-box">
+                        <label class="form-label" >Select a Time:</label>
+                        <div class="selectTime-group">
+                            <div class="form-check">
+                                <input class="form-check-input hide-input" requiredInput type="radio" name="selectTime" id="flexRadioDefault1"  value="1">
+                                <label class="form-check-label" for="flexRadioDefault1">
+                                Connect Now
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input hide-input" requiredInput type="radio" name="selectTime" id="flexRadioDefault2" value="2">
+                                <label class="form-check-label" for="flexRadioDefault2">
+                                    Choose Date & Time
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="mb-3 hidden-box-2">
-                    <label for="datepicker" class="form-label">Select Date & Time</label>
-                    <input type="text" id="datepicker" name="datetime" class="form-control hide-input" requiredInput placeholder="Y-m-d H:i"> 
+                    <div class="mb-3 hidden-box-3">
+                        <label for="datepicker" class="form-label">Select Date & Time</label>
+                        <input type="text" id="datepicker" name="datetime" class="form-control hide-input" requiredInput placeholder="Y-m-d H:i"> 
                     </div>
 
-                    <div class="mb-3 hidden-box-2 ">
+                    <!-- <div class="mb-3 hidden-box-2 ">
                         <label for="multi-select" class="form-label">Choose Plan</label>
                         <select id="plan" class="form-control hide-input" requiredInput name="plan">
                         <option  value="">select value</option>
@@ -208,7 +243,7 @@
                                 <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
                             <?php endforeach; ?>
                         </select>
-                    </div>
+                    </div> -->
                     <div class="mb-3 hidden-box-2">
                         <label for="multi-select" class="form-label">Choose Language</label>
                         <select id="language" class="form-control hide-input" requiredInput name="language">
@@ -218,11 +253,6 @@
                                 <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
                             <?php endforeach; ?>
                         </select>
-                    </div>
-                    <div class="mb-3 hidden-box-2">
-                        <label for="document" class="form-label">Select Document</label>
-                        <input type="file" class="form-control hide-input" id="document" name="document[]" multiple="multiple" requiredInput accept=".jpeg,.jpg,.png,.doc,.docx,.xls,.xlsx,.pdf" title="select jpeg,jpg,png,doc,docx,xls,xlsx,pdf">
-
                     </div>
                     
                     <div>
@@ -278,8 +308,10 @@
         //     const data = await response.json();
         //     let holidays = data?.response?.holidays;
         //     // console.log(holidays);
+        //     let jk = holidays.map(holiday => holiday.date.iso)
+        //     console.log(jk,"jk");
             
-        //     return holidays.map(holiday => holiday.date.iso); // Return array of holiday dates (YYYY-MM-DD)
+        //     return jk //holidays.map(holiday => holiday.date.iso); // Return array of holiday dates (YYYY-MM-DD)
         // }
 
         
@@ -304,7 +336,7 @@
                 }
 
                 const data = await response.json();
-                console.log(`Public Holidays for ${year}:`, data);
+                // console.log(`Public Holidays for ${year}:`, data);
 
                 // Display the events in the console
                 if (data.items && data.items.length > 0) {
@@ -314,12 +346,12 @@
                         if (/Public holiday/.test(event.description)) {
                             const start = event.start.date || event.start.dateTime;
                             dates.push(start);
-                            console.log(`${start} - ${event.summary}`);
+                            // console.log(`${start} - ${event.summary}`);
                         }
                         
                     });
                     return dates
-                    console.log(dates,"datesdatesdates");
+                    
                     
                 } else {
                     console.log(`No public holidays found for ${year}.`);
@@ -327,7 +359,7 @@
             } catch (error) {
                 console.error('Error fetching public holidays:', error.message);
             }
-        }  
+        } 
 
         // Disable weekends and public holidays
         async function initDatePicker() {
@@ -335,8 +367,8 @@
             const nextMonth = new Date();
             nextMonth.setMonth(today.getMonth() + 1); // Get the date next month
 
+            // const publicHolidays = await getPublicHolidays(today.getFullYear());
             const publicHolidays = await fetchPublicHolidays(today.getFullYear());
-            console.log(publicHolidays,'publicHolidays');
             flatpickr("#datepicker", {
                 minDate: today, // Allow dates starting from today
                 maxDate: nextMonth, // Allow dates until the end of next month
@@ -371,15 +403,12 @@
                 }
             });
         }
-
-        // Initialize the date picker
         initDatePicker();
         // fetchPublicHolidays();
 
 
 
         function isValidEmail(email) {
-            // Regular expression for validating email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(email);
         }
@@ -395,13 +424,14 @@
         $(document).ready(() => {
 
 
+
             let validMobileNumber = true;
             let input = document.querySelectorAll("#mobile");
             let iti_el = $('.iti.iti--allow-dropdown.iti--separate-dial-code');
             let iti;
-
             $(function () {
-              
+                
+
                 if (iti_el.length) {
                     iti.destroy();
                 }
@@ -453,7 +483,7 @@
 
 
             })
-
+            
             $('#mobile').on('change', async (e) => {
                 let steps =  document.getElementById('steps');
                 let otp =  document.getElementById('otp');
@@ -467,16 +497,41 @@
                 })
             });
 
-            let call_id=0;
-            form_type ='talk_to_tax_expert'
-            user_id = 0;
+            let chooseOption = document.querySelector('input[name="selectTime"][value="2"]');
+            let dateTimePicker = document.querySelector('#datepicker');
+            document.querySelectorAll('input[name="selectTime"]').forEach((radio) => {
+                radio.addEventListener("change", () => {
+                    if (chooseOption.checked) {
+                        let allbox  = document.querySelectorAll('.hidden-box-3');
+                        allbox.forEach(box => {
+                            
+                                box.style.display = 'block';
+                        })
+                        dateTimePicker.classList.remove('hide-input');
+                        dateTimePicker.classList.add('show-input');
+                        // dateTimePicker.classList.remove("hidden");
+                    } else {
+                        let allbox  = document.querySelectorAll('.hidden-box-3');
+                        allbox.forEach(box => {
+                            box.style.display = 'none';
+                        }) 
+                        dateTimePicker.classList.add('hide-input');
+                        dateTimePicker.classList.remove('show-input');
+                        
+                    }
+                });
+            });
             
+            let call_id=0;
+            form_type =''
+            user_id = 0
             const fetchButton = document.getElementById('submit_button');
+
+
             $('#scheduleform').on('submit', async (e) => {
                 e.preventDefault(); // Prevent default form submission
 
                 try {
-                    
                     let steps =  document.getElementById('steps');
                     const inputsww = document.getElementById('submit_button');
                     console.log("steps",steps.value);
@@ -492,8 +547,10 @@
 
                     // Loop through each input and validate
                     inputs.forEach(input => {
+                        console.log(input.name,'email');
+                        
                         input.classList.remove('is-invalid');
-                        if (input.value.trim() === '' && !input.classList.contains('hide-input')) {
+                        if (input.value.trim() === '' && !input.classList.contains('hide-input') && input.name != 'selectTime') {
                             let errorElement = document.createElement('span');
                             errorElement.className = 'error'; // Add error class for styling
                             errorElement.textContent = `${input.name.charAt(0).toUpperCase() + input.name.slice(1)} is required.`;
@@ -506,7 +563,7 @@
                             }
                             input.classList.add('is-invalid');
                             isValid = false;
-                            
+                            console.log(input.name,'email');
                         } 
                         
                         if(input.name == 'email' && input.value != '' ){
@@ -534,10 +591,23 @@
                                     isValid = false;
                                 }
                         }
+
                     });
 
 
-
+                    const selectedOption = document.querySelector('input[name="selectTime"]:checked');
+                    const selectedOptionw = document.querySelector('input[name="selectTime"]');
+                    if (!selectedOption && !selectedOptionw.classList.contains('hide-input')) {
+                            let mobilebox = document.getElementById('selectTime-box');
+                            let errorElement = document.createElement('span');
+                            errorElement.className = 'error'; // Add error class for styling
+                            errorElement.textContent = `Please select Date time option.`;
+                            mobilebox.after(errorElement);
+                            // input.classList.add('is-invalid');
+                            isValid = false;
+                            console.log("false option ");
+                            
+                    }
 
                     if (isValid && steps.value == 1) {
                         const formElement = document.querySelector('#scheduleform');
@@ -549,8 +619,6 @@
                         fetchButton.disabled = true;
                         fetchButton.innerHTML = 'Loading <span class="loader"></span>';
                         try {
-                            
-                            // Send the POST request
                             const response = await fetch('http://127.0.0.1:8000/api/generate_otp', {
                                 method: 'POST',
                                 headers: {
@@ -563,7 +631,7 @@
 
                             // Parse the JSON response
                             const data = await response.json();
-                            
+                        
                             if(response.status == 200 && data && data.data > 0){
                                 let checkIdinput =  document.querySelector('#id');
                                 if(!checkIdinput){
@@ -574,15 +642,16 @@
                                     hiddenInput.value = data.data;
                                     formElement.appendChild(hiddenInput);
                                 }
-                                user_id = data.data;
+
                                 document.querySelector('.hidden-box-1').style.display = 'block';
                                 document.querySelector('#otp').classList.remove('hide-input');
                                 document.querySelector('#otp').classList.add('show-input');
                                 
                                 steps.value = '2'
                                 inputsww.textContent = 'Veryfy OTP'
+                            }else{
+                                alert(response);
                             }
-
                         } catch (error) {
                             console.error('Error fetching data:', error);
                             fetchButton.innerHTML = 'Retry';
@@ -590,6 +659,7 @@
                             fetchButton.innerHTML = 'Veryfy OTP';
                             fetchButton.disabled = false;
                         }
+                        
                     //    document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
                     }
 
@@ -597,10 +667,10 @@
                     let otp =  document.getElementById('otp');
                     let id =  document.getElementById('id');
                     if(isValid && steps.value == 2 && otp.value > 0 &&  id.value > 0){
-                        // Send the POST request
                         fetchButton.disabled = true;
                         fetchButton.innerHTML = 'Loading <span class="loader"></span>';
                         try {
+                            // Send the POST request
                             const response = await fetch('http://127.0.0.1:8000/api/verifyOtp', {
                                 method: 'POST',
                                 headers: {
@@ -639,8 +709,11 @@
                                 
                                 let inputs  = document.querySelectorAll('.hide-input');
                                 inputs.forEach(input => {
-                                    input.classList.remove('hide-input');
-                                    input.classList.add('show-input');
+                                    if(input.name != 'datetime'){
+                                        input.classList.remove('hide-input');
+                                        input.classList.add('show-input');
+                                    }
+                                    
                                     
                                 })
                                 
@@ -649,7 +722,7 @@
                                 isValid = false
 
                             }else{
-                                alert("Something went wrong.")
+                                alert(response)
                             }
                         } catch (error) {
                             console.error('Error fetching data:', error);
@@ -658,138 +731,130 @@
                             fetchButton.innerHTML = 'Schedule Your Call';
                             fetchButton.disabled = false;
                         }
+                        
                         // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
 
                     }
-
+                    
+                    console.log(isValid,'=', steps.value,"st");
+                    
                     if(isValid && steps.value == 3){
                         const formElement = document.querySelector('#scheduleform');
                         const formData = new FormData(formElement);
-                        // const formObject = Object.fromEntries(formData.entries());
-                        // const fileInput = document.getElementById("document");
-                        // const files = fileInput.files;
-
-                        // for (let i = 0; i < files.length; i++) {
-                        //     formData.append("files[]", files[i]); // Append each file to FormData
-                        // }
-                        // const selectedValues = $('#multi-select').val() || [];
-                        // formObject.QueryType = selectedValues
-                        // formData.append("QueryType", selectedValues);
-                        // console.log(selectedValues,"====selectedValues",formObject);
+                        const formObject = Object.fromEntries(formData.entries());
+                        const selectedValues = $('#multi-select').val() || [];
+                        formObject.QueryType = selectedValues
                         fetchButton.disabled = true;
                         fetchButton.innerHTML = 'Loading <span class="loader"></span>';
                         try {
                             const response = await fetch('http://127.0.0.1:8000/api/calculatePlanForCall', {
                                 method: 'POST',
                                 headers: {
-                                    // 'Content-Type': 'application/json',
+                                    'Content-Type': 'application/json',
                                     'Accept': 'application/json',
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // CSRF token
                                 },
-                                body: formData,
+                                body: JSON.stringify(formObject),
                             });
 
                             // Parse the JSON response
                             const data = await response.json();
 
                             if(response.status == 200){
-                            // Render the response for debugging
+                                // Render the response for debugging
                                 // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
-                                let checkIdinput =  document.querySelector('#call_id');
-                                if(!checkIdinput){
-                                    let hiddenInput = document.createElement('input');
-                                    hiddenInput.type = 'hidden';
-                                    hiddenInput.name = 'call_id';
-                                    hiddenInput.id = 'call_id';
-                                    hiddenInput.value = data.call_id;
-                                    formElement.appendChild(hiddenInput);
-                                }
+                                if(data && !data?.redirect_url){
 
-                                call_id =  data.call_id;
-                            
-                                // console.log(data.call_id,"==",formData?.form_type,"==",formData?.id);
-                                
+                                    let checkIdinput =  document.querySelector('#call_id');
+                                    if(!checkIdinput){
+                                        let hiddenInput = document.createElement('input');
+                                        hiddenInput.type = 'hidden';
+                                        hiddenInput.name = 'call_id';
+                                        hiddenInput.id = 'call_id';
+                                        hiddenInput.value = data.call_id;
+                                        formElement.appendChild(hiddenInput);
+                                    }
 
-                                let html=`<div>
-                                    <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
-                                    <div class="row justify-content-center">
-                                    <div class="col-md-12">
-                                        <!-- Subscription Items -->
-                                        <div class="card shadow-sm">
-                                            <div class="card-body">
-                                                <!-- Item 1 -->
-                                                <div id='cart-details'>
-                                                    <div class="d-flex justify-content-between align-items-center border-bottom py-3">
-                                                    <div>
-                                                        <h6>Schedule Call</h6>
-                                                        <p class="text-muted mb-1">Regarding ::${data?.regarding}</p>
-                                                        ${data?.getPlan?.url && data?.getPlan?.url !='' ? `<a href="${data?.getPlan?.url}" target="_blank">Read more</a>` : ''}
-                                                    </div>
-                                                    <div class="fw-bold">₹${data?.getPlan?.value}</div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <!-- Coupon Code -->
-                                                <div class="mt-4 border-bottom pb-3">
-                                                    <h6>Have a Coupon Code?</h6>
-                                                    <div class="input-group">
-                                                        <input type="text" class="form-control" id="coupon-code" name='coupon' placeholder="Enter coupon code" value='${data?.inputCoupon && data?.inputCoupon != 'undefined' ? data?.inputCoupon:''}'>
-                                                        <button class="btn btn-primary" id="apply-coupon">Apply</button>
-                                                        <button class="btn btn-danger" id="remove-coupon">Remove Coupon</button>
-                                                    </div>
-                                                        <p id="coupon-message" class="text-success mt-2 d-none">Coupon applied successfully!</p>
-                                                </div>
-                                            ${data?.coupon && data?.coupon?.id > 0 ? `
-                                                    <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
-                                                        <h6>Coupon Code :: <strong>${data.coupon.code}</strong></h6>
-                                                        <span class="fw-bold">₹${data.lessAmount}</span>
-                                                    </div>
-                                                ` : `${data?.coupon != null ?`
-                                                    <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
-                                                        <h6>Coupon Code :: <strong style="color">${data.coupon}</strong></h6>
-                                                    </div>`:''}
-                                                `}
+                                    call_id =  data.call_id;
+                                    form_type = formObject?.form_type;
+                                    user_id = formObject?.id;
 
-                                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                                    <h6>Sub Total:</h6>
-                                                    <div>
-                                                        ${data?.defaultOfferAmount && data?.defaultOfferAmount > 0 ? `<span class="strike">₹${data?.defaultOfferAmount}</span>` :''}
-                                                        <span class="fw-bold">₹${data?.subtotal}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                                    <h6>GST 18%:</h6>
-                                                    <span class="fw-bold">₹${data?.gstCharge}</span>
-                                                </div>
-                                                
-                                                <!-- Total -->
-                                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                                    <h6>Total:</h6>
-                                                    <div>
-                                                        
-                                                        <span class="fw-bold" style="font-size:20px;">₹${data?.amount}</span>
+                                    let html=`<div>
+                                        <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
+                                        <div class="row justify-content-center">
+                                        <div class="col-md-12">
+                                            <!-- Subscription Items -->
+                                            <div class="card shadow-sm">
+                                                <div class="card-body">
+                                                    <!-- Item 1 -->
+                                                    <div id='cart-details'>
+                                                        <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                                                        <div>
+                                                            <h6>Schedule Call</h6>
+                                                            <p class="text-muted mb-1">Regarding ::${data?.regarding}</p>
+                                                            
+                                                        </div>
+                                                        <div class="fw-bold">₹${data?.getPlan?.value}</div>
+                                                        </div>
                                                     </div>
                                                     
+                                                    <!-- Coupon Code -->
+                                                    <div class="mt-4 border-bottom pb-3">
+                                                        <h6>Have a Coupon Code?</h6>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control" id="coupon-code" name='coupon' placeholder="Enter coupon code" value='${data?.inputCoupon && data?.inputCoupon != 'undefined' ? data?.inputCoupon:''}'>
+                                                            <button class="btn btn-primary" id="apply-coupon">Apply</button>
+                                                            <button class="btn btn-danger" id="remove-coupon">Remove Coupon</button>
+                                                        </div>
+                                                            <p id="coupon-message" class="text-success mt-2 d-none">Coupon applied successfully!</p>
+                                                    </div>
+                                                ${data?.coupon && data?.coupon?.id > 0 ? `
+                                                        <div class="d-flex justify-content-between align-items-center mt-3  border-bottom pb-3">
+                                                            <h6>Coupon Code :: <strong>${data.coupon.code}</strong></h6>
+                                                            <span class="fw-bold">₹${data.lessAmount}</span>
+                                                        </div>
+                                                    ` : `${data?.coupon != null ?`
+                                                        <div class="d-flex justify-content-between align-items-center mt-3  border-bottom pb-3">
+                                                            <h6>Coupon Code :: <strong style="color">${data.coupon}</strong></h6>
+                                                        </div>`:''}
+                                                    `}
+
+                                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                                    <h6>Sub Total:</h6>
+                                                    <span class="fw-bold">₹${data?.subtotal}</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                                        <h6>GST 18%:</h6>
+                                                        <span class="fw-bold">₹${data?.gstCharge}</span>
+                                                    </div>
+                                                    <!-- Total -->
+                                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                                        <h6>Total:</h6>
+                                                        <span class="fw-bold">₹${data?.amount}</span>
+                                                    </div>
                                                 </div>
                                             </div>
+
+
+
+                                            <!-- Checkout Button -->
+                                            
                                         </div>
+                                        </div>
+                                    </div>`;
 
+                                    
+                                    document.getElementById("checkOutbtn").style.display = 'block'
+                                    document.getElementById("payment-summary").innerHTML = html;
+                                    document.getElementById("payment-summary").style.display = 'block'
+                                    document.getElementById("terms-box").style.display = 'block'
+                                    document.querySelector('#terms').classList.remove('hide-input');
+                                }else{
+                                    window.location.href= data?.redirect_url;
+                                }
 
-
-                                        <!-- Checkout Button -->
-                                        
-                                    </div>
-                                    </div>
-                                </div>`;
-
-                                
-                                document.getElementById("checkOutbtn").style.display = 'block'
-                                document.getElementById("payment-summary").innerHTML = html;
-                                document.getElementById("payment-summary").style.display = 'block'
-                                document.getElementById("terms-box").style.display = 'block'
-                                document.querySelector('#terms').classList.remove('hide-input');
                             }else{
-                                alert('Something went wrong.')
+                                alert(response);
                             }
                         } catch (error) {
                             console.error('Error fetching data:', error);
@@ -798,8 +863,10 @@
                             fetchButton.innerHTML = 'Schedule Your Call';
                             fetchButton.disabled = false;
                         }
-                        // if(formObject.coupon != null  && formObject.coupon != 'null')
-                        // steps.value = '4'
+                        
+                        
+                           
+                        
 
                     }
 

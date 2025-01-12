@@ -62,17 +62,45 @@
             display: none;
         }
         .select2-container{width: 100% !important;}
+        #terms-box{
+            display: none;
+        }
+
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            width: 12px;
+            height: 12px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .strike {
+            color: #999;
+            text-decoration: line-through;
+        }
 
     </style>
 
 <body>
     <div class="container">
         <div class="row justify-content-md-center mt-5">
-            <div class="col-lg-6 col-md-8 col-offset-2 col-sm-12 col-sm-offset-2">
+            <div class="col-12">
                 <!-- Default form -->
                 <form id="gst_queries" method="POST" enctype="multipart/form-data">
                     <input type="hidden" id ="form_type" name="form_type" value="gst_queries">
-                    <input type="hidden" id ="user_id" name="user_id" value="<?= !empty($_GET['user_id'])?$_GET['user_id']:1; ?>">
+                    <input type="hidden" id ="user_id" name="user_id"  value="<?php echo isset($_GET['user_id']) && $_GET['user_id'] != '' ? $_GET['user_id'] : ''; ?>">
                     <div class="mb-3 text-center">
                         <h2>CONNECT US FOR GST QUERIES</h2>
                     </div>
@@ -83,16 +111,16 @@
                     <div class="mb-3">
                         <label for="multi-select" class="form-label">Type of Taxpayer</label>
                         <select id="type_of_taxpayer" class="form-control" requiredInput name="type_of_taxpayer">
-                            <option></option>
-                            <option  value="1">regular</option>
-                            <option  value="2">composition</option>
+                            <option value="">select taxpayer</option>
+                            <option value="1">Regular</option>
+                            <option value="2">Composition</option>
                         </select>
                     </div>
 
                     <div class="mb-3 hidden-box-2 composition">
                         <label for="type" class="form-label">Plan</label>
                         <select class="form-control composition" id="plan_name" name="plan_name" requiredInput>
-                            <option  value="">select value</option>
+                            <option  value="">select paln</option>
                             <option  value="1">Quarterly</option>
                             <option  value="2">Monthly</option>   
                         </select>
@@ -101,12 +129,14 @@
                     <div class="mb-3 hidden-box-2 regular">
                         <label for="type" class="form-label">Return filling frequency</label>
                         <select class="form-control regular" id="return_filling_frequency" name="return_filling_frequency" requiredInput>
-                            <option  value="">select value</option>
-                            <option  value="1">Button of Quarterly</option>
-                            <option  value="2">Button of Monthly</option>   
+                            <option  value="">select frequency</option>
+                            <option  value="3">Annually</option>
+                            <option  value="2">Monthly</option>   
+                            <option  value="1">Quarterly</option>
+                              
                         </select>
                     </div>
-                    <div class="mb-3 hidden-box-2 regular m-select-check">
+                    <!-- <div class="mb-3 hidden-box-2 regular m-select-check">
                         <label for="multi-select" class="form-label w-100">Type of return</label>
                         <select id="multi-select" class="form-control regular" name="plan" requiredInput  multiple="multiple">
                             <option  value="1">GSTR 1</option>
@@ -115,14 +145,14 @@
                             <option  value="4">GSTR 8</option>   
                             <option  value="5">TCS Return</option>
                         </select>
-                    </div>
+                    </div> -->
                     <div class="mb-3 hidden-box-2 regular">
                         <label for="type" class="form-label">Service type</label>
                         <select class="form-control regular" id="service_type" name="service_type" requiredInput>
-                            <option  value="">select value</option>
+                            <option  value="">select service type</option>
                             <option  value="1">Prepare only</option>
-                            <option  value="1">File only</option>
-                            <option  value="2">Both Prepare and file</option>   
+                            <option  value="2">File only</option>
+                            <option  value="3">Both Prepare and file</option>   
                         </select>
                     </div>
                     <div>
@@ -131,11 +161,15 @@
                     <div class="payment-summary" id ="payment-summary">
 
                     </div>
+                    <div class="mt-4" id ="terms-box">
+                        <input type="checkbox" name="terms" class='hide-input' id="terms" value='1'>
+                        <a href="http://" target="_blank">T&C apply</a>
+                    </div>
                 </form>
                 <form action="#" method="POST" name="payuForm">
                 </form>
                 <div class="text-center mt-4">
-                        <button class="btn btn-primary btn-lg w-100 mt-4"  id ='checkOutbtn' onclick="proceedToCheckout()">Proceed to Checkout</button>
+                        <button class="btn btn-primary btn-lg w-100 mt-4"  id ='checkOutbtn' onclick="proceedToCheckout()">Pay Now</button>
                 </div>
             </div>
         </div>
@@ -177,10 +211,11 @@
             let call_id=0;
             form_type =''
             user_id = 0
+            const fetchButton = document.getElementById('submit_button');
 
             $('#gst_queries').on('submit', async (e) => {
 
-                // try {
+                try {
 
                     e.preventDefault(); // Prevent the default form submit
                     let formElement = document.querySelector('#gst_queries'); 
@@ -188,7 +223,7 @@
                     const errorElements = document.querySelectorAll('.error');
                     // Loop through and remove each element
                     errorElements.forEach(element => {
-                    element.remove();
+                        element.remove();
                     });
 
                     const inputs = document.querySelectorAll('[requiredInput]');
@@ -223,128 +258,167 @@
                         }
 
                     });
+                    console.log(isValid,"======");
+                    
                     if(isValid){
                     
-                    const formData = new FormData(formElement);
-                    // Handle multi-select values
-                    const selectedValues = $('#multi-select').val() || [];
-                    formData.append("plan", selectedValues);
+                        const formData = new FormData(formElement);
+                        // Handle multi-select values
+                        const selectedValues = $('#multi-select').val() || [];
+                        formData.append("plan", selectedValues);
+                        fetchButton.disabled = true;
+                        fetchButton.innerHTML = 'Loading <span class="loader"></span>';
+                        try {
+                            // Send the POST request
+                            const response = await fetch('http://127.0.0.1:8000/api/get-queries/store', {
+                                method: 'POST',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // CSRF token
+                                },
+                                body: formData, // Pass the FormData object directly
+                            });
 
-           
-                    // Send the POST request
-                    const response = await fetch('http://127.0.0.1:8000/api/get-queries/store', {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // CSRF token
-                        },
-                        body: formData, // Pass the FormData object directly
-                    });
+                            // Parse the JSON response
+                            const data = await response.json();
 
-                    // Parse the JSON response
-                    const data = await response.json();
-
-                          // Render the response for debugging
-                    //  document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
-                            let checkIdinput =  document.querySelector('#call_id');
-                         
-                            
-                        if(!checkIdinput){
-                            let hiddenInput = document.createElement('input');
-                            hiddenInput.type = 'hidden';
-                            hiddenInput.name = 'call_id';
-                            hiddenInput.id = 'call_id';
-                            hiddenInput.value = data.call_id;
-                            formElement.appendChild(hiddenInput);
-                        }
-
-                        
-                        call_id =  data.call_id;
-                        form_type = formData?.form_type;
-                        user_id = formData?.id;
+                            if(response.status == 200){
 
                             
+                                // Render the response for debugging
+                                //  document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
+                                let checkIdinput =  document.querySelector('#call_id');
+                                
+                                    
+                                if(!checkIdinput){
+                                    let hiddenInput = document.createElement('input');
+                                    hiddenInput.type = 'hidden';
+                                    hiddenInput.name = 'call_id';
+                                    hiddenInput.id = 'call_id';
+                                    hiddenInput.value = data.call_id;
+                                    formElement.appendChild(hiddenInput);
+                                }
 
-                        let html=`<div>
-                            <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
-                            <div class="row justify-content-center">
-                            <div class="col-md-12">
-                                <!-- Subscription Items -->
-                                <div class="card shadow-sm">
-                                    <div class="card-body">
-                                        <!-- Item 1 -->
-                                      <div id='cart-details'>
-                                            <div class="d-flex justify-content-between align-items-center border-bottom py-3">
-                                            <div>
-                                                <h6>Schedule Call</h6>
-                                                <p class="text-muted mb-1">Regarding ::${data?.regarding}</p>
+                                
+                                call_id =  data.call_id;
+                                form_type = formData?.form_type;
+                                user_id = formData?.id;
 
-                                            </div>
-                                            <div class="fw-bold">₹${data?.getPlan?.value}</div>
+                                    
+
+                                let html=`<div>
+                                    <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
+                                    <div class="row justify-content-center">
+                                    <div class="col-md-12">
+                                        <!-- Subscription Items -->
+                                        <div class="card shadow-sm">
+                                            <div class="card-body">
+                                                <!-- Item 1 -->
+                                            <div id='cart-details'>
+                                                    <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                                                    <div>
+                                                        <h6>GST QUERIES</h6>
+                                                        <p class="text-muted mb-1">Regarding ::${data?.regarding}</p>
+                                                        ${data?.getPlan?.url && data?.getPlan?.url !='' ? `<a href="${data?.getPlan?.url}" target="_blank">Read more</a>` : ''}
+
+                                                    </div>
+                                                    <div class="fw-bold">₹${data?.getPlan?.value}</div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Coupon Code -->
+                                                <div class="mt-4 border-bottom pb-3">
+                                                    <h6>Have a Coupon Code?</h6>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control" id="coupon-code" name='coupon' placeholder="Enter coupon code" value='${data?.inputCoupon}'>
+                                                        <button class="btn btn-primary" id="apply-coupon">Apply</button>
+                                                        <button class="btn btn-danger" id="remove-coupon">Remove Coupon</button>
+                                                    </div>
+                                                        <p id="coupon-message" class="text-success mt-2 d-none">Coupon applied successfully!</p>
+                                                </div>
+                                            ${data?.coupon && data?.coupon?.id > 0 ? `
+                                                    <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
+                                                        <h6>Coupon Code :: <strong>${data.coupon.code}</strong></h6>
+                                                        <span class="fw-bold">₹${data.lessAmount}</span>
+                                                    </div>
+                                                ` : `${data?.coupon != null ?`
+                                                    <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
+                                                        <h6>Coupon Code :: <strong style="color">${data.coupon}</strong></h6>
+                                                    </div>`:''}
+                                                `}
+
+                                                <div class="d-flex justify-content-between align-items-center mt-3 ">
+                                                    <h6>Sub Total:</h6>
+                                                    <div>
+                                                        ${data?.defaultOfferAmount && data?.defaultOfferAmount > 0 ? `<span class="strike">₹${data?.defaultOfferAmount}</span>` :''}
+                                                        <span class="fw-bold">₹${data?.subtotal}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                                    <h6>GST 18%:</h6>
+                                                    <span class="fw-bold">₹${data?.gstCharge}</span>
+                                                </div>
+                                                
+                                                <!-- Total -->
+                                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                                    <h6>Total:</h6>
+                                                    <div>
+                                                        
+                                                        <span class="fw-bold" style="font-size:20px;">₹${data?.amount}</span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <!-- Coupon Code -->
-                                        <div class="mt-4 border-bottom pb-3">
-                                            <h6>Have a Coupon Code?</h6>
-                                            <div class="input-group">
-                                                <input type="text" class="form-control" id="coupon-code" name='coupon' placeholder="Enter coupon code" value='${data?.inputCoupon}'>
-                                                <button class="btn btn-primary" id="apply-coupon">Apply</button>
-                                                <button class="btn btn-danger" id="remove-coupon">Remove Coupon</button>
-                                            </div>
-                                                <p id="coupon-message" class="text-success mt-2 d-none">Coupon applied successfully!</p>
-                                        </div>
-                                       ${data?.coupon && data?.coupon?.id > 0 ? `
-                                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                                <h6>Coupon Code :: <strong>${data.coupon.code}</strong></h6>
-                                                <span class="fw-bold">₹${data.lessAmount}</span>
-                                            </div>
-                                        ` : `${data?.coupon != null ?`
-                                             <div class="d-flex justify-content-between align-items-center mt-3">
-                                                <h6>Coupon Code :: <strong style="color">${data.coupon}</strong></h6>
-                                            </div>`:''}
-                                        `}
 
 
-                                        <!-- Total -->
-                                        <div class="d-flex justify-content-between align-items-center mt-3">
-                                            <h6>Total:</h6>
-                                            <span class="fw-bold">₹${data?.amount}</span>
-                                        </div>
+                                        <!-- Checkout Button -->
+
                                     </div>
-                                </div>
+                                    </div>
+                                </div>`;
 
+                                document.getElementById("checkOutbtn").style.display = 'block'
+                                document.getElementById("payment-summary").innerHTML = html;
+                                document.getElementById("payment-summary").style.display = 'block'
+                                document.getElementById("terms-box").style.display = 'block'
+                                document.querySelector('#terms').classList.remove('hide-input');
+                            }else{
+                                alert('Something went wrong.')
 
-
-                                <!-- Checkout Button -->
-
-                            </div>
-                            </div>
-                        </div>`;
-
-                        document.getElementById("checkOutbtn").style.display = 'block'
-                        document.getElementById("payment-summary").innerHTML = html;
-                        document.getElementById("payment-summary").style.display = 'block'
-
+                            }
+                        }catch (error) {
+                            console.error('Error fetching data:', error);
+                            fetchButton.innerHTML = 'Retry';
+                        }finally {
+                            fetchButton.innerHTML = 'Submit';
+                            fetchButton.disabled = false;
+                        }
                     }
-
+                    
 
                     
-                // } catch (error) {
-                //     console.error('Error:', error);
-                // }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
 
-                let checkOutbtn = document.getElementById('checkOutbtn');
+                    let checkOutbtn = document.getElementById('checkOutbtn');
 
-                checkOutbtn.onclick = async function(){
+                    checkOutbtn.onclick = async function(){
                     let checkIdinput =  document.querySelector('#call_id').value;
                     let form_type =  document.querySelector('#form_type').value;
                     let user_id =  document.querySelector('#user_id').value;
-
+                    let terms =  document.querySelector('#terms');
+                    let isValid = true;
+                    if (terms.checked) {
+                        isValid = true;
+                    } else {
+                        isValid = false;
+                    }
 
                     console.log(call_id,form_type,user_id);
                     
-                    if(call_id && form_type && user_id){
+                    if(call_id && form_type && user_id && isValid){
                         console.log(checkIdinput,"checkIdinput",call_id);
 
                         let formObject = {id :call_id,form_type:form_type,user_id:user_id}
