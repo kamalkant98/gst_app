@@ -12,7 +12,7 @@
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
 
     <style>
-       
+
         .pad-bg {
             background: #f8f8f8;
             padding: 40px 20px;
@@ -64,14 +64,14 @@
         .other_query_message_box{
             display: none;
         }
-        
-        
+
+
     </style>
 
-    
+
 </head>
-<?php 
-    
+<?php
+
     $query_types = [
         ['value'=>'1','label' => 'Income Tax Returns'],
         ['value'=>'2','label' => 'TDS Returns'],
@@ -86,12 +86,12 @@
         ['value'=>'1','label' => '10 minutes plan'],
         ['value'=>'2','label' => '20 minutes plan'],
         ['value'=>'3','label' => '30 minutes plan'],
-        
+
     ];
     $language = [
         ['value'=>'Hindi','label' => 'Hindi'],
         ['value'=>'English','label' => 'English'],
-        
+
     ];
 ?>
 
@@ -143,7 +143,7 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    
+
                     <div class="mb-3 other_query_message_box hidden-box-2">
                         <label for="other_query_message" class="form-label">Description</label>
                         <textarea class="form-control hide-input" id="other_query_message" name="other_query_message" rows="4" placeholder="Enter your message here" requiredInput maxlength="500" title="Message should not exceed 500 characters.">
@@ -152,7 +152,7 @@
 
                     <div class="mb-3 hidden-box-2">
                     <label for="datepicker" class="form-label">Select Date & Time</label>
-                    <input type="text" id="datepicker" name="datetime" class="form-control hide-input" requiredInput placeholder="Y-m-d H:i"> 
+                    <input type="text" id="datepicker" name="datetime" class="form-control hide-input" requiredInput placeholder="Y-m-d H:i">
                     </div>
 
                     <div class="mb-3 hidden-box-2 ">
@@ -160,7 +160,7 @@
                         <select id="plan" class="form-control hide-input" requiredInput name="plan">
                         <option  value="">select value</option>
                             <?php foreach ($plan_types as $type): ?>
-                                
+
                                 <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -170,7 +170,7 @@
                         <select id="language" class="form-control hide-input" requiredInput name="language">
                         <option value="">select value</option>
                             <?php foreach ($language as $type): ?>
-                                
+
                                 <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -180,17 +180,17 @@
                         <input type="file" class="form-control hide-input" id="document" name="document[]" multiple="multiple" requiredInput accept=".jpeg,.jpg,.png,.doc,.docx,.xls,.xlsx,.pdf" title="select jpeg,jpg,png,doc,docx,xls,xlsx,pdf">
 
                     </div>
-                    
+
                     <div>
                         <button type="submit" id="submit_button" class="btn btn-primary">veryify Your Number</button>
                     </div>
-                    
+
                     <div class="payment-summary" id ="payment-summary">
-                        
-                    </div>  
+
+                    </div>
 
                 </form>
-                              
+
                 <form action="#" method="POST" name="payuForm">
                 </form>
                 <div class="text-center mt-4">
@@ -206,19 +206,19 @@
 
     <div id="response"></div>
 
-  
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-        
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
 
-            
+
 
 
 
@@ -228,11 +228,11 @@
             const data = await response.json();
             let holidays = data?.response?.holidays;
             // console.log(holidays);
-            
+
             return holidays.map(holiday => holiday.date.iso); // Return array of holiday dates (YYYY-MM-DD)
         }
 
-        
+
         async function fetchPublicHolidays() {
             try {
 
@@ -268,7 +268,7 @@
             } catch (error) {
                 console.error('Error fetching public holidays:', error.message);
             }
-        } 
+        }
 
         // Disable weekends and public holidays
         async function initDatePicker() {
@@ -341,7 +341,7 @@
         }
 
 
-        
+
         $(document).ready(() => {
 
             // Initialize Select2
@@ -395,14 +395,14 @@
                 }
                 $('#multi-select').val(selectedValues).trigger('change');
             });
-                
+
             // Sync checkboxes with the default behavior
             $('#multi-select').on('change', function () {
                 $('.select2-results__option').each(function () {
                 const $checkbox = $(this).find('input[type="checkbox"]');
                 const value = $(this).data('data')?.id;
                 console.log(value,"======");
-                
+
                 if (value) {
                     const isSelected = $('#multi-select').val().includes(value);
                     $checkbox.prop('checked', isSelected);
@@ -446,7 +446,7 @@
                     let steps =  document.getElementById('steps');
                     const inputsww = document.getElementById('submit_button');
                     console.log("steps",steps.value);
-                    
+
                     const errorElements = document.querySelectorAll('.error');
                     // Loop through and remove each element
                     errorElements.forEach(element => {
@@ -463,17 +463,17 @@
                             let errorElement = document.createElement('span');
                             errorElement.className = 'error'; // Add error class for styling
                             errorElement.textContent = `${input.name.charAt(0).toUpperCase() + input.name.slice(1)} is required.`;
-                            
+
                             input.after(errorElement);
                             input.classList.add('is-invalid');
                             isValid = false;
-                            
-                        } 
-                        
+
+                        }
+
                         if(input.name == 'email' && input.value != '' ){
                             let checkEmail = isValidEmail(input.value)
                                 if(isValidEmail(input.value) == false ){
-                                    
+
                                     let errorElement = document.createElement('span');
                                     errorElement.className = 'error'; // Add error class for styling
                                     errorElement.textContent = `Please enter a valid email address.`;
@@ -482,11 +482,11 @@
                                     isValid = false;
                                 }
                         }
-                        
+
                         if(input.name == 'mobile' && input.value != '' ){
                             // let checkMobile = isValidIndianMobileNumber(input.value)
                                 if(isValidIndianMobileNumber(input.value) == false ){
-                                    
+
                                     let errorElement = document.createElement('span');
                                     errorElement.className = 'error'; // Add error class for styling
                                     errorElement.textContent = `Please enter a valid mobile Number.`;
@@ -518,7 +518,7 @@
 
                         // Parse the JSON response
                         const data = await response.json();
-                        
+
                         if(data && data.data > 0){
                             let checkIdinput =  document.querySelector('#id');
                             if(!checkIdinput){
@@ -533,7 +533,7 @@
                             document.querySelector('.hidden-box-1').style.display = 'block';
                             document.querySelector('#otp').classList.remove('hide-input');
                             document.querySelector('#otp').classList.add('show-input');
-                            
+
                             steps.value = '2'
                             inputsww.textContent = 'Veryfy OTP'
                         }
@@ -562,7 +562,7 @@
                             errorElement.textContent = `${data.error}`;
 
                             // Insert the error message after the input field
-                            otp.after(errorElement);  
+                            otp.after(errorElement);
                             otp.classList.add('is-invalid');
                             isValid = false;
                         }else{
@@ -573,21 +573,21 @@
                             let allbox  = document.querySelectorAll('.hidden-box-2');
                             allbox.forEach(box => {
                                 if(box.classList.contains('m-select-check')){
-                                    
+
                                     box.classList.add('m-select');
                                 }else{
                                     box.style.display = 'block';
                                 }
-                                
+
                             })
-                            
+
                             let inputs  = document.querySelectorAll('.hide-input');
                             inputs.forEach(input => {
                                 input.classList.remove('hide-input');
                                 input.classList.add('show-input');
-                                
+
                             })
-                            
+
                             steps.value = '3'
                             inputsww.textContent = 'Schedule Your Call'
                             isValid = false
@@ -637,9 +637,9 @@
                             }
 
                             call_id =  data.call_id;
-                           
+
                             console.log(data.call_id,"==",formData?.form_type,"==",formData?.id);
-                            
+
 
                         let html=`<div>
                             <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
@@ -654,12 +654,12 @@
                                             <div>
                                                 <h6>Schedule Call</h6>
                                                 <p class="text-muted mb-1">Regarding ::${data?.regarding}</p>
-                                                
+
                                             </div>
                                             <div class="fw-bold">₹${data?.getPlan?.value}</div>
                                             </div>
                                         </div>
-                                        
+
                                         <!-- Coupon Code -->
                                         <div class="mt-4 border-bottom pb-3">
                                             <h6>Have a Coupon Code?</h6>
@@ -681,11 +681,15 @@
                                             </div>`:''}
                                         `}
 
-                                        
+
                                         <!-- Total -->
                                         <div class="d-flex justify-content-between align-items-center mt-3">
                                             <h6>Total:</h6>
-                                            <span class="fw-bold">$${data?.amount}</span>
+                                            <div>
+                                                <span class="fw-bold">$${data?.amount}</span>
+                                                <span class="fw-bold">$${data?.amount}</span>
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -693,22 +697,22 @@
 
 
                                 <!-- Checkout Button -->
-                                
+
                             </div>
                             </div>
                         </div>`;
 
-                        
+
                         document.getElementById("checkOutbtn").style.display = 'block'
                         document.getElementById("payment-summary").innerHTML = html;
                         document.getElementById("payment-summary").style.display = 'block'
-                            
+
                         // if(formObject.coupon != null  && formObject.coupon != 'null')
                         // steps.value = '4'
 
                     }
 
-                    
+
                     // let jk = 1;
                     // if (isValid && steps.value == 10) {
                     //     const formElement = document.querySelector('#scheduleform');
@@ -717,9 +721,9 @@
 
                     //     // Convert formData to a plain object
                     //     const formObject = Object.fromEntries(formData.entries());
-                        
-                        
-                        
+
+
+
                     //     // Send the POST request
                     //     const response = await fetch('http://127.0.0.1:8000/api/payu-payment', {
                     //         method: 'POST',
@@ -808,11 +812,11 @@
                     }else{
                         alert(data)
                     }
-                    
+
                 }else{
                     alert("Please fill the from.")
                 }
-                
+
             }
         });
 

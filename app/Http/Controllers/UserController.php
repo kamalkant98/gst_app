@@ -15,6 +15,7 @@ use App\Models\ScheduleCall;
 use App\Models\Coupon;
 use App\Models\TalkToExpert;
 use App\Models\EmailTemplate;
+use Carbon\Carbon;
 
 class UserController extends Controller
 {
@@ -238,60 +239,86 @@ class UserController extends Controller
         // return response()->json(['data'=>$queryTypeArr]);
 
 
+        if($data['form_type'] == 'talk_to_tax_expert'){
+            $getPlan = getCallPlanAmount($data['plan']);
+            $amount =$getPlan['value'];
+            $defaultOfferAmount =0;
+            $subtotal = 0;
+            $gstCharge = 0;
+            $coupon=null;
+            $coupon_id = null;
+            $lessAmount=0;
+            $inputCoupon ='';
+            // $data['coupon'] = 'FIRST20%';
+            if(isset($data['coupon'])){
+            $inputCoupon = $data['coupon'];
+            $queryTypeArr =[];
 
-        $getPlan = getCallPlanAmount($data['plan']);
-        $amount =$getPlan['value'];
-        $coupon=null;
-        $coupon_id = null;
-        $lessAmount=0;
-        $inputCoupon ='';
-        // $data['coupon'] = 'FIRST20%';
-        if(isset($data['coupon'])){
-        $inputCoupon = $data['coupon'];
-        $queryTypeArr =[];
+            $CalculateCoupon = CalculateCoupon($data['coupon'],$amount);
 
-        $CalculateCoupon = CalculateCoupon($data['coupon'],$amount);
-
-            if(isset($CalculateCoupon['finalAmount']) && isset($CalculateCoupon['getCoupon'])){
-                $lessAmount = floor(($amount - $CalculateCoupon['finalAmount']) * 100) / 100;
-                $amount = floor($CalculateCoupon['finalAmount'] * 100) / 100;
-                $coupon = $CalculateCoupon['getCoupon'];
-                $coupon_id= $coupon['id'];
-            }else{
-                $coupon = $CalculateCoupon;
+                if(isset($CalculateCoupon['finalAmount']) && isset($CalculateCoupon['getCoupon'])){
+                    $lessAmount = floor(($amount - $CalculateCoupon['finalAmount']) * 100) / 100;
+                    $amount = floor($CalculateCoupon['finalAmount'] * 100) / 100;
+                    $coupon = $CalculateCoupon['getCoupon'];
+                    $coupon_id= $coupon['id'];
+                }else{
+                    $coupon = $CalculateCoupon;
+                }
             }
-        }
+            $subtotal = $amount;
 
-        // return response()->json(['coupon'=>$coupon]);
-        if($data['form_type'] == 'talk_to_tax_expert'){
-            $QueryType = $data['QueryType'];
-            $queryTypeArr = explode(",",$QueryType);
+            $getDefaulOffer = Coupon::where(['form_type'=>'talk_to_tax_expert','status'=>'active'])->where('expires_at', '>=', Carbon::now())->first();
 
-        }else{
-            $queryTypeArr = $data['QueryType'];
-        }
-        // return response()->json(['data'=>$queryTypeArr ]);
-        // return response()->json(['data'=>$queryTypeArr ]);
+            if($getDefaulOffer){
+                $CalculateCoupon = CalculateCoupon($getDefaulOffer['code'],$amount);
+                // dd($getDefaulOffer['code']);
+                if(isset($CalculateCoupon['finalAmount']) && isset($CalculateCoupon['getCoupon'])){
+                    $defaultOfferAmount = $subtotal; // floor(($amount - $CalculateCoupon['finalAmount']) * 100) / 100;
+                    $subtotal = floor($CalculateCoupon['finalAmount'] * 100) / 100;
+                    // $coupon = $CalculateCoupon['getCoupon'];
+                    $coupon_id= $CalculateCoupon['getCoupon']['id'];
+                }else{
+                    $coupon = $CalculateCoupon;
+                }
+            }
+            $gstCharge = ($subtotal * 18) / 100;
+            $gstCharge = number_format((float)$gstCharge, 2, '.', '');
+            $amount = $subtotal + $gstCharge;
+            $amount = number_format((float)$amount, 2, '.', '');
 
-        $getQuery = Call_query_type($queryTypeArr);
 
-        $QueryType = implode(', ', $queryTypeArr);
-        $QueryTypeName = implode(', ', $getQuery);
-        $setData = [
-            'user_id' => $request['id'],
-            'call_datetime' =>$request['datetime'],
-            'language' =>$request['language'],
-            'form_type' => $request['form_type'],
-            'plan' => $request['plan'],
-            'query_type'=>$QueryType,
-            'coupon_id'=>$coupon_id,
-            'total_amount'=> (float)$amount,
-            'message'=> $request['other_query_message'],
-        ];
+            // dd($getDefaulOffer);
 
-        $getCall;
+            // return response()->json(['coupon'=>$coupon]);
+            if($data['form_type'] == 'talk_to_tax_expert'){
+                // $QueryType = $data['QueryType'];
+                $queryTypeArr[] =  $data['queryType'];
 
-        if($data['form_type'] == 'talk_to_tax_expert'){
+            }else{
+                $queryTypeArr[] = $data['queryType'];
+            }
+            // return response()->json(['data'=>$queryTypeArr ]);
+            // return response()->json(['data'=>$queryTypeArr ]);
+
+            $getQuery = Call_query_type($queryTypeArr);
+            // return response()->json(['data'=>$getQuery]);
+            $QueryType = $data['queryType']; //implode(', ', $queryTypeArr);
+            $QueryTypeName = implode(', ', $getQuery);
+            $setData = [
+                'user_id' => $request['id'],
+                'call_datetime' =>$request['datetime'],
+                'language' =>$request['language'],
+                'form_type' => $request['form_type'],
+                'plan' => $request['plan'],
+                'query_type'=>$QueryType,
+                'coupon_id'=>$coupon_id,
+                'total_amount'=> (float)$amount,
+                'message'=> $request['other_query_message'],
+            ];
+
+            $getCall;
+
+
 
             $uploadedFiles = $request->file('document'); // Get all uploaded files
             $filePaths = []; // Array to store file paths
@@ -315,8 +342,9 @@ class UserController extends Controller
                 // Add the file path to the array
                 $filePaths[] = asset('talk_to_TaxExpertFiles/' . $fileName);
             }
-            $setData['documents'] = $filePaths;
-            // return response()->json(['data'=>$filePaths]);
+            // $setData['documents'] = $filePaths;
+            $setData['documents'] = json_encode($filePaths);
+            // return response()->json(['data'=>$setData]);
 
             if(isset($data['call_id']) && $data['call_id'] !='undefined' && $data['call_id'] > 0){
                 $getCall = TalkToExpert::where('id', $data['call_id'])->first();
@@ -325,23 +353,107 @@ class UserController extends Controller
             }else{
                 $getCall = TalkToExpert::create($setData);
             }
+            // $this->sendMeassage($data['id'],'talk_to_tax_expert',$getCall['id']);
 
-            return response()->json(['call_id'=>$getCall->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon], 200);
+            return response()->json(['call_id'=>$getCall->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount], 200);
         }else{
+
+            $setData = [
+                'user_id' => $request['id'],
+                'call_datetime'=>$request['datetime'],
+                'language' =>$request['language'],
+                'form_type' => $request['form_type'],
+                'call_when'=>$request['selectTime']
+            ];
+
+            // dd($setData);
+            $getCall = ScheduleCall::where('user_id', $data['id'])->first();
             if(isset($data['call_id']) && $data['call_id'] > 0 && $data['call_id'] != 'undefined'){
                 $getCall = ScheduleCall::where('id', $data['call_id'])->first();
                 $getCall->update($setData);
 
+            }else if(isset($data['id']) && $data['id'] > 0 && $data['id'] != 'undefined' && $getCall){
+                $getCall->update($setData);
             }else{
                 $getCall = ScheduleCall::create($setData);
             }
 
-            return response()->json(['call_id'=>$getCall->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon], 200);
+            $this->sendMeassage($data['id'],'schedule_call',$getCall['id']);
+            $redirect_url = env('CALL_BACK_URL');
+            return response()->json(['redirect_url'=>$redirect_url], 200);
+
+            // return response()->json(['call_id'=>$getCall->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge], 200);
 
         }
 
         return response()->json(['message'=>'Something went wrong.' ],422);
 
+
+    }
+
+    public function sendMeassage($userId,$formType,$id){
+
+        $userData = UserInquiry::where('id',$userId)->first();
+
+        $template = EmailTemplate::whereIn('type',[1,2,3])->where('form_type',$formType)->get();
+        // $message = str_replace("{client_name}",$userData->name,$value->description);
+        // dd($template[0]['description']);
+
+        foreach ($template as $key => $value) {
+
+            $message = str_replace("{client_name}",$userData->name,$value->description);
+            $message = str_replace("{mobile_number}",$userData->mobile,$message);
+            if($formType == 'schedule_call'){
+                $getCall = ScheduleCall::where('id',$id)->first();
+                if($getCall && $getCall['call_when'] == 2){
+                    $message = str_replace("{date_time}",$getCall['call_datetime'],$message);
+                }else{
+                    $message = str_replace("{date_time}",'We will call you within the next hour.',$message);
+                }
+
+            }
+
+            if($formType == 'talk_to_tax_expert'){
+
+            }
+
+            // dd($message);
+            // if($value->type == 1){
+
+            // // Send OTP to the provided phone number
+
+            //     $phone = '+91'.$userData->mobile;
+            //     $this->otpService->sendOtp($phone, $message);
+
+            // }elseif($value->type == 2){
+
+            //     $to = '+91'.$userData->mobile; // Recipient's WhatsApp number
+            //     $message = $message; // The message content
+
+            //     try {
+            //         $this->whatsAppService->sendMessage($to, $message);
+            //         // return response()->json(['status' => 'Message sent successfully!'], 200);
+            //     } catch (\Exception $e) {
+            //         // return response()->json(['error' => $e->getMessage()], 500);
+            //     }
+
+            // }else
+
+            if($value->type == 3){
+
+                $data = [
+                    'email' => $userData->email,
+                    'title' => $value->subject,
+                    'message' => $message,
+                ];
+                  // Dispatch the job
+                SendEmailJob::dispatch($data);
+
+            }
+        }
+
+        // dd('done');
+        return 1;
 
     }
 

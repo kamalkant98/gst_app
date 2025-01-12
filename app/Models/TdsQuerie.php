@@ -16,6 +16,7 @@ class TdsQuerie extends Model
         'no_of_employees',
         'no_of_entries',
         'tax_planning_of_employees',
+        'type_of_return',
         'user_id',
         'status',
         'coupon_id',

@@ -16,6 +16,9 @@ use App\Models\TalkToExpert;
 use App\Models\TdsQuerie;
 use App\Services\WhatsAppService;
 use App\Services\OtpService;
+use App\Models\ItrQuerie;
+use Carbon\Carbon;
+
 
 class PayUMoneyController extends Controller
 {
@@ -52,18 +55,26 @@ class PayUMoneyController extends Controller
 
 
         $planDetails = '';
+        $amount = 0;
         $userDetails = UserInquiry::where('id',$request->user_id)->first();
         if($request->form_type == 'schedule_call'){
             $planDetails = ScheduleCall::where('id',$request->id)->first();
-
+            $amount = $planDetails->total_amount;
         }else if($request->form_type == 'talk_to_tax_expert'){
             $planDetails = TalkToExpert::where('id',$request->id)->first();
+            $amount = $planDetails->total_amount;
         }else if($request->form_type == 'business_registration'){
             $planDetails = BusinessRegistration::where('id',$request->id)->first();
+            $amount = $planDetails->total_amount;
         }else if($request->form_type == 'gst_queries'){
             $planDetails = GstQuerie::where('id',$request->id)->first();
+            $amount = $planDetails->total_amount;
         }else if($request->form_type == 'tds_queries'){
             $planDetails = TdsQuerie::where('id',$request->id)->first();
+            $amount = $planDetails->total_amount;
+        }else if($request->form_type == 'itr_queries'){
+            $planDetails = ItrQuerie::where('id',$request->id)->first();
+            $amount = $planDetails->amount;
         }
 
         if($userDetails && $planDetails){
@@ -72,7 +83,7 @@ class PayUMoneyController extends Controller
             $data = [
                 'key' => env('PAYU_MERCHANT_KEY'),
                 'txnid' =>  uniqid(),
-                'amount' => '1.00',//$planDetails->total_amount,
+                'amount' => $amount,
                 'productinfo' => 'API Product', // Example: Replace with actual product info
                 'firstname' => $userDetails->name,
                 'email' => $userDetails->email,
@@ -127,7 +138,91 @@ class PayUMoneyController extends Controller
 
         if ($status == 'success') {
             $updateData  =  Transactions::where('txnid',$request['txnid'])->first();
-            $this->sendMeassage($updateData->user_id, $updateData->form_type);
+
+            $setData = $updateData;
+            if($updateData->form_type == 'talk_to_tax_expert'){
+                $getCall = TalkToExpert::where('id', $updateData['order_id'])->first();
+                $queryTypeArr[] = $getCall->query_type;
+                $getQuery = Call_query_type($queryTypeArr);
+                $QueryTypeName = implode(', ', $getQuery);
+                $getPlan = getCallPlanAmount($getCall->plan);
+                $duration = '10 mins';
+                $date = $getCall->call_datetime;
+
+                if($getCall->plan == 2){
+                    $duration = '20 mins';
+                }else if($getCall->plan == 3){
+                    $duration = '30 mins';
+                }
+                $setData['other_details'] = [
+                    'service_name' => $QueryTypeName,
+                    'duration' => $duration,
+                    'amount' => $updateData['amount'],
+                    'date' => $date,
+                    'invoice_url' => 'https://www.stackhawk.com/blog/laravel-cors/'
+                ];
+            }else if($updateData->form_type == 'itr_queries'){
+                $getplanDetails = ItrQuerie::where('id',$updateData['order_id'])->first();
+                $getplanDetails->income_type =  explode(',',$getplanDetails->income_type);
+                $data = getItrPlanAmount($getplanDetails);
+                $labels = []; // Array to store labels
+
+                foreach ($data['plan'] as $item) {
+                    if (isset($item['label'])) {
+                        $labels[] = $item['label']; // Add label to the labels array
+                    }
+                }
+                $commaSeparatedLabels = implode(", ", $labels);
+
+                $setData['other_details'] = [
+                    'service_name' => $commaSeparatedLabels,
+                    'amount' => $updateData['amount'],
+                    'invoice_url' => 'https://www.stackhawk.com/blog/laravel-cors/'
+                ];
+
+
+            }else if ($updateData->form_type == 'gst_queries'){
+                $getplanDetails = GstQuerie::where('id',$updateData['order_id'])->first();
+                $service_name = getGstPlanAmount($getplanDetails);
+                $setData['other_details'] = [
+                    'service_name' => $service_name['label'],
+                    'amount' => $updateData['amount'],
+                    'invoice_url' => 'https://www.stackhawk.com/blog/laravel-cors/'
+                ];
+            }else if($updateData->form_type == 'business_registration'){
+                $getplanDetails = BusinessRegistration::where('id',$updateData['order_id'])->first();
+
+                $QueryType = $getplanDetails['plan'];
+                $queryTypeArr = explode(",",$QueryType);
+                $getQuery = businessrReg_query_type($queryTypeArr);
+                $QueryTypeName = implode(', ', $getQuery);
+                $setData['other_details'] = [
+                    'service_name' => $QueryTypeName,
+                    'amount' => $updateData['amount'],
+                    'invoice_url' => 'https://www.stackhawk.com/blog/laravel-cors/'
+                ];
+            }else if ($updateData->form_type == 'tds_queries'){
+                $getplanDetails = TdsQuerie::where('id',$updateData['order_id'])->first();
+
+                $typeOfReturnArr=[
+                    '1' =>['label'=>'24Q','url'=>'1'],
+                    '2' => ['label'=>'26Q','url'=>'1'],
+                    '3' =>['label'=>'27Q','url'=>'1'] ,
+                    '4' => ['label'=>'26QB','url'=>'1'],
+                ];
+                $QueryTypeName = $typeOfReturnArr[$getplanDetails->type_of_return]['label'];
+                $getPlan = getTSDPlanAmount($getplanDetails);
+                $QueryTypeName =  $QueryTypeName.'- Number of employee '.$getPlan['label'];
+
+                $setData['other_details'] = [
+                    'service_name' => $QueryTypeName,
+                    'amount' => $updateData['amount'],
+                    'invoice_url' => 'https://www.stackhawk.com/blog/laravel-cors/'
+                ];
+                // dd($QueryTypeName);
+            }
+
+            $this->sendMeassage($setData, $updateData->form_type);
             $updateData->update(["status"=>'completed']);
             return redirect(env('CALL_BACK_URL'));
         }
@@ -135,15 +230,26 @@ class PayUMoneyController extends Controller
         return redirect(env('CALL_BACK_ERROR_URL'));
     }
 
-    public function sendMeassage($userId,$formType){
+    public function sendMeassage($updateData,$formType){
 
-        $userData = UserInquiry::where('id',$userId)->first();
+        $userData = UserInquiry::where('id',$updateData->user_id)->first();
 
         $template = EmailTemplate::whereIn('type',[1,2,3])->where('form_type',$formType)->get();
-
+        // dd($updateData);
         foreach ($template as $key => $value) {
 
             $message = str_replace("{client_name}",$userData->name,$value->description);
+            $message = str_replace("{amount}",$updateData['other_details']['amount'],$message);
+            $message = str_replace("{service_name}",$updateData['other_details']['service_name'],$message);
+            $message = str_replace("{R_No}",$updateData['txnid'],$message);
+            $message = str_replace("{invoice_url}",$updateData['other_details']['invoice_url'],$message);
+
+            if($formType == 'talk_to_tax_expert'){
+                $message = str_replace("{mobile_number}",$userData['mobile'],$message);
+                $message = str_replace("{date_time}",$updateData['other_details']['date'],$message);
+                $message = str_replace("{duration}",$updateData['other_details']['duration'],$message);
+            }
+
 
             // if($value->type == 1){
 
@@ -165,6 +271,7 @@ class PayUMoneyController extends Controller
             //     }
 
             // }else
+            // dd($message);
 
             if($value->type == 3){
 
@@ -180,7 +287,7 @@ class PayUMoneyController extends Controller
         }
 
 
-        return '';
+        return 1;
 
     }
 

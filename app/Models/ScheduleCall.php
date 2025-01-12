@@ -20,6 +20,7 @@ class ScheduleCall extends Model
         'status',
         'coupon_id',
         'total_amount',
+        'call_when',
         'created_at', // These columns are automatically added by Laravel, but you can explicitly include them if you want
         'updated_at', // Same for updated_at
     ];

@@ -9,6 +9,8 @@ use App\Jobs\SendEmailJob;
 use App\Models\TdsQuerie;
 use App\Services\WhatsAppService;
 use App\Services\OtpService;
+use Carbon\Carbon;
+use App\Models\Coupon;
 
 class TdsQuerieController extends Controller
 {
@@ -23,110 +25,40 @@ class TdsQuerieController extends Controller
         $this->otpService = $otpService;
     }
 
-    public function getCallPlanAmount($data){
-
-        $typeOfReturn = $data['type_of_return'];
-
-        if($typeOfReturn == 1){
-           $noOfEmployees = $data['no_of_employees'];
-           $value = $noOfEmployees;
-
-            $callPlan =[
-                '1'  => ['value'=>'4000','label' => '1 to 10'],
-                '2'  => ['value'=>'15000','label' => '10 to 50'],
-                '3'  => ['value'=>'25000','label' => '50 to 100'],
-                '4'  => ['value'=>'0','label' => 'More than 100'],
-            ];
-            return $callPlan[$value];
-        }elseif($typeOfReturn == 2){
-
-            $noOfEntries = $data['no_of_entries'];
-            $value = $noOfEntries;
- 
-             $callPlan =[
-                 '1'  => ['value'=>'4000','label' => 'Up to 100'],
-                 '2'  => ['value'=>'10000','label' => '100 to 250'],
-                 '3'  => ['value'=>'15000','label' => '250 to 500'],
-                 '4'  => ['value'=>'0','label' => 'More than 500'],
-             ];
-             return $callPlan[$value];
-
-        }elseif($typeOfReturn == 3){
-
-            $noOfEntries = $data['no_of_entries_27'];
-            $value = $noOfEntries;
- 
-             $callPlan =[
-                 '1'  => ['value'=>'4000','label' => 'Up to 50'],
-                 '2'  => ['value'=>'10000','label' => '50 to 100'],
-                 '3'  => ['value'=>'15000','label' => '100 to 200'],
-                 '4'  => ['value'=>'0','label' => 'More than 200'],
-             ];
-             return $callPlan[$value];
-
-
-        }else{
-            
-            return ['value'=>'3000','label' => 'Annual Fee'];
-
-        }
-    
-    }
-    public function Call_query_type($arr){
-
-
-        $Call_query_type = [
-            ['value'=>'1','label' => 'GSTR 1'],
-            ['value'=>'2','label' => 'GSTR 3B'],
-            ['value'=>'3','label' => '>GSTR 9/9C'],
-            ['value'=>'4','label' => 'GSTR 8'],
-            ['value'=>'5','label' => 'TCS Return'],
-        ];
-    
-    
-        $labels = [];
-    
-        // Check if $values is an array
-        if (is_array($arr)) {
-            foreach ($arr as $value) {
-                // Find the label for each value
-                $found = false;
-                foreach ($Call_query_type as $item) {
-                    if ($item['value'] == $value) {
-                        $labels[] = $item['label'];
-                        $found = true;
-                        break;
-                    }
-                }
-    
-                // If no label found, add a default message
-                if (!$found) {
-                    $labels[] = 'Unknown value';
-                }
-            }
-        }
-    
-        return $labels;
-    }
 
     public function tdsQuerieStore(Request $request)
-    {   
+    {
 
         $data = $request->all();
-        
-        $getPlan = $this->getCallPlanAmount($data);
+
+        $typeOfReturnArr=[
+            '1' =>['label'=>'24Q','url'=>'1'],
+            '2' => ['label'=>'26Q','url'=>'1'],
+            '3' =>['label'=>'27Q','url'=>'1'] ,
+            '4' => ['label'=>'26QB','url'=>'1'],
+        ];
+        $typeOfReturn = $data['type_of_return'];
+        if($typeOfReturn == 3){
+            $data['no_of_entries'] = $data['no_of_entries_27'];
+        }
+
+        $getPlan = getTSDPlanAmount($data);
         $amount =$getPlan['value'];
+        $defaultOfferAmount = 0;
         $coupon=null;
         $coupon_id = null;
         $lessAmount=0;
         $inputCoupon ='';
+        $subtotal = 0;
+        $gstCharge = 0;
+        // dd($getPlan);
          // $data['coupon'] = 'FIRST20%';
         if(isset($data['coupon'])){
             $inputCoupon = $data['coupon'];
             $queryTypeArr =[];
-    
-            $CalculateCoupon = CalculateCoupon($data['coupon'],$amount);
-    
+
+                $CalculateCoupon = CalculateCoupon($data['coupon'],$amount);
+
                 if(isset($CalculateCoupon['finalAmount']) && isset($CalculateCoupon['getCoupon'])){
                     $lessAmount = floor(($amount - $CalculateCoupon['finalAmount']) * 100) / 100;
                     $amount = floor($CalculateCoupon['finalAmount'] * 100) / 100;
@@ -136,32 +68,69 @@ class TdsQuerieController extends Controller
                     $coupon = $CalculateCoupon;
                 }
         }
-        
+
                 $QueryType = null;
-                $QueryTypeName = 'Quarterly';
+                $returnType = $data['type_of_return'];
+
+                $QueryTypeName = $typeOfReturnArr[$returnType]['label'];
+                $getPlan['url']= $typeOfReturnArr[$returnType]['url'];
+
+                $subtotal = $amount;
+
+                $getDefaulOffer = Coupon::where(['form_type'=>'tds_queries','status'=>'active'])->where('expires_at', '>=', Carbon::now())->first();
+                if($getDefaulOffer){
+                    $CalculateCoupon = CalculateCoupon($getDefaulOffer['code'],$amount);
+                    // dd($getDefaulOffer['code']);
+                    if(isset($CalculateCoupon['finalAmount']) && isset($CalculateCoupon['getCoupon'])){
+                        $defaultOfferAmount = $subtotal; // floor(($amount - $CalculateCoupon['finalAmount']) * 100) / 100;
+                        $subtotal = floor($CalculateCoupon['finalAmount'] * 100) / 100;
+                        // $coupon = $CalculateCoupon['getCoupon'];
+                        $coupon_id= $CalculateCoupon['getCoupon']['id'];
+                    }else{
+                        $coupon = $CalculateCoupon;
+                    }
+                }
+                $gstCharge = ($subtotal * 18) / 100;
+                $gstCharge = number_format((float)$gstCharge, 2, '.', '');
+                $amount = $subtotal + $gstCharge;
+                $amount = number_format((float)$amount, 2, '.', '');
+
 
 
         $setData = [
             'tan_number' => $request['tan_number'],
             'no_of_employees' => $request['no_of_employees'],
-            'no_of_entries' => $request['no_of_entries'],
+            'no_of_entries' => $data['no_of_entries'],
             'tax_planning_of_employees' => $request['tax_planning'],
+            'type_of_return' => $request['type_of_return'],
             'coupon_id'=>$coupon_id,
-            'total_amount'=> (float)$amount, 
+            'total_amount'=> (float)$amount,
         ];
+
+        // dd($setData);
 
         if(isset($data['call_id']) && $data['call_id'] !='undefined' && $data['call_id'] > 0){
             $create = TdsQuerie::where('id', $data['call_id'])->first();
             $create->update($setData);
 
         }else{
-           
+
             $setData['user_id'] =    $data['user_id'];
             $create = TdsQuerie::create($setData);
         }
 
-        return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon], 200);
-       
+        $QueryTypeName =  $QueryTypeName.'- Number of employee'.$getPlan['label'];
+
+        if($request['no_of_employees'] ==  4){
+            // return redirect(env('CALL_BACK_URL'));
+            $redirect_url = env('CALL_BACK_URL');
+            return response()->json(['redirect_url'=>$redirect_url], 200);
+
+        }else{
+            return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount], 200);
+
+        }
+
     }
 
     public function handlePaySuccess(Request $request)
@@ -173,9 +142,9 @@ class TdsQuerieController extends Controller
 
         //  // Send OTP to the provided phone number
          $this->otpService->sendOtp($phone, $otp);
- 
+
          return response()->json(['message' => 'OTP sent successfully']);
-       
+
         // phone send otp end
 
 
@@ -194,19 +163,19 @@ class TdsQuerieController extends Controller
         //Send whatsapp message end
 
         //Send email start
-        
+
 
         $data = [
             'email' => $request['email'],
             'title' => 'Welcome to our App',
             'message' => 'Thank you for registering with us!',
         ];
-    
+
         // // Dispatch the job
         SendEmailJob::dispatch($data);
 
         //Send email end
-        
+
     }
 
 }

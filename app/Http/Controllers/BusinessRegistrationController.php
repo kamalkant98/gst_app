@@ -4,80 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\BusinessRegistration;
 use Illuminate\Http\Request;
-
+use Carbon\Carbon;
+use App\Models\Coupon;
 
 
 class BusinessRegistrationController extends Controller
 {
 
 
-    public function getCallPlanAmount($value){
-        $callPlan =[
-            '1'  => ['value'=>'500','label' => 'PAN Registration'],
-            '2'  => ['value'=>'500','label' => 'TAN Registration'],
-            '3'  => ['value'=>'2000','label' => 'GST Registration'],
-            '4'  => ['value'=>'1000','label' => 'MSME Registration'],
-            '5'  => ['value'=>'5000','label' => 'SHOP ACT Registration'],
-            '6'  => ['value'=>'11000','label' => 'LLP Registration'],
-            '7'  => ['value'=>'15000','label' => 'PRIVATE LIMITED COMPANY Registration'],
-            '8'  => ['value'=>'20000','label' => 'PUBLIC LIMITED COMPANY Registration'],
-            '9'  => ['value'=>'20000','label' => 'SECTION 8 COMPANY Registration'],
-            '10' => ['value'=>'10000','label' => 'TRADEMARK Registration'],
-            '11' => ['value'=>'30000','label' => 'COPYRIGHT Registration'],
-            '12' => ['value'=>'15000','label' => 'OPC Registration'],
-            '13' => ['value'=>'10000','label' => 'ESI Registration'],
-            '14' => ['value'=>'10000','label' => 'PF Registration'],
-            '15' => ['value'=>'5000','label' => 'FIRM Registration'],
-            '16' => ['value'=>'20000','label' => 'Start up Registration']
-        ];
 
-        return $callPlan[$value];
-    }
-    public function Call_query_type($arr){
-        $Call_query_type = [
-            ['value'=>'1','label' => 'PAN Registration'],
-            ['value'=>'2','label' => 'TAN Registration'],
-            ['value'=>'3','label' => 'GST Registration'],
-            ['value'=>'4','label' => 'MSME Registration'],
-            ['value'=>'5','label' => 'SHOP ACT Registration'],
-            ['value'=>'6','label' => 'LLP Registration'],
-            ['value'=>'7','label' => 'PRIVATE LIMITED COMPANY Registration'],
-            ['value'=>'8','label' => 'PUBLIC LIMITED COMPANY Registration'],
-            ['value'=>'9','label' => 'SECTION 8 COMPANY Registration'],
-            ['value'=>'10','label' => 'TRADEMARK Registration'],
-            ['value'=>'11','label' => 'COPYRIGHT Registration'],
-            ['value'=>'12','label' => 'OPC Registration'],
-            ['value'=>'13','label' => 'ESI Registration'],
-            ['value'=>'14','label' => 'PF Registration'],
-            ['value'=>'15','label' => 'FIRM Registration'],
-            ['value'=>'16','label' => 'Start up Registration']
-        ];
-
-
-        $labels = [];
-
-        // Check if $values is an array
-        if (is_array($arr)) {
-            foreach ($arr as $value) {
-                // Find the label for each value
-                $found = false;
-                foreach ($Call_query_type as $item) {
-                    if ($item['value'] == $value) {
-                        $labels[] = $item['label'];
-                        $found = true;
-                        break;
-                    }
-                }
-
-                // If no label found, add a default message
-                if (!$found) {
-                    $labels[] = 'Unknown value';
-                }
-            }
-        }
-
-        return $labels;
-    }
 
 
     public function businessStore(Request $request)
@@ -87,10 +22,13 @@ class BusinessRegistrationController extends Controller
 
         $plan = explode(",",$data['plan']);
         $amount = 0;
+        $defaultOfferAmount = 0;
+        $subtotal = 0;
+        $gstCharge = 0;
         $getPlan = [];
         foreach($plan as $value){
 
-            $planData = $this->getCallPlanAmount($value);
+            $planData = getBusinessrRegPlanAmount($value);
             $getPlan[] = $planData;
             $amount += $planData['value'];
         }
@@ -114,12 +52,33 @@ class BusinessRegistrationController extends Controller
                     $coupon = $CalculateCoupon;
                 }
         }
+        $subtotal = $amount;
+
+        $getDefaulOffer = Coupon::where(['form_type'=>'business_registration','status'=>'active'])->where('expires_at', '>=', Carbon::now())->first();
+        if($getDefaulOffer){
+            $CalculateCoupon = CalculateCoupon($getDefaulOffer['code'],$amount);
+            // dd($getDefaulOffer['code']);
+            if(isset($CalculateCoupon['finalAmount']) && isset($CalculateCoupon['getCoupon'])){
+                $defaultOfferAmount = $subtotal; // floor(($amount - $CalculateCoupon['finalAmount']) * 100) / 100;
+                $subtotal = floor($CalculateCoupon['finalAmount'] * 100) / 100;
+                // $coupon = $CalculateCoupon['getCoupon'];
+                $coupon_id= $CalculateCoupon['getCoupon']['id'];
+            }else{
+                $coupon = $CalculateCoupon;
+            }
+        }
+
+        $gstCharge = ($subtotal * 18) / 100;
+        $gstCharge = number_format((float)$gstCharge, 2, '.', '');
+        $amount = $subtotal + $gstCharge;
+        $amount = number_format((float)$amount, 2, '.', '');
+
 
         $QueryType = $data['plan'];
         $queryTypeArr = explode(",",$QueryType);
 
 
-        $getQuery = $this->Call_query_type($queryTypeArr);
+        $getQuery = businessrReg_query_type($queryTypeArr);
 
 
         $QueryType = implode(', ', $queryTypeArr);
@@ -151,7 +110,7 @@ class BusinessRegistrationController extends Controller
             $create = BusinessRegistration::create($setData);
         }
 
-        return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon], 200);
+        return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount], 200);
 
     }
 

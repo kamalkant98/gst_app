@@ -3,26 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Jobs\SendEmailJob;
-use App\Models\GstQuerie;
 use Illuminate\Support\Facades\Validator;
+use App\Models\ItrQuerie;
 use Carbon\Carbon;
 use App\Models\Coupon;
 
-class GstQuerieController extends Controller
+class ItrQueriesController extends Controller
 {
 
+    public function ItrQuerieStore(Request $request){
 
-
-
-
-
-    public function gstQuerieStore(Request $request)
-    {
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|string',
              'form_type' => 'required|string',
-             'gst_number' => 'required|string',
+             'income_type' => 'required|array',
          ]);
 
          // Check if validation fails
@@ -33,18 +27,22 @@ class GstQuerieController extends Controller
              ], 422);
          }
 
-        $data = $request->all();
+         $data = $request->all();
 
-        $getPlan = getGstPlanAmount($data);
-        $amount =$getPlan['value'];
+        $amount = 0;
         $defaultOfferAmount = 0;
         $subtotal = 0;
         $gstCharge = 0;
+        $getPlan = [];
         $coupon=null;
         $coupon_id = null;
         $lessAmount=0;
         $inputCoupon ='';
-         // $data['coupon'] = 'FIRST20%';
+
+        $plan = getItrPlanAmount($data);
+        $getPlan = $plan['summary'];
+        $amount = $plan['amount'];
+
         if(isset($data['coupon'])){
             $inputCoupon = $data['coupon'];
             $queryTypeArr =[];
@@ -60,30 +58,10 @@ class GstQuerieController extends Controller
                     $coupon = $CalculateCoupon;
                 }
         }
-        if( $data['type_of_taxpayer'] == 1){
-
-            $QueryType = $data['plan'];
-            $queryTypeArr = explode(",",$QueryType);
-            $getQuery = gst_query_type($queryTypeArr);
-            $QueryType = implode(', ', $queryTypeArr);
-            $QueryTypeName = implode(', ', $getQuery);
-        }else{
-            if($request['plan_name'] == 1){
-                $QueryType = null;
-                $QueryTypeName = 'Quarterly';
-
-            }else{
-                $QueryType = null;
-                $QueryTypeName = 'Monthly';
-
-            }
-        }
-
-        $QueryTypeName = $getPlan['label'];
 
         $subtotal = $amount;
 
-        $getDefaulOffer = Coupon::where(['form_type'=>'gst_queries','status'=>'active'])->where('expires_at', '>=', Carbon::now())->first();
+        $getDefaulOffer = Coupon::where(['form_type'=>'itr_queries','status'=>'active'])->where('expires_at', '>=', Carbon::now())->first();
         if($getDefaulOffer){
             $CalculateCoupon = CalculateCoupon($getDefaulOffer['code'],$amount);
             // dd($getDefaulOffer['code']);
@@ -102,28 +80,28 @@ class GstQuerieController extends Controller
         $amount = number_format((float)$amount, 2, '.', '');
 
 
-        $setData = [
-            'gst_number' => $request['gst_number'],
-            'type_of_taxpayer' => $request['type_of_taxpayer'],
-            'return_filling_frequency' => $data['type_of_taxpayer'] == 1 ? $request['return_filling_frequency'] : $request['plan_name'],
-            'type_of_return' => $QueryType,
-            'service_type' =>  $data['type_of_taxpayer'] == 1?$request['service_type']:null,
+        $income_type = implode(',', $data['income_type']);
+
+        $setData=[
+            'user_id'=>$data['user_id'],
+            'income_type' =>$income_type,
+            'resident'=> $data['resident'],
+            'business_income'=> $data['business_income'],
+            'profit_loss'=> $data['profit_loss'],
+            'income_tax_forms'=>$data['income_tax_forms'],
+            'services'=>$data['services'],
             'coupon_id'=>$coupon_id,
-            'total_amount'=> (float)$amount,
+            'amount'=>$amount,
         ];
-
+        // return $plan;
         if(isset($data['call_id']) && $data['call_id'] !='undefined' && $data['call_id'] > 0){
-            $create = GstQuerie::where('id', $data['call_id'])->first();
+            $create = ItrQuerie::where('id', $data['call_id'])->first();
             $create->update($setData);
-
         }else{
-
-            $setData['user_id'] =$data['user_id'];
-            $create = GstQuerie::create($setData);
+            $create = ItrQuerie::create($setData);
         }
-
-        return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount], 200);
-
+        return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount], 200);
+         //dd($plan);
+        //  getCallPlanAmount
     }
-
 }
