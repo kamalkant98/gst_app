@@ -8,7 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-
+use Illuminate\Mail\Mailables\Attachment;
 
 class SendEmail extends Mailable
 {
@@ -51,6 +51,22 @@ class SendEmail extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        $attachments = [];
+
+        // foreach ($this->data['filePaths'] as $filePath) {
+        //     $attachments[] = \Illuminate\Mail\Mailables\Attachment::fromPath($filePath);
+        //     // dd($attachments);
+        // }
+        foreach ($this->data['filePaths'] as $filePath) {
+
+            // $fullPath = public_path($filePath); // Resolve path dynamically
+            // if (file_exists($filePath)) {
+                $attachments[] = Attachment::fromPath($filePath);
+            // } else {
+            //     $attachments[] = "Attachment file does not exist: {$filePath}";
+            // }
+        }
+        // dd($attachments);
+        return $attachments;
     }
 }

@@ -18,7 +18,10 @@ use App\Services\WhatsAppService;
 use App\Services\OtpService;
 use App\Models\ItrQuerie;
 use Carbon\Carbon;
-
+// use Barryvdh\DomPDF\Facade\Pdf;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+use Illuminate\Support\Facades\Storage;
 
 class PayUMoneyController extends Controller
 {
@@ -31,6 +34,44 @@ class PayUMoneyController extends Controller
     //     $this->whatsAppService = $whatsAppService;
     //     $this->otpService = $otpService;
     // }
+
+    function generatePdf($data){
+        $userData = UserInquiry::where('id',$data['user_id'])->first();
+        $formattedDate = Carbon::now()->format('j-M-y');
+        $data['date'] = $formattedDate;
+        $data['buyer_name'] = $userData['name'];
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isPhpEnabled', true);
+        $options->set('isHtml5ParserEnabled', true);
+        $dompdf = new Dompdf($options);
+        $pdfContent = view('invoice_template',['data' => $data])->render();
+        $dompdf->loadHtml($pdfContent);
+        $dompdf->setPaper('a4', 'portrait');
+        $dompdf->render();
+
+        $output = $dompdf->output();
+        // $destinationPath = public_path('invoice');
+        $destinationPath = public_path('invoice');
+
+        if (!file_exists($destinationPath)) {
+            mkdir($destinationPath, 0777, true);
+        }
+
+        $filename = str_replace('/', '-', $data['invoice_id']);
+        $fileName =   $filename.'-invoice.pdf';
+
+        // Storage::put('public/' . $fileName,$output);
+        file_put_contents($destinationPath.'/'.$fileName, $output);
+        // $file->move($destinationPath, $fileName);
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => 'PDF saved successfully!',
+        //     'file_path' => url('storage/invoice/'.$fileName),
+        // ]);
+        return 'invoice/'.$fileName;
+    }
+
 
     function formatNumber($number) {
         return number_format($number, 2, '.', '');
@@ -106,11 +147,13 @@ class PayUMoneyController extends Controller
             "amount"=>$data['amount'],
             "form_type"=>$request->form_type,
             "order_id"=>$request->id,
-            "user_id"=>$request->user_id
+            "user_id"=>$request->user_id,
+            "coupon_code"=>$planDetails['coupon_id'],
+            "default_discount" =>$planDetails['default_discount']
         ];
 
         Transactions::create($setData);
-
+        dd("as");
         // Return the payment data as a JSON response
         return response()->json([
             'url' => env('PAYU_URL'),
@@ -129,18 +172,25 @@ class PayUMoneyController extends Controller
 
 
 
+
+
     public function handleCallbackSuccess(Request $request)
     {
         $postedHash = $request->hash;
         $status = $request->status;
+        // dd("sd");
+        $invoice_id = generateInvoiceId();
 
         $generatedHash  = $this->generateHash($request);
-
+        $pdfData = [];
         if ($status == 'success') {
             $updateData  =  Transactions::where('txnid',$request['txnid'])->first();
-            $updateData->update(["status"=>'completed']);
+            $invoice_id = $invoice_id.$updateData['id'];
+            $updateData->update(["status"=>'completed',"invoice_id"=> $invoice_id]);
             $setData = $updateData;
+
             if($updateData->form_type == 'talk_to_tax_expert'){
+
                 $getCall = TalkToExpert::where('id', $updateData['order_id'])->first();
                 $queryTypeArr[] = $getCall->query_type;
                 $getQuery = Call_query_type($queryTypeArr);
@@ -154,13 +204,58 @@ class PayUMoneyController extends Controller
                 }else if($getCall->plan == 3){
                     $duration = '30 mins';
                 }
+
+
+                $pdfData['plans']=[];
+                array_push( $pdfData['plans'], ["name"=>$QueryTypeName.'-'.$getPlan['label'],"amount" =>$getPlan['value']]);
+                $pdfData['paid_amount'] = $updateData['amount'];
+                $pdfData['coupon'] =  $updateData['coupon_code'];
+                $pdfData['default_discount'] =  $updateData['default_discount'];
+                $pdfData['invoice_id'] =$invoice_id;
+                $pdfData['user_id'] = $updateData['user_id'];
+                $getTotal = sumAmountOfPlan($pdfData['plans']);
+
+                $amount =  $getTotal['totalAmount'];
+                $lessAmount = 0;
+                $couponDiscount ;
+                $defaultDiscount;
+                if($pdfData['coupon'] != ""){
+                    $couponDiscount = CalculateCoupon(null,$amount, $pdfData['coupon']);
+                    if(isset($couponDiscount['finalAmount']) && isset($couponDiscount['getCoupon'])){
+                        $lessAmount =$lessAmount + floor(($amount - $couponDiscount['finalAmount']) * 100) / 100;
+                        $amount = floor($couponDiscount['finalAmount'] * 100) / 100;
+                    }
+                }
+                // dd($amount);
+                if($pdfData['default_discount'] > 0){
+                    $couponDiscount = CalculateCoupon(null,$amount,  $pdfData['default_discount']);
+                    if(isset($couponDiscount['finalAmount']) && isset($couponDiscount['getCoupon'])){
+                        $lessAmount = $lessAmount + floor(($amount - $couponDiscount['finalAmount']) * 100) / 100;
+                        $amount = floor($couponDiscount['finalAmount'] * 100) / 100;
+                    }
+                }
+
+                $calculateTaxes = calculateTaxes($amount);
+                $pdfData['totalAmount'] = $calculateTaxes['totalAmount'];
+                $pdfData['subtotal'] =  $amount ;
+                $pdfData['lessAmount'] =  $lessAmount;
+                $pdfData['cgst'] =  $calculateTaxes['cgst'];
+                $pdfData['sgst'] =  $calculateTaxes['sgst'];
+                $pdfData['totalTax'] =  $calculateTaxes['totalTax'];
+
+                $pdf = $this->generatePdf($pdfData);
+                $fileArr= [];
+                array_push($fileArr,$pdf);
                 $setData['other_details'] = [
                     'service_name' => $QueryTypeName,
                     'duration' => $duration,
-                    'amount' => $updateData['amount'],
+                    'amount' => $calculateTaxes['totalAmount'],
                     'date' => $date,
-                    'invoice_url' => 'https://www.stackhawk.com/blog/laravel-cors/'
+                    'files' =>$fileArr
                 ];
+
+
+
             }else if($updateData->form_type == 'itr_queries'){
                 $getplanDetails = ItrQuerie::where('id',$updateData['order_id'])->first();
                 $getplanDetails->income_type =  explode(',',$getplanDetails->income_type);
@@ -174,32 +269,182 @@ class PayUMoneyController extends Controller
                 }
                 $commaSeparatedLabels = implode(", ", $labels);
 
+
+                $pdfData['plans']=[];
+                array_push( $pdfData['plans'], ["name"=>'ITR FEES AS PER FORM ATTACHED',"amount" =>$data['amount']]);
+
+                $pdfData['paid_amount'] = $updateData['amount'];
+                $pdfData['coupon'] =  $updateData['coupon_code'];
+                $pdfData['default_discount'] =  $updateData['default_discount'];
+                $pdfData['invoice_id'] =$invoice_id;
+                $pdfData['user_id'] = $updateData['user_id'];
+                $getTotal = sumAmountOfPlan($pdfData['plans']);
+
+
+                $amount =  $getTotal['totalAmount'];
+                $lessAmount = 0;
+                $couponDiscount ;
+                $defaultDiscount;
+                if($pdfData['coupon'] != ""){
+                    $couponDiscount = CalculateCoupon(null,$amount, $pdfData['coupon']);
+                    if(isset($couponDiscount['finalAmount']) && isset($couponDiscount['getCoupon'])){
+                        $lessAmount =$lessAmount + floor(($amount - $couponDiscount['finalAmount']) * 100) / 100;
+                        $amount = floor($couponDiscount['finalAmount'] * 100) / 100;
+                    }
+                }
+                // dd($amount);
+                if($pdfData['default_discount'] > 0){
+                    $couponDiscount = CalculateCoupon(null,$amount,  $pdfData['default_discount']);
+                    if(isset($couponDiscount['finalAmount']) && isset($couponDiscount['getCoupon'])){
+                        $lessAmount = $lessAmount + floor(($amount - $couponDiscount['finalAmount']) * 100) / 100;
+                        $amount = floor($couponDiscount['finalAmount'] * 100) / 100;
+                    }
+                }
+
+                $calculateTaxes = calculateTaxes($amount);
+                $pdfData['totalAmount'] = $calculateTaxes['totalAmount'];
+                $pdfData['subtotal'] =  $amount ;
+                $pdfData['lessAmount'] =  $lessAmount;
+                $pdfData['cgst'] =  $calculateTaxes['cgst'];
+                $pdfData['sgst'] =  $calculateTaxes['sgst'];
+                $pdfData['totalTax'] =  $calculateTaxes['totalTax'];
+
+                $pdf = $this->generatePdf($pdfData);
+                $fileArr= [];
+                array_push($fileArr,$pdf);
+
+                // dd($pdfData);
+
                 $setData['other_details'] = [
                     'service_name' => $commaSeparatedLabels,
                     'amount' => $updateData['amount'],
-                    'invoice_url' => 'https://www.stackhawk.com/blog/laravel-cors/'
+                    'files' => $fileArr
                 ];
 
 
             }else if ($updateData->form_type == 'gst_queries'){
                 $getplanDetails = GstQuerie::where('id',$updateData['order_id'])->first();
                 $service_name = getGstPlanAmount($getplanDetails);
+                $pdfData['plans']=[];
+
+                // $service_name['label']
+                array_push( $pdfData['plans'], ["name"=>'GST FEES AS PER FORM ATTACHED',"amount" =>$service_name['value']]);
+
+
+                $pdfData['paid_amount'] = $updateData['amount'];
+                $pdfData['coupon'] =  $updateData['coupon_code'];
+                $pdfData['default_discount'] =  $updateData['default_discount'];
+                $pdfData['invoice_id'] =$invoice_id;
+                $pdfData['user_id'] = $updateData['user_id'];
+                $getTotal = sumAmountOfPlan($pdfData['plans']);
+
+
+                $amount =  $getTotal['totalAmount'];
+                $lessAmount = 0;
+                $couponDiscount ;
+                $defaultDiscount;
+                if($pdfData['coupon'] != ""){
+                    $couponDiscount = CalculateCoupon(null,$amount, $pdfData['coupon']);
+                    if(isset($couponDiscount['finalAmount']) && isset($couponDiscount['getCoupon'])){
+                        $lessAmount =$lessAmount + floor(($amount - $couponDiscount['finalAmount']) * 100) / 100;
+                        $amount = floor($couponDiscount['finalAmount'] * 100) / 100;
+                    }
+                }
+                // dd($amount);
+                if($pdfData['default_discount'] > 0){
+                    $couponDiscount = CalculateCoupon(null,$amount,  $pdfData['default_discount']);
+                    if(isset($couponDiscount['finalAmount']) && isset($couponDiscount['getCoupon'])){
+                        $lessAmount = $lessAmount + floor(($amount - $couponDiscount['finalAmount']) * 100) / 100;
+                        $amount = floor($couponDiscount['finalAmount'] * 100) / 100;
+                    }
+                }
+
+                $calculateTaxes = calculateTaxes($amount);
+                $pdfData['totalAmount'] = $calculateTaxes['totalAmount'];
+                $pdfData['subtotal'] =  $amount ;
+                $pdfData['lessAmount'] =  $lessAmount;
+                $pdfData['cgst'] =  $calculateTaxes['cgst'];
+                $pdfData['sgst'] =  $calculateTaxes['sgst'];
+                $pdfData['totalTax'] =  $calculateTaxes['totalTax'];
+
+                $pdf = $this->generatePdf($pdfData);
+                $fileArr= [];
+                array_push($fileArr,$pdf);
+
                 $setData['other_details'] = [
                     'service_name' => $service_name['label'],
                     'amount' => $updateData['amount'],
-                    'invoice_url' => 'https://www.stackhawk.com/blog/laravel-cors/'
+                    'files' => $fileArr
                 ];
+
+
             }else if($updateData->form_type == 'business_registration'){
                 $getplanDetails = BusinessRegistration::where('id',$updateData['order_id'])->first();
 
                 $QueryType = $getplanDetails['plan'];
-                $queryTypeArr = explode(",",$QueryType);
+                $queryTypeArr = explode(", ",$QueryType);
                 $getQuery = businessrReg_query_type($queryTypeArr);
+
+                $getPlan = [];
+                foreach($queryTypeArr as $value){
+
+                    $planData = getBusinessrRegPlanAmount($value);
+                    $nestendArr = ['name'=>$planData['label'],'amount'=>$planData['value']];
+                    $getPlan[] = $nestendArr;
+                    // $amount += $planData['value'];
+                }
+
+
+                $pdfData['plans']=$getPlan;
+                // array_push( $pdfData['plans'], ["name"=>$service_name['label'],"amount" =>$service_name['value']]);
+
+
+                $pdfData['paid_amount'] = $updateData['amount'];
+                $pdfData['coupon'] =  $updateData['coupon_code'];
+                $pdfData['default_discount'] =  $updateData['default_discount'];
+                $pdfData['invoice_id'] =$invoice_id;
+                $pdfData['user_id'] = $updateData['user_id'];
+                $getTotal = sumAmountOfPlan($pdfData['plans']);
+
+                $amount =  $getTotal['totalAmount'];
+                $lessAmount = 0;
+                $couponDiscount ;
+                $defaultDiscount;
+                if($pdfData['coupon'] != ""){
+                    $couponDiscount = CalculateCoupon(null,$amount, $pdfData['coupon']);
+                    if(isset($couponDiscount['finalAmount']) && isset($couponDiscount['getCoupon'])){
+                        $lessAmount =$lessAmount + floor(($amount - $couponDiscount['finalAmount']) * 100) / 100;
+                        $amount = floor($couponDiscount['finalAmount'] * 100) / 100;
+                    }
+                }
+                // dd($amount);
+                if($pdfData['default_discount'] > 0){
+                    $couponDiscount = CalculateCoupon(null,$amount,  $pdfData['default_discount']);
+                    if(isset($couponDiscount['finalAmount']) && isset($couponDiscount['getCoupon'])){
+                        $lessAmount = $lessAmount + floor(($amount - $couponDiscount['finalAmount']) * 100) / 100;
+                        $amount = floor($couponDiscount['finalAmount'] * 100) / 100;
+                    }
+                }
+
+                $calculateTaxes = calculateTaxes($amount);
+                $pdfData['totalAmount'] = $calculateTaxes['totalAmount'];
+                $pdfData['subtotal'] =  $amount ;
+                $pdfData['lessAmount'] =  $lessAmount;
+                $pdfData['cgst'] =  $calculateTaxes['cgst'];
+                $pdfData['sgst'] =  $calculateTaxes['sgst'];
+                $pdfData['totalTax'] =  $calculateTaxes['totalTax'];
+
+                $pdf = $this->generatePdf($pdfData);
+                $fileArr= [];
+                array_push($fileArr,$pdf);
+
+
+
                 $QueryTypeName = implode(', ', $getQuery);
                 $setData['other_details'] = [
                     'service_name' => $QueryTypeName,
                     'amount' => $updateData['amount'],
-                    'invoice_url' => 'https://www.stackhawk.com/blog/laravel-cors/'
+                    'files' => $fileArr,
                 ];
             }else if ($updateData->form_type == 'tds_queries'){
                 $getplanDetails = TdsQuerie::where('id',$updateData['order_id'])->first();
@@ -212,16 +457,63 @@ class PayUMoneyController extends Controller
                 ];
                 $QueryTypeName = $typeOfReturnArr[$getplanDetails->type_of_return]['label'];
                 $getPlan = getTSDPlanAmount($getplanDetails);
-                $QueryTypeName =  $QueryTypeName.'- Number of employee '.$getPlan['label'];
+
+                // dd($getPlan);
+
+                $QueryTypeName = 'TDS FEES AS PER FORM ATTACHED'; //$QueryTypeName.'- Number of employee '.$getPlan['label'];
+
+                $pdfData['plans']=[];
+                array_push( $pdfData['plans'], ["name"=>$QueryTypeName,"amount" =>$getPlan['value']]);
+                $pdfData['paid_amount'] = $updateData['amount'];
+                $pdfData['coupon'] =  $updateData['coupon_code'];
+                $pdfData['default_discount'] =  $updateData['default_discount'];
+                $pdfData['invoice_id'] =$invoice_id;
+                $pdfData['user_id'] = $updateData['user_id'];
+                $getTotal = sumAmountOfPlan($pdfData['plans']);
+
+
+                $amount =  $getTotal['totalAmount'];
+                $lessAmount = 0;
+                $couponDiscount ;
+                $defaultDiscount;
+                if($pdfData['coupon'] != ""){
+                    $couponDiscount = CalculateCoupon(null,$amount, $pdfData['coupon']);
+                    if(isset($couponDiscount['finalAmount']) && isset($couponDiscount['getCoupon'])){
+                        $lessAmount =$lessAmount + floor(($amount - $couponDiscount['finalAmount']) * 100) / 100;
+                        $amount = floor($couponDiscount['finalAmount'] * 100) / 100;
+                    }
+                }
+                // dd($amount);
+                if($pdfData['default_discount'] > 0){
+                    $couponDiscount = CalculateCoupon(null,$amount,  $pdfData['default_discount']);
+                    if(isset($couponDiscount['finalAmount']) && isset($couponDiscount['getCoupon'])){
+                        $lessAmount = $lessAmount + floor(($amount - $couponDiscount['finalAmount']) * 100) / 100;
+                        $amount = floor($couponDiscount['finalAmount'] * 100) / 100;
+                    }
+                }
+
+
+                $calculateTaxes = calculateTaxes($amount);
+                $pdfData['totalAmount'] = $calculateTaxes['totalAmount'];
+                $pdfData['subtotal'] =  $amount ;
+                $pdfData['lessAmount'] =  $lessAmount;
+                $pdfData['cgst'] =  $calculateTaxes['cgst'];
+                $pdfData['sgst'] =  $calculateTaxes['sgst'];
+                $pdfData['totalTax'] =  $calculateTaxes['totalTax'];
+
+                $pdf = $this->generatePdf($pdfData);
+                $fileArr= [];
+                array_push($fileArr,$pdf);
+
 
                 $setData['other_details'] = [
                     'service_name' => $QueryTypeName,
                     'amount' => $updateData['amount'],
-                    'invoice_url' => 'https://www.stackhawk.com/blog/laravel-cors/'
+                    'files' => $fileArr,
                 ];
-                // dd($QueryTypeName);
-            }
 
+            }
+            // dd('s');
             $this->sendMeassage($setData, $updateData->form_type);
 
             return redirect(env('CALL_BACK_URL'));
@@ -241,8 +533,8 @@ class PayUMoneyController extends Controller
             $message = str_replace("{client_name}",$userData->name,$value->description);
             $message = str_replace("{amount}",$updateData['other_details']['amount'],$message);
             $message = str_replace("{service_name}",$updateData['other_details']['service_name'],$message);
-            $message = str_replace("{R_No}",$updateData['txnid'],$message);
-            $message = str_replace("{invoice_url}",$updateData['other_details']['invoice_url'],$message);
+            $message = str_replace("{R_No}",$updateData['invoice_id'],$message);
+            // $message = str_replace("{invoice_url}",$updateData['other_details']['invoice_url'],$message);
 
             if($formType == 'talk_to_tax_expert'){
                 $message = str_replace("{mobile_number}",$userData['mobile'],$message);
@@ -272,15 +564,16 @@ class PayUMoneyController extends Controller
 
             // }else
             // dd($message);
-
+            $filePaths = $updateData['other_details']['files'];
+            // dd($filePaths);
             if($value->type == 3){
 
                 $data = [
                     'email' => $userData->email,
                     'title' => $value->subject,
                     'message' => $message,
+                    'filePaths' => $filePaths
                 ];
-                  // Dispatch the job
                 SendEmailJob::dispatch($data);
 
             }

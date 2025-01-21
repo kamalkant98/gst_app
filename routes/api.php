@@ -50,3 +50,7 @@ Route::post('/api/get-queries/store', [GstQuerieController::class, 'gstQuerieSto
 Route::post('/api/tds-queries/store', [TdsQuerieController::class, 'tdsQuerieStore'])->name('tds-querie-store');
 
 Route::post('/api/itr-queries/store', [ItrQueriesController::class, 'ItrQuerieStore'])->name('itr-querie-store');
+
+Route::get('/api/generatePdf',[PayUMoneyController::class,'generatePdf'])->name('generatePdf');
+Route::post('/api/commonUploadFile',[UserController::class, 'commonUploadFile'])->name('commonUploadFile');
+Route::delete('/api/deleteFile',[UserController::class, 'deleteFile'])->name('deleteFile');

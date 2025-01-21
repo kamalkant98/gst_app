@@ -15,7 +15,7 @@ use App\Http\Controllers\PayUMoneyController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('invoice_template');
 });
 
 

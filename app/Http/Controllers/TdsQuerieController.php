@@ -47,6 +47,7 @@ class TdsQuerieController extends Controller
         $defaultOfferAmount = 0;
         $coupon=null;
         $coupon_id = null;
+        $defaultOffer_id= null;
         $lessAmount=0;
         $inputCoupon ='';
         $subtotal = 0;
@@ -85,7 +86,7 @@ class TdsQuerieController extends Controller
                         $defaultOfferAmount = $subtotal; // floor(($amount - $CalculateCoupon['finalAmount']) * 100) / 100;
                         $subtotal = floor($CalculateCoupon['finalAmount'] * 100) / 100;
                         // $coupon = $CalculateCoupon['getCoupon'];
-                        $coupon_id= $CalculateCoupon['getCoupon']['id'];
+                        $defaultOffer_id= $CalculateCoupon['getCoupon']['id'];
                     }else{
                         $coupon = $CalculateCoupon;
                     }
@@ -105,9 +106,15 @@ class TdsQuerieController extends Controller
             'type_of_return' => $request['type_of_return'],
             'coupon_id'=>$coupon_id,
             'total_amount'=> (float)$amount,
+            'default_discount'=>$defaultOffer_id,
         ];
 
-        // dd($setData);
+        if($request['no_of_employees'] ==  4){
+            $setData['call_when'] =  $request['selectTime'];
+            $setData['call_datetime'] =  $request['datetime'];
+            $setData['language'] =  $request['language'];
+        }
+
 
         if(isset($data['call_id']) && $data['call_id'] !='undefined' && $data['call_id'] > 0){
             $create = TdsQuerie::where('id', $data['call_id'])->first();
@@ -119,9 +126,11 @@ class TdsQuerieController extends Controller
             $create = TdsQuerie::create($setData);
         }
 
-        $QueryTypeName =  $QueryTypeName.'- Number of employee'.$getPlan['label'];
+        $QueryTypeName =  $QueryTypeName.'- Number of employee '.$getPlan['label'];
 
         if($request['no_of_employees'] ==  4){
+            commonSendMeassage($create['user_id'],'tds_queries',$create['id']);
+            // dd("ddd");
             // return redirect(env('CALL_BACK_URL'));
             $redirect_url = env('CALL_BACK_URL');
             return response()->json(['redirect_url'=>$redirect_url], 200);

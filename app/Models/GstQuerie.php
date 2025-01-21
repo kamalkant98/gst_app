@@ -21,6 +21,7 @@ class GstQuerie extends Model
         'status',
         'coupon_id',
         'total_amount',
+        'default_discount',
     ];
 }
 

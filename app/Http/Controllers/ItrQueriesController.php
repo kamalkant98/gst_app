@@ -36,6 +36,7 @@ class ItrQueriesController extends Controller
         $getPlan = [];
         $coupon=null;
         $coupon_id = null;
+        $defaultOffer_id = null;
         $lessAmount=0;
         $inputCoupon ='';
 
@@ -69,9 +70,7 @@ class ItrQueriesController extends Controller
                 $defaultOfferAmount = $subtotal; // floor(($amount - $CalculateCoupon['finalAmount']) * 100) / 100;
                 $subtotal = floor($CalculateCoupon['finalAmount'] * 100) / 100;
                 // $coupon = $CalculateCoupon['getCoupon'];
-                $coupon_id= $CalculateCoupon['getCoupon']['id'];
-            }else{
-                $coupon = $CalculateCoupon;
+                $defaultOffer_id= $CalculateCoupon['getCoupon']['id'];
             }
         }
         $gstCharge = ($subtotal * 18) / 100;
@@ -92,6 +91,7 @@ class ItrQueriesController extends Controller
             'services'=>$data['services'],
             'coupon_id'=>$coupon_id,
             'amount'=>$amount,
+            'default_discount'=>$defaultOffer_id
         ];
         // return $plan;
         if(isset($data['call_id']) && $data['call_id'] !='undefined' && $data['call_id'] > 0){

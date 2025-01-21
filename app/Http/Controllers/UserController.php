@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\File;
 use App\Jobs\SendEmailJob;
 use App\Services\WhatsAppService;
 use App\Services\OtpService;
@@ -16,6 +17,8 @@ use App\Models\Coupon;
 use App\Models\TalkToExpert;
 use App\Models\EmailTemplate;
 use Carbon\Carbon;
+use App\models\Documents;
+
 
 class UserController extends Controller
 {
@@ -164,6 +167,7 @@ class UserController extends Controller
                     'email' => $data['email'],
                     'title' => $value->subject,
                     'message' => $message,
+                    'filePaths'=>[]
                 ];
                   // Dispatch the job
                 SendEmailJob::dispatch($data2);
@@ -247,6 +251,7 @@ class UserController extends Controller
             $gstCharge = 0;
             $coupon=null;
             $coupon_id = null;
+            $defaultOffer_id = null;
             $lessAmount=0;
             $inputCoupon ='';
             // $data['coupon'] = 'FIRST20%';
@@ -276,9 +281,8 @@ class UserController extends Controller
                     $defaultOfferAmount = $subtotal; // floor(($amount - $CalculateCoupon['finalAmount']) * 100) / 100;
                     $subtotal = floor($CalculateCoupon['finalAmount'] * 100) / 100;
                     // $coupon = $CalculateCoupon['getCoupon'];
-                    $coupon_id= $CalculateCoupon['getCoupon']['id'];
-                }else{
-                    $coupon = $CalculateCoupon;
+                    // $coupon_id= $CalculateCoupon['getCoupon']['id'];
+                    $defaultOffer_id =$CalculateCoupon['getCoupon']['id'];
                 }
             }
             $gstCharge = ($subtotal * 18) / 100;
@@ -312,6 +316,7 @@ class UserController extends Controller
                 'plan' => $request['plan'],
                 'query_type'=>$QueryType,
                 'coupon_id'=>$coupon_id,
+                'default_discount'=>$defaultOffer_id,
                 'total_amount'=> (float)$amount,
                 'message'=> $request['other_query_message'],
             ];
@@ -320,30 +325,34 @@ class UserController extends Controller
 
 
 
-            $uploadedFiles = $request->file('document'); // Get all uploaded files
-            $filePaths = []; // Array to store file paths
+            // $uploadedFiles = $request->file('document'); // Get all uploaded files
+            // $filePaths = []; // Array to store file paths
 
-            // Define the destination path (within the public folder)
-            $destinationPath = public_path('talk_to_TaxExpertFiles');
+            // // Define the destination path (within the public folder)
+            // $destinationPath = public_path('talk_to_TaxExpertFiles');
 
-            // Create the uploads directory if it doesn't exist
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0777, true);
-            }
+            // // Create the uploads directory if it doesn't exist
+            // if (!file_exists($destinationPath)) {
+            //     mkdir($destinationPath, 0777, true);
+            // }
 
-            // Loop through each file and move it
-            foreach ($uploadedFiles as $file) {
-                // Generate a unique filename
-                $fileName = time() . '_' . $file->getClientOriginalName();
+            // // Loop through each file and move it
+            // if($request->file('document')){
+            //     foreach ($uploadedFiles as $file) {
+            //         // Generate a unique filename
+            //         $fileName = time() . '_' . $file->getClientOriginalName();
 
-                // Move the file to the destination folder
-                $file->move($destinationPath, $fileName);
+            //         // Move the file to the destination folder
+            //         $file->move($destinationPath, $fileName);
 
-                // Add the file path to the array
-                $filePaths[] = asset('talk_to_TaxExpertFiles/' . $fileName);
-            }
+            //         // Add the file path to the array
+            //         $filePaths[] = asset('talk_to_TaxExpertFiles/' . $fileName);
+            //     }
+            //     $setData['documents'] = $filePaths && count($filePaths) > 0 ? json_encode($filePaths) : '';
+            // }
+
             // $setData['documents'] = $filePaths;
-            $setData['documents'] = json_encode($filePaths);
+
             // return response()->json(['data'=>$setData]);
 
             if(isset($data['call_id']) && $data['call_id'] !='undefined' && $data['call_id'] > 0){
@@ -354,6 +363,26 @@ class UserController extends Controller
                 $getCall = TalkToExpert::create($setData);
             }
             // $this->sendMeassage($data['id'],'talk_to_tax_expert',$getCall['id']);
+
+            Documents::where('query_id',$getCall->id)->where('form_type','talk_to_tax_expert')->delete();
+            if($request->uploadedFile && count($request->uploadedFile) > 0){
+                foreach ($request->uploadedFile as $file) {
+                    $filePath = public_path('tmp_uploads/'. $file); // Set the correct file path
+                    $newPath = public_path('uploads/' . $file);
+                    if (File::exists($filePath) || File::exists($newPath)) {
+                        if(File::exists($filePath)){
+                            File::move($filePath, $newPath);
+                        }
+
+                        Documents::create([
+                            'query_id' => $getCall->id,
+                            'file_url' => 'uploads/'.$file,
+                            'form_type' => 'talk_to_tax_expert',
+                        ]);
+                    }
+
+                }
+            }
 
             return response()->json(['call_id'=>$getCall->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount], 200);
         }else{
@@ -378,7 +407,7 @@ class UserController extends Controller
                 $getCall = ScheduleCall::create($setData);
             }
 
-            $this->sendMeassage($data['id'],'schedule_call',$getCall['id']);
+            commonSendMeassage($data['id'],'schedule_call',$getCall['id']);
             $redirect_url = env('CALL_BACK_URL');
             return response()->json(['redirect_url'=>$redirect_url], 200);
 
@@ -391,7 +420,7 @@ class UserController extends Controller
 
     }
 
-    public function sendMeassage($userId,$formType,$id){
+    public function commonSendMeassage($userId,$formType,$id){
 
         $userData = UserInquiry::where('id',$userId)->first();
 
@@ -457,6 +486,83 @@ class UserController extends Controller
 
     }
 
+
+    public function commonUploadFile(Request $request)
+    {
+        // Validate the files input
+        // $request->validate([
+        //     'files.*' => 'required|file|mimes:jpg,png,pdf|max:2048', // Adjust rules as needed
+        // ]);
+
+        $validator = Validator::make($request->all(), [
+            'files.*' => 'required|file|mimes:jpg,jpeg,doc,png,pdf|max:2048',
+        ]);
+
+        // Check if validation fails
+        if($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(), // Get the error messages
+            ], 422);
+        }
+
+        $uploadedFiles = [];
+
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                // Define the destination path
+                $destinationPath = public_path('tmp_uploads');
+
+                // Ensure the uploads directory exists
+                if (!file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0777, true);
+                }
+
+                // Generate a unique file name
+                $fileName = time() . '_' . str_replace(' ', '-', $file->getClientOriginalName());
+                $originalFileNames = $file->getClientOriginalName();
+                // Move the file to the destination folder
+                $file->move($destinationPath, $fileName);
+
+                $fileArr = ['originalName'=>$originalFileNames,'uploadedFile'=>$fileName];
+                // Store the file path for later use
+                $uploadedFiles[] = $fileArr; //url('tmp_uploads/' . $fileName);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Files uploaded successfully!',
+                'files' => $uploadedFiles, // Return an array of file paths
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'No files uploaded.',
+        ], 400);
+    }
+
+    public function deleteFile(Request $request){
+
+        $uploadedFile = $request->input('uploadedFile'); // Get the original name or filename
+
+        $filePath = public_path('tmp_uploads/'. $uploadedFile); // Set the correct file path
+
+        if (File::exists($filePath)) {
+            // If file exists, delete it
+            File::delete($filePath);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'File deleted successfully'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'File not found'
+        ]);
+    }
 
 }
 

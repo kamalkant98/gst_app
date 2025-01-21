@@ -20,10 +20,13 @@ class Transactions extends Model
         'amount',
         'currency',
         'coupon_code',
+        'default_discount',
         'status',
         'description',
         'transaction_reference',
         'txnid',
+        'invoice_id',
+        'invoice',
         'hash'
     ];
 

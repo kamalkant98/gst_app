@@ -20,5 +20,6 @@ class ItrQuerie extends Model
         'services',
         'coupon_id',
         'amount',
+        'default_discount',
     ];
 }

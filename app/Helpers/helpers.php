@@ -1,6 +1,247 @@
 <?php
 use App\Models\Coupon;
 use Carbon\Carbon;
+use App\Models\ScheduleCall;
+use App\Jobs\SendEmailJob;
+use App\Models\EmailTemplate;
+use App\Models\User;
+use App\Models\TdsQuerie;
+use App\Models\UserInquiry;
+use Illuminate\Support\Str;
+
+
+
+function numberToWords($number)
+{
+    $hyphen = '-';
+    $conjunction = ' and ';
+    $separator = ', ';
+    $negative = 'negative ';
+    $decimal = ' point ';
+    $dictionary = [
+        0 => 'zero',
+        1 => 'one',
+        2 => 'two',
+        3 => 'three',
+        4 => 'four',
+        5 => 'five',
+        6 => 'six',
+        7 => 'seven',
+        8 => 'eight',
+        9 => 'nine',
+        10 => 'ten',
+        11 => 'eleven',
+        12 => 'twelve',
+        13 => 'thirteen',
+        14 => 'fourteen',
+        15 => 'fifteen',
+        16 => 'sixteen',
+        17 => 'seventeen',
+        18 => 'eighteen',
+        19 => 'nineteen',
+        20 => 'twenty',
+        30 => 'thirty',
+        40 => 'forty',
+        50 => 'fifty',
+        60 => 'sixty',
+        70 => 'seventy',
+        80 => 'eighty',
+        90 => 'ninety',
+        100 => 'hundred',
+        1000 => 'thousand',
+        1000000 => 'million',
+        1000000000 => 'billion',
+        1000000000000 => 'trillion',
+        1000000000000000 => 'quadrillion',
+        1000000000000000000 => 'quintillion'
+    ];
+
+    if (!is_numeric($number)) {
+        return false;
+    }
+
+    if ($number < 0) {
+        return $negative . numberToWords(abs($number));
+    }
+
+    $string = $fraction = null;
+
+    if (strpos((string)$number, '.') !== false) {
+        [$number, $fraction] = explode('.', (string)$number, 2);
+    }
+
+    switch (true) {
+        case $number < 21:
+            $string = $dictionary[$number];
+            break;
+        case $number < 100:
+            $tens = ((int) ($number / 10)) * 10;
+            $units = $number % 10;
+            $string = $dictionary[$tens];
+            if ($units) {
+                $string .= $hyphen . $dictionary[$units];
+            }
+            break;
+        case $number < 1000:
+            $hundreds = $number / 100;
+            $remainder = $number % 100;
+            $string = $dictionary[(int) $hundreds] . ' ' . $dictionary[100];
+            if ($remainder) {
+                $string .= $conjunction . numberToWords($remainder);
+            }
+            break;
+        default:
+            $baseUnit = pow(1000, floor(log($number, 1000)));
+            $numBaseUnits = (int) ($number / $baseUnit);
+            $remainder = $number % $baseUnit;
+            $string = numberToWords($numBaseUnits) . ' ' . $dictionary[$baseUnit];
+            if ($remainder) {
+                $string .= $remainder < 100 ? $conjunction : $separator;
+                $string .= numberToWords($remainder);
+            }
+            break;
+    }
+
+    if (null !== $fraction && is_numeric($fraction)) {
+        $string .= $decimal;
+        foreach (str_split((string)$fraction) as $digit) {
+            $string .= $dictionary[$digit] . ' ';
+        }
+    }
+
+    $string = ucwords(strtolower($string));
+    return $string;
+}
+
+
+
+function sumAmountOfPlan(array $plans, float $taxRate = 9): array
+{
+    // Calculate the sum of the amounts
+    $totalAmount = array_reduce($plans, function ($carry, $plan) {
+        return $carry + (float) $plan['amount'];
+    }, 0);
+
+    // Calculate CGST and SGST
+    $cgst = ($totalAmount * $taxRate) / 100;
+    $sgst = ($totalAmount * $taxRate) / 100;
+
+    // Return the results as an array
+    return [
+        'totalAmount' => $totalAmount,
+        'cgst' => $cgst,
+        'sgst' => $sgst,
+        'totalTax' => $cgst + $sgst
+    ];
+}
+function calculateTaxes($totalAmount,float $taxRate = 9){
+    $cgst = ($totalAmount * $taxRate) / 100;
+    $sgst = ($totalAmount * $taxRate) / 100;
+    return [
+        'totalAmount' => $totalAmount + $cgst + $sgst,
+        'cgst' => $cgst,
+        'sgst' => $sgst,
+        'totalTax' => $cgst + $sgst
+    ];
+}
+
+
+function generateInvoiceId()
+{
+    $currentMonth = now()->month;
+
+    // Determine the fiscal year
+    if ($currentMonth >= 4) {
+        $startYear = now()->year;
+        $endYear = now()->year + 1;
+    } else {
+        $startYear = now()->year - 1;
+        $endYear = now()->year;
+    }
+
+    $fiscalYear = substr($startYear,2) . '-' . substr($endYear, 2); // e.g., "2024-25"
+
+    // Create the invoice ID with the fiscal year
+    $invoiceId = 'TD/' . $fiscalYear . '/';// . Str::random(6); // Use Str::random() instead of str_random()
+
+    return $invoiceId;
+}
+
+function commonSendMeassage($userId,$formType,$id, $filePaths = []){
+
+    $userData = UserInquiry::where('id',$userId)->first();
+
+    $template = EmailTemplate::whereIn('type',[1,2,3])->where('form_type',$formType)->get();
+    if($formType == 'tds_queries'){
+        $template = EmailTemplate::whereIn('type',[1,2,3])->where('form_type','schedule_call')->get();
+    }
+    // $message = str_replace("{client_name}",$userData->name,$value->description);
+    // dd($template[0]['description']);
+
+    foreach ($template as $key => $value) {
+
+        $message = str_replace("{client_name}",$userData->name,$value->description);
+        $message = str_replace("{mobile_number}",$userData->mobile,$message);
+        if($formType == 'schedule_call'){
+            $getCall = ScheduleCall::where('id',$id)->first();
+            if($getCall && $getCall['call_when'] == 2){
+                $message = str_replace("{date_time}",$getCall['call_datetime'],$message);
+            }else{
+                $message = str_replace("{date_time}",'We will call you within the next hour.',$message);
+            }
+
+        }
+
+        if($formType == 'tds_queries'){
+            $getCall = TdsQuerie::where('id',$id)->first();
+            if($getCall && $getCall['call_when'] == 2){
+                $message = str_replace("{date_time}",$getCall['call_datetime'],$message);
+            }else{
+                $message = str_replace("{date_time}",'We will call you within the next hour.',$message);
+            }
+        }
+
+        // dd($message);
+        // if($value->type == 1){
+
+        // // Send OTP to the provided phone number
+
+        //     $phone = '+91'.$userData->mobile;
+        //     $this->otpService->sendOtp($phone, $message);
+
+        // }elseif($value->type == 2){
+
+        //     $to = '+91'.$userData->mobile; // Recipient's WhatsApp number
+        //     $message = $message; // The message content
+
+        //     try {
+        //         $this->whatsAppService->sendMessage($to, $message);
+        //         // return response()->json(['status' => 'Message sent successfully!'], 200);
+        //     } catch (\Exception $e) {
+        //         // return response()->json(['error' => $e->getMessage()], 500);
+        //     }
+
+        // }else
+
+        if($value->type == 3){
+
+            $data = [
+                'email' => $userData->email,
+                'title' => $value->subject,
+                'message' => $message,
+                'filePaths'=>$filePaths,
+            ];
+              // Dispatch the job
+            SendEmailJob::dispatch($data);
+
+        }
+    }
+
+    // dd('done');
+    return 1;
+
+}
+
 
 function getCallPlanAmount($value){
     $callPlan =[
@@ -49,9 +290,15 @@ function Call_query_type($arr){
 }
 
 
-function CalculateCoupon($code, $value) {
+function CalculateCoupon($code, $value,$id = 0) {
     // Retrieve the coupon based on the code
-    $getCoupon = Coupon::where('code', $code)->where('status','active')->first();
+    $getCoupon;
+    if($id > 0){
+        $getCoupon = Coupon::where('id', $id)->where('status','active')->first();
+    }else{
+        $getCoupon = Coupon::where('code', $code)->where('status','active')->first();
+    }
+
 
     // Check if the coupon exists
     if (!$getCoupon) {
@@ -198,8 +445,8 @@ function getGstPlanAmount($value){
         $value = $taxpayer.'_'.$fillingFrequency;
 
         $callPlan =[
-            '2_1'  => ['value'=>'1499','label' => 'composition Quarterly'],
-            '2_2'  => ['value'=>'4999','label' => 'composition Anually'],
+            '2_1'  => ['value'=>'1499','label' => 'composition Quarterly','url'=>'https://www.taxdunia.com/blogs/'],
+            '2_2'  => ['value'=>'4999','label' => 'composition Anually','url'=>'https://www.taxdunia.com/blogs/'],
         ];
         return $callPlan[$value];
 

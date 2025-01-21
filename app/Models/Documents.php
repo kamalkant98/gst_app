@@ -5,24 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TalkToExpert extends Model
+class Documents extends Model
 {
     use HasFactory;
-
-    protected $table = 'talk_expert_call';
+    protected $table = 'documents';
 
     protected $fillable = [
-        'user_id',
-        'query_type',
-        'plan',
-        'call_datetime',
-        'language',
-        'message',
-        'status',
-        'coupon_id',
-        'default_discount',
-        'total_amount',
-        'documents',
+        'query_id',
+        'file_url',
+        'form_type',
         'created_at', // These columns are automatically added by Laravel, but you can explicitly include them if you want
         'updated_at', // Same for updated_at
     ];

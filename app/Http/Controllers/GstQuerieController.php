@@ -42,6 +42,7 @@ class GstQuerieController extends Controller
         $gstCharge = 0;
         $coupon=null;
         $coupon_id = null;
+        $defaultOffer_id = null;
         $lessAmount=0;
         $inputCoupon ='';
          // $data['coupon'] = 'FIRST20%';
@@ -70,11 +71,11 @@ class GstQuerieController extends Controller
         }else{
             if($request['plan_name'] == 1){
                 $QueryType = null;
-                $QueryTypeName = 'Quarterly';
+                $QueryTypeName = 'Quarterly ssas';
 
             }else{
                 $QueryType = null;
-                $QueryTypeName = 'Monthly';
+                $QueryTypeName = 'Monthly asd';
 
             }
         }
@@ -91,7 +92,7 @@ class GstQuerieController extends Controller
                 $defaultOfferAmount = $subtotal; // floor(($amount - $CalculateCoupon['finalAmount']) * 100) / 100;
                 $subtotal = floor($CalculateCoupon['finalAmount'] * 100) / 100;
                 // $coupon = $CalculateCoupon['getCoupon'];
-                $coupon_id= $CalculateCoupon['getCoupon']['id'];
+                $defaultOffer_id = $CalculateCoupon['getCoupon']['id'];
             }else{
                 $coupon = $CalculateCoupon;
             }
@@ -110,6 +111,7 @@ class GstQuerieController extends Controller
             'service_type' =>  $data['type_of_taxpayer'] == 1?$request['service_type']:null,
             'coupon_id'=>$coupon_id,
             'total_amount'=> (float)$amount,
+            'default_discount'=>$defaultOffer_id,
         ];
 
         if(isset($data['call_id']) && $data['call_id'] !='undefined' && $data['call_id'] > 0){

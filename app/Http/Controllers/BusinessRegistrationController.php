@@ -6,7 +6,8 @@ use App\Models\BusinessRegistration;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\Coupon;
-
+use App\models\Documents;
+use Illuminate\Support\Facades\File;
 
 class BusinessRegistrationController extends Controller
 {
@@ -25,6 +26,7 @@ class BusinessRegistrationController extends Controller
         $defaultOfferAmount = 0;
         $subtotal = 0;
         $gstCharge = 0;
+        $defaultOffer_id = null;
         $getPlan = [];
         foreach($plan as $value){
 
@@ -62,7 +64,7 @@ class BusinessRegistrationController extends Controller
                 $defaultOfferAmount = $subtotal; // floor(($amount - $CalculateCoupon['finalAmount']) * 100) / 100;
                 $subtotal = floor($CalculateCoupon['finalAmount'] * 100) / 100;
                 // $coupon = $CalculateCoupon['getCoupon'];
-                $coupon_id= $CalculateCoupon['getCoupon']['id'];
+                $defaultOffer_id= $CalculateCoupon['getCoupon']['id'];
             }else{
                 $coupon = $CalculateCoupon;
             }
@@ -83,23 +85,28 @@ class BusinessRegistrationController extends Controller
 
         $QueryType = implode(', ', $queryTypeArr);
         $QueryTypeName = implode(', ', $getQuery);
+        $destinationPath = public_path('business_documents');
 
+        if (!file_exists($destinationPath)) {
+            mkdir($destinationPath, 0777, true);
+        }
         // Handle file uploads
         $uploadedFiles = [];
         if ($request->hasFile('files')) {
 
             foreach ($request->file('files') as $file) {
-                // Store the file and get the path
-                $filePath = $file->store('business_documents', 'public');
-                $uploadedFiles[] = $filePath;
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $file->move($destinationPath, $fileName);
+                $uploadedFiles[] = asset('talk_to_TaxExpertFiles/' . $fileName);
             }
         }
+
 
         $setData = [
             'coupon_id'=>$coupon_id,
             'total_amount'=> (float)$amount,
             'plan' =>   $QueryType,
-            'documents' =>  json_encode($uploadedFiles)
+            'default_discount'=>$defaultOffer_id,
         ];
 
         if(isset($data['call_id']) && $data['call_id'] !='undefined' && $data['call_id'] > 0){
@@ -108,6 +115,27 @@ class BusinessRegistrationController extends Controller
         }else{
             $setData['user_id'] =    $request['user_id'];
             $create = BusinessRegistration::create($setData);
+        }
+
+
+        Documents::where('query_id',$create->id)->where('form_type','business_registration')->delete();
+        if($request->uploadedFile && count($request->uploadedFile) > 0){
+            foreach ($request->uploadedFile as $file) {
+                $filePath = public_path('tmp_uploads/'. $file); // Set the correct file path
+                $newPath = public_path('uploads/' . $file);
+                if (File::exists($filePath) || File::exists($newPath)) {
+                    if(File::exists($filePath)){
+                        File::move($filePath, $newPath);
+                    }
+
+                    Documents::create([
+                        'query_id' => $create->id,
+                        'file_url' => 'uploads/'.$file,
+                        'form_type' => 'business_registration',
+                    ]);
+                }
+
+            }
         }
 
         return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount], 200);

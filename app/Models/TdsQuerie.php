@@ -20,6 +20,7 @@ class TdsQuerie extends Model
         'user_id',
         'status',
         'coupon_id',
+        'default_discount',
         'total_amount',
     ];
 }

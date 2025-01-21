@@ -19,6 +19,7 @@ class ScheduleCall extends Model
         'message',
         'status',
         'coupon_id',
+        'default_discount',
         'total_amount',
         'call_when',
         'created_at', // These columns are automatically added by Laravel, but you can explicitly include them if you want
