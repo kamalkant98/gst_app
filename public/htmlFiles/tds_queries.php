@@ -89,7 +89,29 @@
             color: #999;
             text-decoration: line-through;
         }
+        .selectTime-group{
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .selectTime-group > .form-check {
+            margin-right: 10px;
+        }
+        .hidden-box-3 {
+            display: none;
+        }
+        .hidden-box-4 {
+            display: none;
+        }
     </style>
+
+    <?php
+        $language = [
+            ['value'=>'Hindi','label' => 'Hindi'],
+            ['value'=>'English','label' => 'English'],
+            
+        ];
+    ?>
 
 <body>
     <div class="container">
@@ -109,13 +131,13 @@
 
                     <div class="mb-3 ">
                         <label for="type" class="form-label">Tan No.</label>
-                        <input type="text" class="form-control " id="tan_number" name="tan_number" requiredInput placeholder="TAN No.">
+                        <input type="text" class="form-control " id="tan_number" name="tan_number" requiredInput placeholder="TAN No." show_name='Tan No.'>
 
                         
                     </div>
                     <div class="mb-3 ">
                         <label for="type_of_return" class="form-label w-100">Type of return</label>
-                        <select id="type_of_return" class="form-control" name="type_of_return" requiredInput>
+                        <select id="type_of_return" class="form-control" name="type_of_return" requiredInput show_name="Type of return">
                             <option  value="">select value</option>
                             <option  value="1">24Q</option>
                             <option  value="2">26Q</option> 
@@ -126,7 +148,7 @@
 
                     <div class="mb-3 first_select hidden-box-2">
                         <label for="no_of_employees" class="form-label w-100">No of employees</label>
-                        <select id="no_of_employees" class="form-control first_select hide-input" name="no_of_employees" requiredInput>
+                        <select id="no_of_employees" class="form-control first_select hide-input selectEmp" name="no_of_employees" requiredInput show_name="No of employees">
                             <option  value="">select value</option>
                             <option  value="1">1 to 10</option>
                             <option  value="2">10 to 50</option> 
@@ -137,7 +159,7 @@
 
                     <div class="mb-3 first_select hidden-box-2">
                         <label for="tax_planning" class="form-label w-100">Computation/Tax Planning of Employees</label>
-                        <select id="tax_planning" class="form-control first_select hide-input" name="tax_planning" requiredInput>
+                        <select id="tax_planning" class="form-control first_select hide-input" name="tax_planning" requiredInput show_name="Tax planning">
                             <option  value="">select value</option>
                             <option  value="1">Yes</option>
                             <option  value="2">No</option>   
@@ -147,7 +169,8 @@
 
                     <div class="mb-3 secend_select hidden-box-2">
                         <label for="no_of_entries" class="form-label w-100">No of entries</label>
-                        <select id="no_of_entries" class="form-control secend_select hide-input" name="no_of_entries" requiredInput>
+                           
+                        <select id="no_of_entries" class="form-control secend_select hide-input selectEmp" name="no_of_entries" requiredInput show_name = "No of entries">
                             <option  value="">select value</option>
                             <option  value="1">Up to 100</option>
                             <option  value="2">100 to 250</option> 
@@ -158,7 +181,7 @@
 
                     <div class="mb-3 third_select hidden-box-2">
                         <label for="no_of_entries_27" class="form-label w-100">No of entries</label>
-                        <select id="no_of_entries_27" class="form-control third_select hide-input" name="no_of_entries_27" requiredInput>
+                        <select id="no_of_entries_27" class="form-control third_select hide-input selectEmp" name="no_of_entries_27" requiredInput show_name="No of entries">
                             <option  value="">select value</option>
                             <option  value="1">Up to 50</option>
                             <option  value="2">50 to 100</option> 
@@ -166,6 +189,42 @@
                             <option  value="4">More than 200</option>   
                         </select>
                     </div>
+
+                    <div class="form-section hidden-box-3" id ="selectTime-box">
+                        <label class="form-label" >Select a Time:</label>
+                        <div class="selectTime-group">
+                            <div class="form-check">
+                                <input class="form-check-input hide-input" requiredInput type="radio" name="selectTime" id="flexRadioDefault1"  value="1">
+                                <label class="form-check-label" for="flexRadioDefault1">
+                                Connect Now
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input hide-input" requiredInput type="radio" name="selectTime" id="flexRadioDefault2" value="2">
+                                <label class="form-check-label" for="flexRadioDefault2">
+                                    Choose Date & Time
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+                    <div class="mb-3 hidden-box-4">
+                        <label for="datepicker" class="form-label">Select Date & Time</label>
+                        <input type="text" id="datepicker" name="datetime" class="form-control hide-input" requiredInput placeholder="Y-m-d H:i" show_name="DateTime"> 
+                    </div>
+
+                    <div class="mb-3 hidden-box-3">
+                        <label for="multi-select" class="form-label">Choose Language</label>
+                        <select id="language" class="form-control hide-input" requiredInput name="language" show_name="language">
+                        <option value="">select value</option>
+                            <?php foreach ($language as $type): ?>
+                                
+                                <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
                     <div>
                         <button type="submit" id="submit_button" class="btn btn-primary">Submit</button>
                     </div>
@@ -193,14 +252,108 @@
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-    crossorigin="anonymous"></script>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+        
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/intlTelInput.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.0/js/utils.js"></script>
 <script>
+
+        async function fetchPublicHolidays(year) {
+            try {
+
+                    const API_KEY = 'AIzaSyD5_j5XtDqu_IBjkAOu8w_FraLVQcDCeKk';
+                    const CALENDAR_ID = 'en.indian%23holiday@group.v.calendar.google.com'; // URL-encoded Calendar ID
+
+                    // Set year dynamically
+                    // const year = 2024; // Change the year as needed
+                    const timeMin = `${year}-01-01T00:00:00Z`; // Start of the year
+                    const timeMax = `${year}-12-31T23:59:59Z`; // End of the year
+
+                    const URL = `https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}`;
+
+                const response = await fetch(URL);
+
+                // Check if the response is OK
+                if (!response.ok) {
+                throw new Error(`HTTP Error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                // console.log(`Public Holidays for ${year}:`, data);
+
+                // Display the events in the console
+                if (data.items && data.items.length > 0) {
+                    let dates = [];
+
+                    data.items.forEach((event) => {
+                        if (/Public holiday/.test(event.description)) {
+                            const start = event.start.date || event.start.dateTime;
+                            dates.push(start);
+                            // console.log(`${start} - ${event.summary}`);
+                        }
+                        
+                    });
+                    return dates
+                    
+                    
+                } else {
+                    console.log(`No public holidays found for ${year}.`);
+                }
+            } catch (error) {
+                console.error('Error fetching public holidays:', error.message);
+            }
+        } 
+
+        // Disable weekends and public holidays
+        async function initDatePicker() {
+            const today = new Date();
+            const nextMonth = new Date();
+            nextMonth.setMonth(today.getMonth() + 1); // Get the date next month
+
+            // const publicHolidays = await getPublicHolidays(today.getFullYear());
+            const publicHolidays = await fetchPublicHolidays(today.getFullYear());
+            flatpickr("#datepicker", {
+                minDate: today, // Allow dates starting from today
+                maxDate: nextMonth, // Allow dates until the end of next month
+                enableTime: true, // Enable time selection
+                noCalendar: false, // Show calendar for date selection
+                dateFormat: "Y-m-d H:i", // Format the date and time (YYYY-MM-DD HH:mm)
+                time_24hr: true, // 24-hour time format
+                disable: [
+                    // Disable weekends (Saturday and Sunday)
+                    function (date) {
+                        return date.getDay() === 0 || date.getDay() === 6; // 0 is Sunday, 6 is Saturday
+                    },
+                    // Disable public holidays
+                    function (date) {
+                        const dateStr = date.toISOString().split('T')[0]; // Convert date to YYYY-MM-DD format
+                        return publicHolidays.includes(dateStr); // If the date is a holiday, disable it
+                    }
+                ],
+                minTime: "09:00", // Minimum time selectable
+                maxTime: "19:00", // Maximum time selectable
+                onReady: function (selectedDates, dateStr, instance) {
+                    instance.config.minTime = "09:00"; // Set the minimum time
+                    instance.config.maxTime = "19:00"; // Set the maximum time
+                },
+                onValueUpdate: function (selectedDates, dateStr, instance) {
+                    const time = instance.input.value.split(" ")[1]; // Get the selected time (HH:mm)
+                    const [hours, minutes] = time.split(":").map(Number); // Convert to numbers
+                    if (hours < 9 || (hours === 19 && minutes > 0) || hours > 19) {
+                        alert("Please select a time between 9:00 AM and 7:00 PM.");
+                        instance.clear(); // Clear the invalid selection
+                    }
+                }
+            });
+        }
+        initDatePicker();
+
+
         $(document).ready(function (e) {
 
             function isValidTAN(tan) {
@@ -210,28 +363,176 @@
             }
 
             $('#type_of_return').on('change', function (event) {
-
+                $('#no_of_employees').val('').trigger('change');
+                $('#no_of_entries').val('').trigger('change');
+                $('#no_of_entries_27').val('').trigger('change');
+                // triggerChange('1')
                 var selectedValue = $(this).val();
                 if(selectedValue == 1){
                     $('.first_select').show().removeClass('hide-input');
-                    $('.secend_select').hide().addClass('hide-input');
-                    $('.third_select').hide().addClass('hide-input');
+                    $('.secend_select').hide().addClass('hide-input').val('');
+                    $('.third_select').hide().addClass('hide-input').val('');
                 }else if(selectedValue == 2){
-                    $('.first_select').hide();
+                    $('.first_select').hide().addClass('hide-input').val('');
                     $('.secend_select').show().removeClass('hide-input');
-                    $('.third_select').hide();
+                    $('.third_select').hide().addClass('hide-input').val('');
 
                 }else if(selectedValue == 3){
-                    $('.first_select').hide().addClass('hide-input');
-                    $('.secend_select').hide().addClass('hide-input');
+                    $('.first_select').hide().addClass('hide-input').val('');
+                    $('.secend_select').hide().addClass('hide-input').val('');
                     $('.third_select').show().removeClass('hide-input');
 
                 }else{
-                    $('.first_select').hide().addClass('hide-input');
-                    $('.secend_select').hide().addClass('hide-input');
-                    $('.third_select').hide().addClass('hide-input');
+                    $('.first_select').hide().addClass('hide-input').val('');
+                    $('.secend_select').hide().addClass('hide-input').val('');
+                    $('.third_select').hide().addClass('hide-input').val('');
                 }
             });
+
+            
+
+
+            $('.selectEmp').on('change', function (event) { 
+                var selectedValue = $(this).val();
+               
+                const elements = document.querySelectorAll('.selectTimeClass');
+                elements.forEach(element => {
+                    element.remove();
+                });
+                let language = document.getElementById('language');
+                let datepicker = document.getElementById('datepicker');
+                
+                datepicker.classList.remove('show-input');
+                datepicker.classList.add('hide-input');
+                // const radioButtons = document.querySelectorAll('input[name="selectTime"]');
+
+                // // Iterate through each radio button and uncheck them
+                // radioButtons.forEach(radio => {
+                //     radio.checked = false;
+                // });
+                $('.hidden-box-4').hide();
+                if(selectedValue == 4){
+                    $('.hidden-box-3').show();
+                    let inputs = document.querySelectorAll('input[name="selectTime"]');
+                    inputs.forEach(input => {
+                        input.classList.add('show-input');
+                        input.classList.remove('hide-input');
+                        input.checked = false;
+                    })
+                   
+                    language.classList.add('show-input');
+                    language.classList.remove('hide-input');
+                    
+                }else{
+                    $('.hidden-box-3').hide();
+                    let inputs = document.querySelectorAll('input[name="selectTime"]');
+                    inputs.forEach(input => {
+                        input.classList.remove('show-input');
+                        input.classList.add('hide-input');
+                        input.checked = false;
+                    })
+                    let language = document.getElementById('language');
+                    language.classList.remove('show-input');
+                    language.classList.add('hide-input');
+                   
+                }
+            })
+
+            // $('#no_of_entries').on('change', function (event) { 
+            //     var selectedValue = $(this).val();
+            //     const elements = document.querySelectorAll('.selectTimeClass');
+            //     elements.forEach(element => {
+            //         element.remove();
+            //     });
+
+            //     if(selectedValue == 4){
+            //         $('.hidden-box-3').show();
+            //         let inputs = document.querySelectorAll('input[name="selectTime"]');
+            //         inputs.forEach(input => {
+            //             input.value = ''
+            //             input.classList.add('show-input');
+            //             input.classList.remove('hide-input');
+            //         })
+            //         let language = document.getElementById('language');
+            //         language.classList.add('show-input');
+            //         language.classList.remove('hide-input');
+                    
+            //     }else{
+            //         $('.hidden-box-3').hide();
+            //         let inputs = document.querySelectorAll('input[name="selectTime"]');
+            //         inputs.forEach(input => {
+            //             input.value = ''
+            //             input.classList.remove('show-input');
+            //             input.classList.add('hide-input');
+            //         })
+            //         let language = document.getElementById('language');
+            //         language.classList.remove('show-input');
+            //         language.classList.add('hide-input');
+            //     }
+
+            // })
+
+            // $('#no_of_entries_27').on('change', function (event) { 
+            //     var selectedValue = $(this).val();
+            //     const elements = document.querySelectorAll('.selectTimeClass');
+            //     elements.forEach(element => {
+            //         element.remove();
+            //     });
+
+            //     if(selectedValue == 4){
+            //         $('.hidden-box-3').show();
+            //         let inputs = document.querySelectorAll('input[name="selectTime"]');
+            //         inputs.forEach(input => {
+            //             input.value = ''
+            //             input.classList.add('show-input');
+            //             input.classList.remove('hide-input');
+            //         })
+            //         let language = document.getElementById('language');
+            //         language.classList.add('show-input');
+            //         language.classList.remove('hide-input');
+                    
+            //     }else{
+            //         $('.hidden-box-3').hide();
+            //         let inputs = document.querySelectorAll('input[name="selectTime"]');
+            //         inputs.forEach(input => {
+            //             input.value = ''
+            //             input.classList.remove('show-input');
+            //             input.classList.add('hide-input');
+            //         })
+            //         let language = document.getElementById('language');
+            //         language.classList.remove('show-input');
+            //         language.classList.add('hide-input');
+            //     }
+
+            // })
+            
+
+            let chooseOption = document.querySelector('input[name="selectTime"][value="2"]');
+            let dateTimePicker = document.querySelector('#datepicker');
+            document.querySelectorAll('input[name="selectTime"]').forEach((radio) => {
+                radio.addEventListener("change", () => {
+                    if (chooseOption.checked) {
+                        let allbox  = document.querySelectorAll('.hidden-box-4');
+                        allbox.forEach(box => {
+                            
+                                box.style.display = 'block';
+                        })
+                        dateTimePicker.classList.remove('hide-input');
+                        dateTimePicker.classList.add('show-input');
+                        // dateTimePicker.classList.remove("hidden");
+                    } else {
+                        let allbox  = document.querySelectorAll('.hidden-box-4');
+                        allbox.forEach(box => {
+                            box.style.display = 'none';
+                        }) 
+                        dateTimePicker.classList.add('hide-input');
+                        dateTimePicker.classList.remove('show-input');
+                        
+                    }
+                });
+            });
+
+            
 
             let call_id=0;
             form_type =''
@@ -243,11 +544,15 @@
 
                     e.preventDefault(); // Prevent the default form submit
                     let formElement = document.querySelector('#tds_queries'); 
-
+                    const formData = new FormData(formElement);
+                    const formObject = Object.fromEntries(formData.entries());
+                    let chooseOptions = document.querySelector('input[name="selectTime"][value="2"]');
+                    console.log("chooseOption",formObject);
+                    
                     const errorElements = document.querySelectorAll('.error');
                     // Loop through and remove each element
                     errorElements.forEach(element => {
-                    element.remove();
+                        element.remove();
                     });
 
                     const inputs = document.querySelectorAll('[requiredInput]');
@@ -257,10 +562,15 @@
                     // Loop through each input and validate
                     inputs.forEach(input => {
                     input.classList.remove('is-invalid');
-                        if (input.value.trim() === '' && !input.classList.contains('hide-input')) {
+                        if (input.value.trim() === '' && !input.classList.contains('hide-input')  && input.name != 'selectTime') {
+                            // console.log(input.show_name);
+                            let showName = input.getAttribute('show_name'); 
+                            showName = showName && showName!= null ? showName : input.name;
+                            console.log(showName);
+                            
                             let errorElement = document.createElement('span');
                             errorElement.className = 'error'; // Add error class for styling
-                            errorElement.textContent = `${input.name.charAt(0).toUpperCase() + input.name.slice(1)} is required.`;
+                            errorElement.textContent = `${showName.charAt(0).toUpperCase() + showName.slice(1)} is required.`;
 
                             input.after(errorElement);
                             input.classList.add('is-invalid');
@@ -282,7 +592,21 @@
 
                     });
                     
-                    const formData = new FormData(formElement);
+                    const selectedOption = document.querySelector('input[name="selectTime"]:checked');
+                    const selectedOptionw = document.querySelector('input[name="selectTime"]');
+                    if (!selectedOption && !selectedOptionw.classList.contains('hide-input')) {
+                            let mobilebox = document.getElementById('selectTime-box');
+                            let errorElement = document.createElement('span');
+                            errorElement.className = 'error selectTimeClass'; // Add error class for styling
+                            errorElement.textContent = `Please select Date time option.`;
+                            mobilebox.after(errorElement);
+                            // input.classList.add('is-invalid');
+                            isValid = false;
+                            console.log("false option ");
+                            
+                    }
+
+                    
 
                 if (isValid) {
                     // Send the POST request
@@ -398,7 +722,7 @@
                                 document.getElementById("payment-summary").style.display = 'block';
                                 document.getElementById("terms-box").style.display = 'block'
                                 document.querySelector('#terms').classList.remove('hide-input');
-                            }else{
+                            }else if(data?.redirect_url !=''){
                                 document.getElementById("tds_queries").reset();
                                 window.location.href = `${data?.redirect_url}`;
                                 

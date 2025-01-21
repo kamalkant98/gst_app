@@ -6,7 +6,7 @@ use App\Models\BusinessRegistration;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\Coupon;
-use App\models\Documents;
+use App\Models\Documents;
 use Illuminate\Support\Facades\File;
 
 class BusinessRegistrationController extends Controller
@@ -130,7 +130,7 @@ class BusinessRegistrationController extends Controller
 
                     Documents::create([
                         'query_id' => $create->id,
-                        'file_url' => 'uploads/'.$file,
+                        'file_url' => $file,
                         'form_type' => 'business_registration',
                     ]);
                 }

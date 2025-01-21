@@ -118,7 +118,7 @@
                     </div>
 
                     <div class="mb-3 hidden-box-2 composition">
-                        <label for="type" class="form-label">Plan</label>
+                        <label for="type" class="form-label">Plan's</label>
                         <select class="form-control composition" id="plan_name" name="plan_name" requiredInput>
                             <option  value="">select paln</option>
                             <option  value="1">Quarterly</option>

@@ -166,16 +166,16 @@
                     <input type="hidden" id ="form_type" name="form_type" value="schedule_call">
 
                     <div class="mb-3 text-center">
-                        <h2>Schedule Call</h2>
+                        <h2>Schedule a Call</h2>
                     </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control " id="name" name="name" requiredInput placeholder="Fullname">
+                        <input type="text" class="form-control " id="name" name="name" requiredInput placeholder="Full name" showname= 'Name'>
 
                     </div>
                     <div class="mb-3">
-                        <label for="exampleInputEmail1" class="form-label">Email address</label>
-                        <input type="text" class="form-control " id="exampleInputEmail1" name="email" requiredInput placeholder="Email">
+                        <label for="exampleInputEmail1" class="form-label">Email</label>
+                        <input type="text" class="form-control " id="exampleInputEmail1" name="email" requiredInput placeholder="Email" showname= 'Email'>
                     </div>
                     <!-- <div class="mb-3">
                         <label for="amount" class="form-label">Amount</label>
@@ -184,14 +184,14 @@
                     <div class="mb-3">
                         <label for="mobile" class="form-label">Mobile</label>
                         <div id="mobile-box">
-                            <input type="mobile" class="form-control" id="mobile" name="mobile" requiredInput placeholder="Mobile">
+                            <input type="mobile" class="form-control" id="mobile" name="mobile" requiredInput placeholder="Mobile" showname= 'Mobile'>
                         </div>
                     </div>
 
 
                     <div class="mb-3 hidden-box-1">
-                        <label for="otp" class="form-label">Otp</label>
-                        <input type="text" class="form-control hide-input" id="otp" name="otp" maxlength="6" requiredInput pattern="\d{6}" placeholder="******" title="OTP must be exactly 6 digits">
+                        <label for="otp" class="form-label">OTP</label>
+                        <input type="text" class="form-control hide-input" id="otp" name="otp" maxlength="6" requiredInput pattern="\d{6}" placeholder="******" title="OTP must be exactly 6 digits" showname= 'OTP'>
                         <!-- <input type="number" class="form-control hide" id="otp" name="otp" requiredInput pattern="\d{6}" placeholder="******" title="OTP must be 6 digits."> -->
                     </div>
 
@@ -256,7 +256,7 @@
                     </div>
                     
                     <div>
-                        <button type="submit" id="submit_button" class="btn btn-primary">veryify Your Number</button>
+                        <button type="submit" id="submit_button" class="btn btn-primary">Sign Up</button>
                     </div>
                     
                     <div class="payment-summary" id ="payment-summary">
@@ -294,7 +294,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/intlTelInput.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.0/js/utils.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.0/js/utils.js"></script>
 
     <script>
 
@@ -648,15 +648,15 @@
                                 document.querySelector('#otp').classList.add('show-input');
                                 
                                 steps.value = '2'
-                                inputsww.textContent = 'Veryfy OTP'
+                                inputsww.textContent = 'Verify OTP'
                             }else{
                                 alert(response);
                             }
                         } catch (error) {
                             console.error('Error fetching data:', error);
-                            fetchButton.innerHTML = 'Retry';
+                            fetchButton.innerHTML = 'Sign Up';
                         }finally {
-                            fetchButton.innerHTML = 'Veryfy OTP';
+                            fetchButton.innerHTML = 'Verify OTP';
                             fetchButton.disabled = false;
                         }
                         
@@ -726,7 +726,7 @@
                             }
                         } catch (error) {
                             console.error('Error fetching data:', error);
-                            fetchButton.innerHTML = 'Retry';
+                            fetchButton.innerHTML = 'Verify OTP';
                         }finally {
                             fetchButton.innerHTML = 'Schedule Your Call';
                             fetchButton.disabled = false;

@@ -105,8 +105,10 @@
                     <img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" alt="Instagram">
                 </a>
             </div>
-            <p>123 Business Street, Suite 100, City, State, 12345</p>
-            <p>&copy; 2025 [Company Name]. All rights reserved.</p>
+            <p>96, Arjun Nagar, Behind Dalda Factory
+                Durgapura, Jaipur,Rajasthan, 12345</p>
+            <p>&copy; 2025 PAPERLESS RACK DIGITAL SOLUTIONS PVT
+                LTD. All rights reserved.</p>
             <a href="#">Unsubscribe</a> | <a href="#">Privacy Policy</a>
         </div>
     </div>

@@ -6,10 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Business Registration</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+        <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+        <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
 </head>
 <style>
     
@@ -89,6 +91,9 @@
             color: #999;
             text-decoration: line-through;
         }
+        .filepond--credits {
+            display: none !important;
+        }
     </style>
 
 <body>
@@ -142,9 +147,12 @@
 
                     <div class="mb-3">
                         <label for="document" class="form-label">Document requirements for business registration</label>
-                        <input type="file" class="form-control " id="document" name="document" multiple="multiple"  requiredInput accept=".jpg,.jpeg,.png,.xls,.doc,.pdf">
-
+                        <input type="file" class="form-control " id="document" name="files[]" multiple="multiple"  requiredInput > 
+                        <!-- accept=".jpg,.jpeg,.png,.xls,.doc,.pdf" -->
+                                
                     </div>
+
+
                     <div>
                         <button type="submit" id="submit_button" class="btn btn-primary">Submit</button>
                     </div>
@@ -178,340 +186,429 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+<script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
+<script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
 <script>
-        $(document).ready(function (e) {
-            let call_id=0;
-            form_type =''
-            user_id = 0
-            const fetchButton = document.getElementById('submit_button');
+        FilePond.registerPlugin(
+            FilePondPluginFileValidateType,
+            FilePondPluginImagePreview
+        );
 
-            
-            
-            $('#business_registration').on('submit', async (e) => {
-            e.preventDefault(); // Prevent the default form submit
+        let uploadedFiles = []; // Array to store uploaded file names
 
+        // Initialize FilePond
+        const pond = FilePond.create(document.querySelector('#document'), {
+            allowMultiple: true,
+            server: {
+                process: (fieldName, file, metadata, load, error, progress, abort) => {
+                    const formData = new FormData();
+                    formData.append('files[]', file);
 
-            const errorElements = document.querySelectorAll('.error');
-            // Loop through and remove each element
-            errorElements.forEach(element => {
-            element.remove();
-            });
-
-
-            const inputs = document.querySelectorAll('[requiredInput]');
-            let isValid = true;
-
-            // Loop through each input and validate
-            inputs.forEach(input => {
-                input.classList.remove('is-invalid');
-                if (input.value.trim() === '' && !input.classList.contains('hide-input')) {
-                    let errorElement = document.createElement('span');
-                    errorElement.className = 'error'; // Add error class for styling
-                    errorElement.textContent = `${input.name.charAt(0).toUpperCase() + input.name.slice(1)} is required.`;
-
-                    input.after(errorElement);
-                    input.classList.add('is-invalid');
-                    isValid = false;
-
+                    fetch('http://127.0.0.1:8000/api/commonUploadFile', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                console.log("asdasd");
+                                
+                                data.files.forEach(fileInfo => {
+                                    uploadedFiles.push(fileInfo); // Store uploaded file name
+                                });
+                                console.log('Uploaded Files:', uploadedFiles); // Log the uploaded files array
+                                load(data.files.map(file => file.name)); // Pass file name to FilePond
+                            } else {
+                                error('Upload failed');
+                            }
+                        })
+                        .catch(() => {
+                            error('Upload error');
+                        });
                 }
-            });
-
-            let formElement = document.querySelector('#business_registration'); 
-
-            const fileInput = document.getElementById("document");
-            const files = fileInput.files;
-
-            if (files.length === 0) {
-                alert("Please select files to upload.");
+            }
+        });
+        
+        pond.on('removefile', (error, file) => {
+            if (error) {
+                console.error('Error removing file:', error);
                 return;
             }
 
-            const formData = new FormData(formElement);
-            for (let i = 0; i < files.length; i++) {
-                formData.append("files[]", files[i]); // Append each file to FormData
-            }
+            // Find the file to be deleted by matching originalName and get the uploadedFile
+            const fileToDelete = uploadedFiles.find(uploadedFile => uploadedFile.originalName === file.filename);
 
-            // Handle multi-select values
-            const selectedValues = $('#multi-select').val() || [];
-            formData.append("plan", selectedValues);
-            fetchButton.disabled = true;
-            fetchButton.innerHTML = 'Loading <span class="loader"></span>';
-           
-            try {
-                // Send the POST request
-                const response = await fetch('http://127.0.0.1:8000/api/business-registration/store', {
-                    method: 'POST',
+            if (fileToDelete) {
+                // Call API to delete the file from the server using uploadedFile (not originalName)
+                fetch('http://127.0.0.1:8000/api/deleteFile', {
+                    method: 'DELETE',
                     headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // CSRF token
+                        'Content-Type': 'application/json'
                     },
-                    body: formData, // Pass the FormData object directly
+                    body: JSON.stringify({
+                        uploadedFile: fileToDelete.uploadedFile, // Use the uploadedFile key to delete the file
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        console.log('File deleted from server:', fileToDelete.uploadedFile);
+                    } else {
+                        console.error('Error deleting file:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('API request error:', error);
                 });
 
-                // Parse the JSON response
-                const data = await response.json();
-                if(response.status == 200){
-                    // Render the response for debugging
-                    // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
-                    //$('#submit_button').hide();
-                    let checkIdinput =  document.querySelector('#call_id');
-                    
-                    
-                    if(!checkIdinput){
-                        let hiddenInput = document.createElement('input');
-                        hiddenInput.type = 'hidden';
-                        hiddenInput.name = 'call_id';
-                        hiddenInput.id = 'call_id';
-                        hiddenInput.value = data.call_id;
-                        formElement.appendChild(hiddenInput);
-                    }
+                // Remove the file from the uploadedFiles array after deletion
+                uploadedFiles = uploadedFiles.filter(uploadedFile => uploadedFile.originalName !== file.filename);
 
-                        
-                    call_id =  data.call_id;
-                    form_type = formData?.form_type;
-                    user_id = formData?.id;
-
-                            
-
-                        let html=`<div>
-                            <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
-                            <div class="row justify-content-center">
-                            <div class="col-md-12">
-                                <!-- Subscription Items -->
-                                <div class="card shadow-sm">
-                                    <div class="card-body">
-                                        <!-- Item 1 -->
-                                        <div id='cart-details'>
-         
-                                        <h6>Plan List</h6>
-                                            <div class=" justify-content-between align-items-center border-top">
- 
-                                            ${data?.getPlan.map(plan => `
-                                            <div class="d-flex justify-content-between align-items-center border-bottom py-3">
-                                                <div>
-                                                    <h6>${plan.label}</h6>
-                                                    ${plan.url && plan.url !='' ? `<a href="${plan.url}" target="_blank">Read more</a>` : ''}
-                                                </div>
-                                                <div class="fw-bold">₹${plan.value}</div>
-                                               
-                                            </div>
-                                            `).join('')}
-                                                </div>
-                                            </div>
-
-                                        <!-- Coupon Code -->
-                                        <div class="mt-4 border-bottom pb-3">
-                                            <h6>Have a Coupon Code?</h6>
-                                            <div class="input-group">
-                                                <input type="text" class="form-control" id="coupon-code" name='coupon' placeholder="Enter coupon code" value='${data?.inputCoupon}'>
-                                                <button class="btn btn-primary" id="apply-coupon">Apply</button>
-                                                <button class="btn btn-danger" id="remove-coupon">Remove Coupon</button>
-                                            </div>
-                                                <p id="coupon-message" class="text-success mt-2 d-none">Coupon applied successfully!</p>
-                                        </div>
-                                       ${data?.coupon && data?.coupon?.id > 0 ? `
-                                            <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
-                                                <h6>Coupon Code :: <strong>${data.coupon.code}</strong></h6>
-                                                <span class="fw-bold">₹${data.lessAmount}</span>
-                                            </div>
-                                        ` : `${data?.coupon != null ?`
-                                             <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
-                                                <h6>Coupon Code :: <strong style="color">${data.coupon}</strong></h6>
-                                            </div>`:''}
-                                        `}
-
-                                        <div class="d-flex justify-content-between align-items-center mt-3">
-                                            <h6>Sub Total:</h6>
-                                            <div>
-                                                ${data?.defaultOfferAmount && data?.defaultOfferAmount > 0 ? `<span class="strike">₹${data?.defaultOfferAmount}</span>` :''}
-                                                <span class="fw-bold">₹${data?.subtotal}</span>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center mt-3">
-                                            <h6>GST 18%:</h6>
-                                            <span class="fw-bold">₹${data?.gstCharge}</span>
-                                        </div>
-                                        <!-- Total -->
-                                        <div class="d-flex justify-content-between align-items-center mt-3">
-                                            <h6>Total:</h6>
-                                             <div>
-                                               
-                                                <span class="fw-bold" style="font-size:20px;">₹${data?.amount}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-
-                                <!-- Checkout Button -->
-
-                            </div>
-                            </div>
-                        </div>`;
-
-
-
-                        document.getElementById("checkOutbtn").style.display = 'block'
-                        document.getElementById("payment-summary").innerHTML = html;
-                        document.getElementById("payment-summary").style.display = 'block'
-                        document.getElementById("terms-box").style.display = 'block'
-                        document.querySelector('#terms').classList.remove('hide-input');
-
-                }else{
-                    alert(data)
-                }
-               
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                fetchButton.innerHTML = 'Retry';
-            } finally {
-                fetchButton.innerHTML = 'Submit';
-                fetchButton.disabled = false;
+                console.log('Updated Uploaded Files:', uploadedFiles); // Log the updated array after removal
             }
-            let checkOutbtn = document.getElementById('checkOutbtn');
+        });
 
-            checkOutbtn.onclick = async function(){
-                let checkIdinput =  document.querySelector('#call_id').value;
-                let form_type =  document.querySelector('#form_type').value;
-                let user_id =  document.querySelector('#user_id').value;
-                let terms =  document.querySelector('#terms');
-                let isValid = true;
-                if (terms.checked) {
-                    isValid = true;
-                } else {
-                    isValid = false;
-                }
-                // console.log(call_id,form_type,user_id && isValid);
+        $(document).ready(function (e) {
+                let call_id=0;
+                form_type =''
+                user_id = 0
+                const fetchButton = document.getElementById('submit_button');
+
                 
-                if(call_id && form_type && user_id && isValid){
-                    console.log(checkIdinput,"checkIdinput",call_id);
+                
+                $('#business_registration').on('submit', async (e) => {
+                e.preventDefault(); // Prevent the default form submit
 
-                    let formObject = {id :call_id,form_type:form_type,user_id:user_id}
-                    const response = await fetch('http://127.0.0.1:8000/api/payu-payment', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // CSRF token
-                                },
-                                body: JSON.stringify(formObject),
+                console.log("asdasdasd");
+                
+                const errorElements = document.querySelectorAll('.error');
+                // Loop through and remove each element
+                errorElements.forEach(element => {
+                element.remove();
+                });
+
+
+                const inputs = document.querySelectorAll('[requiredInput]');
+                let isValid = true;
+
+                // Loop through each input and validate
+                inputs.forEach(input => {
+                    input.classList.remove('is-invalid');
+                    if (input.value.trim() === '' && !input.classList.contains('hide-input')) {
+                        let errorElement = document.createElement('span');
+                        errorElement.className = 'error'; // Add error class for styling
+                        errorElement.textContent = `${input.name.charAt(0).toUpperCase() + input.name.slice(1)} is required.`;
+
+                        input.after(errorElement);
+                        input.classList.add('is-invalid');
+                        isValid = false;
+
+                    }
+                });
+
+                let formElement = document.querySelector('#business_registration'); 
+
+                const fileInput = document.getElementById("document");
+                const files = fileInput.files;
+
+                if (uploadedFiles?.length === 0) {
+                    alert("Please select files to upload.");
+                    return;
+                }
+
+                const formData = new FormData(formElement);
+                for (let i = 0; i < files?.length; i++) {
+                    formData.append("files[]", files[i]); // Append each file to FormData
+                }
+
+                // Handle multi-select values
+                const selectedValues = $('#multi-select').val() || [];
+                formData.append("plan", selectedValues);
+                console.log(uploadedFiles);
+                
+                // let uploadedFiles2 = JSON.stringify(uploadedFiles);
+                // formData.append("uploadedFile", uploadedFiles);
+                uploadedFiles.forEach((file, index) => {
+                    // Append both originalName and uploadedFile to the FormData
+                    formData.append('uploadedFile[' + index + ']', file.uploadedFile);
+                    // formData.append('files[' + index + '][uploadedFile]', file.uploadedFile);
+                });
+                fetchButton.disabled = true;
+                fetchButton.innerHTML = 'Loading <span class="loader"></span>';
+           
+                try {
+                    // Send the POST request
+                    const response = await fetch('http://127.0.0.1:8000/api/business-registration/store', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // CSRF token
+                        },
+                        body: formData, // Pass the FormData object directly
                     });
 
                     // Parse the JSON response
                     const data = await response.json();
-                 
                     if(response.status == 200){
                         // Render the response for debugging
                         // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
-
-                        // Select the form and set the action
-                        const payuForm = document.forms['payuForm'];
-                        payuForm.action = data?.url || ''; // Ensure the URL is set
-
-                        // Add hidden inputs dynamically
-                        if (data.data) {
-                            for (const [key, value] of Object.entries(data.data)) {
-                                const hiddenInput = document.createElement('input');
-                                hiddenInput.type = 'hidden';
-                                hiddenInput.name = key;
-                                hiddenInput.value = value;
-                                payuForm.appendChild(hiddenInput);
-                            }
+                        //$('#submit_button').hide();
+                        let checkIdinput =  document.querySelector('#call_id');
+                        
+                        
+                        if(!checkIdinput){
+                            let hiddenInput = document.createElement('input');
+                            hiddenInput.type = 'hidden';
+                            hiddenInput.name = 'call_id';
+                            hiddenInput.id = 'call_id';
+                            hiddenInput.value = data.call_id;
+                            formElement.appendChild(hiddenInput);
                         }
 
-                        // Submit the form
-                        payuForm.submit();
+                            
+                        call_id =  data.call_id;
+                        form_type = formData?.form_type;
+                        user_id = formData?.id;
+
+                                
+
+                            let html=`<div>
+                                <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
+                                <div class="row justify-content-center">
+                                <div class="col-md-12">
+                                    <!-- Subscription Items -->
+                                    <div class="card shadow-sm">
+                                        <div class="card-body">
+                                            <!-- Item 1 -->
+                                            <div id='cart-details'>
+            
+                                            <h6>Plan List</h6>
+                                                <div class=" justify-content-between align-items-center border-top">
+    
+                                                ${data?.getPlan.map(plan => `
+                                                <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                                                    <div>
+                                                        <h6>${plan.label}</h6>
+                                                        ${plan.url && plan.url !='' ? `<a href="${plan.url}" target="_blank">Read more</a>` : ''}
+                                                    </div>
+                                                    <div class="fw-bold">₹${plan.value}</div>
+                                                
+                                                </div>
+                                                `).join('')}
+                                                    </div>
+                                                </div>
+
+                                            <!-- Coupon Code -->
+                                            <div class="mt-4 border-bottom pb-3">
+                                                <h6>Have a Coupon Code?</h6>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" id="coupon-code" name='coupon' placeholder="Enter coupon code" value='${data?.inputCoupon}'>
+                                                    <button class="btn btn-primary" id="apply-coupon">Apply</button>
+                                                    <button class="btn btn-danger" id="remove-coupon">Remove Coupon</button>
+                                                </div>
+                                                    <p id="coupon-message" class="text-success mt-2 d-none">Coupon applied successfully!</p>
+                                            </div>
+                                        ${data?.coupon && data?.coupon?.id > 0 ? `
+                                                <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
+                                                    <h6>Coupon Code :: <strong>${data.coupon.code}</strong></h6>
+                                                    <span class="fw-bold">₹${data.lessAmount}</span>
+                                                </div>
+                                            ` : `${data?.coupon != null ?`
+                                                <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
+                                                    <h6>Coupon Code :: <strong style="color">${data.coupon}</strong></h6>
+                                                </div>`:''}
+                                            `}
+
+                                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                                <h6>Sub Total:</h6>
+                                                <div>
+                                                    ${data?.defaultOfferAmount && data?.defaultOfferAmount > 0 ? `<span class="strike">₹${data?.defaultOfferAmount}</span>` :''}
+                                                    <span class="fw-bold">₹${data?.subtotal}</span>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                                <h6>GST 18%:</h6>
+                                                <span class="fw-bold">₹${data?.gstCharge}</span>
+                                            </div>
+                                            <!-- Total -->
+                                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                                <h6>Total:</h6>
+                                                <div>
+                                                
+                                                    <span class="fw-bold" style="font-size:20px;">₹${data?.amount}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                    <!-- Checkout Button -->
+
+                                </div>
+                                </div>
+                            </div>`;
+
+
+
+                            document.getElementById("checkOutbtn").style.display = 'block'
+                            document.getElementById("payment-summary").innerHTML = html;
+                            document.getElementById("payment-summary").style.display = 'block'
+                            document.getElementById("terms-box").style.display = 'block'
+                            document.querySelector('#terms').classList.remove('hide-input');
+
                     }else{
                         alert(data)
                     }
+                
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    fetchButton.innerHTML = 'Retry';
+                } finally {
+                    fetchButton.innerHTML = 'Submit';
+                    fetchButton.disabled = false;
+                }
+                let checkOutbtn = document.getElementById('checkOutbtn');
 
-                }else{
-                    alert("Please fill the from.")
+                checkOutbtn.onclick = async function(){
+                    let checkIdinput =  document.querySelector('#call_id').value;
+                    let form_type =  document.querySelector('#form_type').value;
+                    let user_id =  document.querySelector('#user_id').value;
+                    let terms =  document.querySelector('#terms');
+                    let isValid = true;
+                    if (terms.checked) {
+                        isValid = true;
+                    } else {
+                        isValid = false;
+                    }
+                    // console.log(call_id,form_type,user_id && isValid);
+                    
+                    if(call_id && form_type && user_id && isValid){
+                        console.log(checkIdinput,"checkIdinput",call_id);
+
+                        let formObject = {id :call_id,form_type:form_type,user_id:user_id}
+                        const response = await fetch('http://127.0.0.1:8000/api/payu-payment', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // CSRF token
+                                    },
+                                    body: JSON.stringify(formObject),
+                        });
+
+                        // Parse the JSON response
+                        const data = await response.json();
+                    
+                        if(response.status == 200){
+                            // Render the response for debugging
+                            // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
+
+                            // Select the form and set the action
+                            const payuForm = document.forms['payuForm'];
+                            payuForm.action = data?.url || ''; // Ensure the URL is set
+
+                            // Add hidden inputs dynamically
+                            if (data.data) {
+                                for (const [key, value] of Object.entries(data.data)) {
+                                    const hiddenInput = document.createElement('input');
+                                    hiddenInput.type = 'hidden';
+                                    hiddenInput.name = key;
+                                    hiddenInput.value = value;
+                                    payuForm.appendChild(hiddenInput);
+                                }
+                            }
+
+                            // Submit the form
+                            payuForm.submit();
+                        }else{
+                            alert(data)
+                        }
+
+                    }else{
+                        alert("Please fill the from.")
+                    }
+
                 }
 
-            }
 
-
-        });
+            });
 
         
             
        
 
         });
-    </script>
 
-
-
-<script>
     
-    $(document).ready(() => {
+        $(document).ready(() => {
 
-// Initialize Select2
-$('#multi-select').select2({
-    placeholder: "Select options",
-    closeOnSelect: false, // Prevent dropdown from closing on selection
-    templateResult: formatOption, // Custom rendering for dropdown options
-    templateSelection: formatSelection // Custom rendering for selected options
-});
+            // Initialize Select2
+            $('#multi-select').select2({
+                placeholder: "Select options",
+                closeOnSelect: false, // Prevent dropdown from closing on selection
+                templateResult: formatOption, // Custom rendering for dropdown options
+                templateSelection: formatSelection // Custom rendering for selected options
+            });
 
-// Function to render checkboxes in options
-function formatOption(option) {
-    if (!option.id) {
-    return option.text; // For the placeholder
-    }
-    const isChecked = option.selected ? "checked" : "";
-    const $option = $(
-    `<span>
-        <input type="checkbox" class="option-checkbox" style="margin-right: 10px;" ${isChecked} />
-        ${option.text}
-    </span>`
-    );
-    return $option;
-}
+            // Function to render checkboxes in options
+            function formatOption(option) {
+                if (!option.id) {
+                return option.text; // For the placeholder
+                }
+                const isChecked = option.selected ? "checked" : "";
+                const $option = $(
+                `<span>
+                    <input type="checkbox" class="option-checkbox" style="margin-right: 10px;" ${isChecked} />
+                    ${option.text}
+                </span>`
+                );
+                return $option;
+            }
 
-// Function to customize the selected option display
-function formatSelection(option) {
-    return option.text;
-}
+            // Function to customize the selected option display
+            function formatSelection(option) {
+                return option.text;
+            }
 
-// Handle clicks on checkboxes or options
-$(document).on('click', '.select2-results__option', function (e) {
-    e.preventDefault(); // Prevent default Select2 behavior
+            // Handle clicks on checkboxes or options
+            $(document).on('click', '.select2-results__option', function (e) {
+                e.preventDefault(); // Prevent default Select2 behavior
 
-    const $checkbox = $(this).find('input[type="checkbox"]');
-    const isChecked = $checkbox.prop('checked');
-    const value = $(this).data('select2Id');
+                const $checkbox = $(this).find('input[type="checkbox"]');
+                const isChecked = $checkbox.prop('checked');
+                const value = $(this).data('select2Id');
 
-    // Toggle checkbox state
-    $checkbox.prop('checked', !isChecked);
+                // Toggle checkbox state
+                $checkbox.prop('checked', !isChecked);
 
-    // Update the Select2 value
-    const selectedValues = $('#multi-select').val() || [];
-    if (!isChecked) {
-        selectedValues.push(value);
-    } else {
-        const index = selectedValues.indexOf(value);
-        if (index > -1) {
-            selectedValues.splice(index, 1);
-        }
-    }
-    $('#multi-select').val(selectedValues).trigger('change');
-});
+                // Update the Select2 value
+                const selectedValues = $('#multi-select').val() || [];
+                if (!isChecked) {
+                    selectedValues.push(value);
+                } else {
+                    const index = selectedValues.indexOf(value);
+                    if (index > -1) {
+                        selectedValues.splice(index, 1);
+                    }
+                }
+                $('#multi-select').val(selectedValues).trigger('change');
+            });
 
-// Sync checkboxes with the default behavior
-$('#multi-select').on('change', function () {
-    $('.select2-results__option').each(function () {
-    const $checkbox = $(this).find('input[type="checkbox"]');
-    const value = $(this).data('data')?.id;
-    if (value) {
-        const isSelected = $('#multi-select').val().includes(value);
-        $checkbox.prop('checked', isSelected);
-    }
-    });
-});
-});
+            // Sync checkboxes with the default behavior
+            $('#multi-select').on('change', function () {
+                $('.select2-results__option').each(function () {
+                const $checkbox = $(this).find('input[type="checkbox"]');
+                const value = $(this).data('data')?.id;
+                if (value) {
+                    const isSelected = $('#multi-select').val().includes(value);
+                    $checkbox.prop('checked', isSelected);
+                }
+                });
+            });
+        });
 </script>
 
 </body>

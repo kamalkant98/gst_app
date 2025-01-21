@@ -151,11 +151,11 @@
                     </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control " id="name" name="name" requiredInput placeholder="Fullname">
+                        <input type="text" class="form-control " id="name" name="name" requiredInput placeholder="Full name">
 
                     </div>
                     <div class="mb-3">
-                        <label for="exampleInputEmail1" class="form-label">Email address</label>
+                        <label for="exampleInputEmail1" class="form-label">Email</label>
                         <input type="text" class="form-control " id="exampleInputEmail1" name="email" requiredInput placeholder="Email">
                     </div>
                     <!-- <div class="mb-3">
@@ -171,24 +171,24 @@
 
                     <div class="mb-3 ">
                         <select class="form-select formurl" id ="formurl" aria-label="Default select example">
-                            <option value=''>Open this select menu</option>
-                            <option value="http://localhost/work/laravel/gst-html/tds_queries.php">Contact us for TDS/TCS Queries</option>
-                            <option value="http://localhost/work/laravel/gst-html/itr_queries.php">Contact us for ITR Queries</option>
-                            <option value="http://localhost/work/laravel/gst-html/gst_queries.php">Contact us for GST Queries</option>
-                            <option value="http://localhost/work/laravel/gst-html/business_registration.php">Contact us for Business Registration</option>
+                            <option value=''>Select Your Preferred Service</option>
+                            <option value="http://localhost/work/laravel/gst-html/tds_queries.php">TDS/TCS Forms</option>
+                            <option value="http://localhost/work/laravel/gst-html/itr_queries.php">Income Tax Returns</option>
+                            <option value="http://localhost/work/laravel/gst-html/gst_queries.php">GST Returns</option>
+                            <option value="http://localhost/work/laravel/gst-html/business_registration.php">Business Registration</option>
                         </select>
                     </div>
 
 
                     <div class="mb-3 hidden-box-1">
-                        <label for="otp" class="form-label">Otp</label>
+                        <label for="otp" class="form-label">OTP</label>
                         <input type="text" class="form-control hide-input" id="otp" name="otp" maxlength="6" requiredInput pattern="\d{6}" placeholder="******" title="OTP must be exactly 6 digits">
                         <!-- <input type="number" class="form-control hide" id="otp" name="otp" requiredInput pattern="\d{6}" placeholder="******" title="OTP must be 6 digits."> -->
                     </div>
 
                     
                     <div>
-                        <button type="submit" id="submit_button" class="btn btn-primary">veryify Your Number</button>
+                        <button type="submit" id="submit_button" class="btn btn-primary">Sign Up</button>
                     </div>
 
                     <div class="payment-summary" id ="payment-summary">
@@ -450,16 +450,16 @@
                                 document.querySelector('#otp').classList.add('show-input');
 
                                 steps.value = '2'
-                                inputsww.textContent = 'Veryfy OTP'
+                                inputsww.textContent = 'Verify OTP'
                             }else{
                                 alert("Something went wrong.");
                             }
 
                         } catch (error) {
                             console.error('Error fetching data:', error);
-                            fetchButton.innerHTML = 'Retry';
+                            fetchButton.innerHTML = 'Sign up';
                         } finally {
-                            fetchButton.innerHTML = 'Veryfy OTP';
+                            fetchButton.innerHTML = 'Verify OTP';
                             fetchButton.disabled = false;
                         }
                     }
@@ -531,9 +531,9 @@
                             }
                         } catch (error) {
                             console.error('Error fetching data:', error);
-                            fetchButton.innerHTML = 'Retry';
+                            fetchButton.innerHTML = 'Verify OTP';
                         } finally {
-                            fetchButton.innerHTML = 'Veryfy OTP';
+                            fetchButton.innerHTML = 'Verify OTP';
                             fetchButton.disabled = false;
                         }
                     }

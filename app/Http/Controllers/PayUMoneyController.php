@@ -18,10 +18,12 @@ use App\Services\WhatsAppService;
 use App\Services\OtpService;
 use App\Models\ItrQuerie;
 use Carbon\Carbon;
+use App\Models\Documents;
 // use Barryvdh\DomPDF\Facade\Pdf;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class PayUMoneyController extends Controller
 {
@@ -69,7 +71,7 @@ class PayUMoneyController extends Controller
         //     'message' => 'PDF saved successfully!',
         //     'file_path' => url('storage/invoice/'.$fileName),
         // ]);
-        return 'invoice/'.$fileName;
+        return $destinationPath.'/'.$fileName;
     }
 
 
@@ -153,7 +155,7 @@ class PayUMoneyController extends Controller
         ];
 
         Transactions::create($setData);
-        dd("as");
+        // dd("as");
         // Return the payment data as a JSON response
         return response()->json([
             'url' => env('PAYU_URL'),
@@ -187,8 +189,9 @@ class PayUMoneyController extends Controller
             $updateData  =  Transactions::where('txnid',$request['txnid'])->first();
             $invoice_id = $invoice_id.$updateData['id'];
             $updateData->update(["status"=>'completed',"invoice_id"=> $invoice_id]);
+            // $updateData  =  Transactions::where('txnid',$request['txnid'])->first();
             $setData = $updateData;
-
+            $fileArr= [];
             if($updateData->form_type == 'talk_to_tax_expert'){
 
                 $getCall = TalkToExpert::where('id', $updateData['order_id'])->first();
@@ -244,14 +247,13 @@ class PayUMoneyController extends Controller
                 $pdfData['totalTax'] =  $calculateTaxes['totalTax'];
 
                 $pdf = $this->generatePdf($pdfData);
-                $fileArr= [];
+                // $fileArr= [];
                 array_push($fileArr,$pdf);
                 $setData['other_details'] = [
                     'service_name' => $QueryTypeName,
                     'duration' => $duration,
                     'amount' => $calculateTaxes['totalAmount'],
                     'date' => $date,
-                    'files' =>$fileArr
                 ];
 
 
@@ -310,15 +312,14 @@ class PayUMoneyController extends Controller
                 $pdfData['totalTax'] =  $calculateTaxes['totalTax'];
 
                 $pdf = $this->generatePdf($pdfData);
-                $fileArr= [];
+                // $fileArr= [];
                 array_push($fileArr,$pdf);
 
                 // dd($pdfData);
 
                 $setData['other_details'] = [
                     'service_name' => $commaSeparatedLabels,
-                    'amount' => $updateData['amount'],
-                    'files' => $fileArr
+                    'amount' => $updateData['amount']
                 ];
 
 
@@ -368,13 +369,12 @@ class PayUMoneyController extends Controller
                 $pdfData['totalTax'] =  $calculateTaxes['totalTax'];
 
                 $pdf = $this->generatePdf($pdfData);
-                $fileArr= [];
+                // $fileArr= [];
                 array_push($fileArr,$pdf);
 
                 $setData['other_details'] = [
                     'service_name' => $service_name['label'],
-                    'amount' => $updateData['amount'],
-                    'files' => $fileArr
+                    'amount' => $updateData['amount']
                 ];
 
 
@@ -435,7 +435,7 @@ class PayUMoneyController extends Controller
                 $pdfData['totalTax'] =  $calculateTaxes['totalTax'];
 
                 $pdf = $this->generatePdf($pdfData);
-                $fileArr= [];
+                // $fileArr= [];
                 array_push($fileArr,$pdf);
 
 
@@ -443,8 +443,7 @@ class PayUMoneyController extends Controller
                 $QueryTypeName = implode(', ', $getQuery);
                 $setData['other_details'] = [
                     'service_name' => $QueryTypeName,
-                    'amount' => $updateData['amount'],
-                    'files' => $fileArr,
+                    'amount' => $updateData['amount']
                 ];
             }else if ($updateData->form_type == 'tds_queries'){
                 $getplanDetails = TdsQuerie::where('id',$updateData['order_id'])->first();
@@ -502,19 +501,26 @@ class PayUMoneyController extends Controller
                 $pdfData['totalTax'] =  $calculateTaxes['totalTax'];
 
                 $pdf = $this->generatePdf($pdfData);
-                $fileArr= [];
+
                 array_push($fileArr,$pdf);
 
 
                 $setData['other_details'] = [
                     'service_name' => $QueryTypeName,
-                    'amount' => $updateData['amount'],
-                    'files' => $fileArr,
+                    'amount' => $updateData['amount']
                 ];
 
             }
-            // dd('s');
-            $this->sendMeassage($setData, $updateData->form_type);
+            $getOtherFiles = Documents::where('query_id',$updateData['order_id'])->where('form_type',$updateData['form_type'])->get();
+
+            foreach ($getOtherFiles as $file) {
+                $newPath = public_path('uploads/' . $file['file_url']);
+                if (File::exists($newPath)) {
+                    array_push($fileArr,$newPath);
+                }
+            }
+
+            $this->sendMeassage($setData, $updateData->form_type,$fileArr);
 
             return redirect(env('CALL_BACK_URL'));
         }
@@ -522,7 +528,7 @@ class PayUMoneyController extends Controller
         return redirect(env('CALL_BACK_ERROR_URL'));
     }
 
-    public function sendMeassage($updateData,$formType){
+    public function sendMeassage($updateData,$formType,$filePaths = []){
 
         $userData = UserInquiry::where('id',$updateData->user_id)->first();
 
@@ -564,13 +570,21 @@ class PayUMoneyController extends Controller
 
             // }else
             // dd($message);
-            $filePaths = $updateData['other_details']['files'];
+            // $filePaths = $updateData['other_details']['files'];
             // dd($filePaths);
             if($value->type == 3){
 
                 $data = [
                     'email' => $userData->email,
                     'title' => $value->subject,
+                    'message' => $message,
+                    'filePaths' => $filePaths
+                ];
+                SendEmailJob::dispatch($data);
+
+                $data = [
+                    'email' => env('ADMIN_EMAIL'),
+                    'title' => $value->subject.'-'.$userData->name.'('.$userData['mobile'].')',
                     'message' => $message,
                     'filePaths' => $filePaths
                 ];

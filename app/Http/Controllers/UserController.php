@@ -17,7 +17,7 @@ use App\Models\Coupon;
 use App\Models\TalkToExpert;
 use App\Models\EmailTemplate;
 use Carbon\Carbon;
-use App\models\Documents;
+use App\Models\Documents;
 
 
 class UserController extends Controller
@@ -376,7 +376,7 @@ class UserController extends Controller
 
                         Documents::create([
                             'query_id' => $getCall->id,
-                            'file_url' => 'uploads/'.$file,
+                            'file_url' => $file,
                             'form_type' => 'talk_to_tax_expert',
                         ]);
                     }

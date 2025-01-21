@@ -101,7 +101,7 @@
                     <input type="hidden" id ="form_type" name="form_type" value="itr_queries">
                     <input type="hidden" id ="user_id" name="user_id" value="<?= !empty($_GET['user_id'])?$_GET['user_id']:1; ?>">
                     <div class="mb-5 text-center">
-                        <h2>CONNECT US FOR ITR QUERIES</h2>
+                        <h2>Income Tax Returns</h2>
                     </div>
 
                     <?php 

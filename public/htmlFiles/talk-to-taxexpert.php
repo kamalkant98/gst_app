@@ -11,6 +11,8 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/css/intlTelInput.css">
+        <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+        <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
 
     <style>
        
@@ -96,6 +98,9 @@
             text-decoration: line-through;
         }
         
+        .filepond--credits {
+            display: none !important;
+        }
     </style>
 
     
@@ -139,15 +144,15 @@
                     <input type="hidden" id ="form_type" name="form_type" value="talk_to_tax_expert">
 
                     <div class="mb-3 text-center">
-                        <h2>Talk To Tax Expert</h2>
+                        <h2>Talk To Our Tax Expert</h2>
                     </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control " id="name" name="name" requiredInput placeholder="Fullname">
+                        <input type="text" class="form-control " id="name" name="name" requiredInput placeholder="Full name">
 
                     </div>
                     <div class="mb-3">
-                        <label for="exampleInputEmail1" class="form-label">Email address</label>
+                        <label for="exampleInputEmail1" class="form-label">Email</label>
                         <input type="text" class="form-control " id="exampleInputEmail1" name="email" requiredInput placeholder="Email">
                     </div>
                    
@@ -165,7 +170,7 @@
 
 
                     <div class="mb-3 hidden-box-1">
-                        <label for="otp" class="form-label">Otp</label>
+                        <label for="otp" class="form-label">OTP</label>
                         <input type="text" class="form-control hide-input" id="otp" name="otp" maxlength="6" requiredInput pattern="\d{6}" placeholder="******" title="OTP must be exactly 6 digits">
                         <!-- <input type="number" class="form-control hide" id="otp" name="otp" requiredInput pattern="\d{6}" placeholder="******" title="OTP must be 6 digits."> -->
                     </div>
@@ -221,12 +226,13 @@
                     </div>
                     <div class="mb-3 hidden-box-2">
                         <label for="document" class="form-label">Select Document</label>
-                        <input type="file" class="form-control hide-input" id="document" name="document[]" multiple="multiple" requiredInput accept=".jpeg,.jpg,.png,.doc,.docx,.xls,.xlsx,.pdf" title="select jpeg,jpg,png,doc,docx,xls,xlsx,pdf">
+                        <!-- <input type="file" class="form-control hide-input" id="document" name="document[]" multiple="multiple"  accept=".jpeg,.jpg,.png,.doc,.docx,.xls,.xlsx,.pdf" title="select jpeg,jpg,png,doc,docx,xls,xlsx,pdf"> -->
+                        <input type="file" class="form-control hide-input" id="document" name="document[]" multiple="multiple"  requiredInput > 
 
                     </div>
                     
                     <div>
-                        <button type="submit" id="submit_button" class="btn btn-primary">veryify Your Number</button>
+                        <button type="submit" id="submit_button" class="btn btn-primary">Sign Up</button>
                     </div>
                     
                     <div class="payment-summary" id ="payment-summary">
@@ -264,12 +270,93 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/intlTelInput.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.0/js/utils.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.0/js/utils.js"></script>
+    
+    <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
 
-    <script>
+<script>
 
             
+        FilePond.registerPlugin(
+            FilePondPluginFileValidateType,
+            FilePondPluginImagePreview
+        );
 
+        let uploadedFiles = []; // Array to store uploaded file names
+
+        // Initialize FilePond
+        const pond = FilePond.create(document.querySelector('#document'), {
+            allowMultiple: true,
+            server: {
+                process: (fieldName, file, metadata, load, error, progress, abort) => {
+                    const formData = new FormData();
+                    formData.append('files[]', file);
+
+                    fetch('http://127.0.0.1:8000/api/commonUploadFile', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                console.log("asdasd");
+                                
+                                data.files.forEach(fileInfo => {
+                                    uploadedFiles.push(fileInfo); // Store uploaded file name
+                                });
+                                // console.log('Uploaded Files:', uploadedFiles); // Log the uploaded files array
+                                load(data.files.map(file => file.name)); // Pass file name to FilePond
+                            } else {
+                                error('Upload failed');
+                            }
+                        })
+                        .catch(() => {
+                            error('Upload error');
+                        });
+                }
+            }
+        });
+        
+        pond.on('removefile', (error, file) => {
+            if (error) {
+                console.error('Error removing file:', error);
+                return;
+            }
+
+            // Find the file to be deleted by matching originalName and get the uploadedFile
+            const fileToDelete = uploadedFiles.find(uploadedFile => uploadedFile.originalName === file.filename);
+
+            if (fileToDelete) {
+                // Call API to delete the file from the server using uploadedFile (not originalName)
+                fetch('http://127.0.0.1:8000/api/deleteFile', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        uploadedFile: fileToDelete.uploadedFile, // Use the uploadedFile key to delete the file
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        console.log('File deleted from server:', fileToDelete.uploadedFile);
+                    } else {
+                        console.error('Error deleting file:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('API request error:', error);
+                });
+
+                // Remove the file from the uploadedFiles array after deletion
+                uploadedFiles = uploadedFiles.filter(uploadedFile => uploadedFile.originalName !== file.filename);
+
+                console.log('Updated Uploaded Files:', uploadedFiles); // Log the updated array after removal
+            }
+        });
 
 
 
@@ -319,7 +406,7 @@
                         
                     });
                     return dates
-                    console.log(dates,"datesdatesdates");
+                    // console.log(dates,"datesdatesdates");
                     
                 } else {
                     console.log(`No public holidays found for ${year}.`);
@@ -336,7 +423,7 @@
             nextMonth.setMonth(today.getMonth() + 1); // Get the date next month
 
             const publicHolidays = await fetchPublicHolidays(today.getFullYear());
-            console.log(publicHolidays,'publicHolidays');
+            // console.log(publicHolidays,'publicHolidays');
             flatpickr("#datepicker", {
                 minDate: today, // Allow dates starting from today
                 maxDate: nextMonth, // Allow dates until the end of next month
@@ -580,14 +667,14 @@
                                 document.querySelector('#otp').classList.add('show-input');
                                 
                                 steps.value = '2'
-                                inputsww.textContent = 'Veryfy OTP'
+                                inputsww.textContent = 'Verify OTP'
                             }
 
                         } catch (error) {
                             console.error('Error fetching data:', error);
                             fetchButton.innerHTML = 'Retry';
                         }finally {
-                            fetchButton.innerHTML = 'Veryfy OTP';
+                            fetchButton.innerHTML = 'Verify OTP';
                             fetchButton.disabled = false;
                         }
                     //    document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
@@ -663,8 +750,18 @@
                     }
 
                     if(isValid && steps.value == 3){
+                        if (uploadedFiles?.length === 0) {
+                            alert("Please select files to upload.");
+                            return;
+                        }
                         const formElement = document.querySelector('#scheduleform');
                         const formData = new FormData(formElement);
+                        
+                        uploadedFiles.forEach((file, index) => {
+                            // Append both originalName and uploadedFile to the FormData
+                            formData.append('uploadedFile[' + index + ']', file.uploadedFile);
+                            // formData.append('files[' + index + '][uploadedFile]', file.uploadedFile);
+                        });
                         // const formObject = Object.fromEntries(formData.entries());
                         // const fileInput = document.getElementById("document");
                         // const files = fileInput.files;

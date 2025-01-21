@@ -66,14 +66,14 @@
                         <strong>{{$data['date']}}</strong>
                     </td>
                 </tr>
-                <tr>
+                {{-- <tr>
                     <td>
                         Order No.</br>
-                        <!-- <strong>PLR/24-25/1</strong> -->
+                        <strong>PLR/24-25/1</strong>
                     </td>
                     <td>
                         Dated</br>
-                        <!-- <strong>PLR/24-25/1</strong> -->
+                        <strong>PLR/24-25/1</strong>
                     </td>
                 </tr>
                 <tr>
@@ -95,7 +95,7 @@
                         Destination</br>
                         <!-- <strong>PLR/24-25/1</strong> -->
                     </td>
-                </tr>
+                </tr> --}}
                </table>
             </td>
         </tr>
