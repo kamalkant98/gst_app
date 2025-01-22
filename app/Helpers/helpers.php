@@ -388,16 +388,16 @@ function getItrPlanAmount($data){
 
     if($data['profit_loss'] == 1){
         $amount = $amount + 1000;
-        $summary[] = ['plan'=>'Do you want us tp prepare profit & loss and balance sheet?','amount'=>1000,'answer'=>'Yes'];
+        $summary[] = ['plan'=>'Do you want us to prepare profit & loss and balance sheet?','amount'=>1000,'answer'=>'Yes'];
     }else if($data['profit_loss'] == 2){
-        $summary[] = ['plan'=>'Do you want us tp prepare profit & loss and balance sheet?','amount'=>0,'answer'=>'No'];
+        $summary[] = ['plan'=>'Do you want us to prepare profit & loss and balance sheet?','amount'=>0,'answer'=>'No'];
     }
 
     if($data['income_tax_forms'] == 1){
         $amount = $amount + 500;
-        $summary[] = ['plan'=>'Do you want us tp file any income tax forms?','amount'=>500,'answer'=>'Yes'];
+        $summary[] = ['plan'=>'Do you want us to file any income tax forms?','amount'=>500,'answer'=>'Yes'];
     }else{
-        $summary[] = ['plan'=>'Do you want us tp file any income tax forms?','amount'=>0,'answer'=>'No'];
+        $summary[] = ['plan'=>'Do you want us to file any income tax forms?','amount'=>0,'answer'=>'No'];
     }
 
     if($data['services'] == 1){

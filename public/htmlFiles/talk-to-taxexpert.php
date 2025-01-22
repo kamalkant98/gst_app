@@ -148,7 +148,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control " id="name" name="name" requiredInput placeholder="Full name">
+                        <input type="text" class="form-control " id="name" name="name" requiredInput placeholder="Full Name">
 
                     </div>
                     <div class="mb-3">
@@ -750,18 +750,14 @@
                     }
 
                     if(isValid && steps.value == 3){
-                        if (uploadedFiles?.length === 0) {
-                            alert("Please select files to upload.");
-                            return;
-                        }
+                       
                         const formElement = document.querySelector('#scheduleform');
                         const formData = new FormData(formElement);
                         
                         uploadedFiles.forEach((file, index) => {
-                            // Append both originalName and uploadedFile to the FormData
-                            formData.append('uploadedFile[' + index + ']', file.uploadedFile);
-                            // formData.append('files[' + index + '][uploadedFile]', file.uploadedFile);
+                           formData.append('uploadedFile[' + index + ']', file.uploadedFile);
                         });
+
                         // const formObject = Object.fromEntries(formData.entries());
                         // const fileInput = document.getElementById("document");
                         // const files = fileInput.files;

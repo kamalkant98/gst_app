@@ -170,7 +170,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control " id="name" name="name" requiredInput placeholder="Full name" showname= 'Name'>
+                        <input type="text" class="form-control " id="name" name="name" requiredInput placeholder="Full Name" showname= 'Full Name'>
 
                     </div>
                     <div class="mb-3">
@@ -547,7 +547,7 @@
 
                     // Loop through each input and validate
                     inputs.forEach(input => {
-                        console.log(input.name,'email');
+                        // console.log(input.name,'email');
                         
                         input.classList.remove('is-invalid');
                         if (input.value.trim() === '' && !input.classList.contains('hide-input') && input.name != 'selectTime') {

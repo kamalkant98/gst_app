@@ -151,7 +151,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control " id="name" name="name" requiredInput placeholder="Full name">
+                        <input type="text" class="form-control " id="name" name="name" requiredInput placeholder="Full Name">
 
                     </div>
                     <div class="mb-3">

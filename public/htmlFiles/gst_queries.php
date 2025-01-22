@@ -12,7 +12,7 @@
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
 </head>
 <style>
-    
+
         .pad-bg {
             background: #f8f8f8;
             padding: 40px 20px;
@@ -120,9 +120,9 @@
                     <div class="mb-3 hidden-box-2 composition">
                         <label for="type" class="form-label">Plan's</label>
                         <select class="form-control composition" id="plan_name" name="plan_name" requiredInput>
-                            <option  value="">select paln</option>
+                            <option  value="">select plan</option>
                             <option  value="1">Quarterly</option>
-                            <option  value="2">Monthly</option>   
+                            <option  value="2">Annually</option>
                         </select>
                     </div>
 
@@ -131,18 +131,18 @@
                         <select class="form-control regular" id="return_filling_frequency" name="return_filling_frequency" requiredInput>
                             <option  value="">select frequency</option>
                             <option  value="3">Annually</option>
-                            <option  value="2">Monthly</option>   
+                            <option  value="2">Monthly</option>
                             <option  value="1">Quarterly</option>
-                              
+
                         </select>
                     </div>
                     <!-- <div class="mb-3 hidden-box-2 regular m-select-check">
                         <label for="multi-select" class="form-label w-100">Type of return</label>
                         <select id="multi-select" class="form-control regular" name="plan" requiredInput  multiple="multiple">
                             <option  value="1">GSTR 1</option>
-                            <option  value="2">GSTR 3B</option> 
-                            <option  value="3">GSTR 9/9C</option>   
-                            <option  value="4">GSTR 8</option>   
+                            <option  value="2">GSTR 3B</option>
+                            <option  value="3">GSTR 9/9C</option>
+                            <option  value="4">GSTR 8</option>
                             <option  value="5">TCS Return</option>
                         </select>
                     </div> -->
@@ -152,7 +152,7 @@
                             <option  value="">select service type</option>
                             <option  value="1">Prepare only</option>
                             <option  value="2">File only</option>
-                            <option  value="3">Both Prepare and file</option>   
+                            <option  value="3">Both Prepare and file</option>
                         </select>
                     </div>
                     <div>
@@ -218,7 +218,7 @@
                 try {
 
                     e.preventDefault(); // Prevent the default form submit
-                    let formElement = document.querySelector('#gst_queries'); 
+                    let formElement = document.querySelector('#gst_queries');
 
                     const errorElements = document.querySelectorAll('.error');
                     // Loop through and remove each element
@@ -227,7 +227,7 @@
                     });
 
                     const inputs = document.querySelectorAll('[requiredInput]');
-                    
+
                     let isValid = true;
 
                     // Loop through each input and validate
@@ -246,7 +246,7 @@
 
                         if (input.name == 'gst_number' && input.value != '') {
                             let checkGST = isValidGST(input.value);
-                           
+
                             if (checkGST == false) {
                                 let errorElement = document.createElement('span');
                                 errorElement.className = 'error'; // Add error class for styling
@@ -258,10 +258,8 @@
                         }
 
                     });
-                    console.log(isValid,"======");
-                    
                     if(isValid){
-                    
+
                         const formData = new FormData(formElement);
                         // Handle multi-select values
                         const selectedValues = $('#multi-select').val() || [];
@@ -284,12 +282,12 @@
 
                             if(response.status == 200){
 
-                            
+
                                 // Render the response for debugging
                                 //  document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
                                 let checkIdinput =  document.querySelector('#call_id');
-                                
-                                    
+
+
                                 if(!checkIdinput){
                                     let hiddenInput = document.createElement('input');
                                     hiddenInput.type = 'hidden';
@@ -299,12 +297,12 @@
                                     formElement.appendChild(hiddenInput);
                                 }
 
-                                
+
                                 call_id =  data.call_id;
                                 form_type = formData?.form_type;
                                 user_id = formData?.id;
 
-                                    
+
 
                                 let html=`<div>
                                     <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
@@ -358,12 +356,12 @@
                                                     <h6>GST 18%:</h6>
                                                     <span class="fw-bold">₹${data?.gstCharge}</span>
                                                 </div>
-                                                
+
                                                 <!-- Total -->
                                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                                     <h6>Total:</h6>
                                                     <div>
-                                                        
+
                                                         <span class="fw-bold" style="font-size:20px;">₹${data?.amount}</span>
                                                     </div>
                                                 </div>
@@ -395,9 +393,9 @@
                             fetchButton.disabled = false;
                         }
                     }
-                    
 
-                    
+
+
                 } catch (error) {
                     console.error('Error:', error);
                 }
@@ -417,7 +415,7 @@
                     }
 
                     console.log(call_id,form_type,user_id);
-                    
+
                     if(call_id && form_type && user_id && isValid){
                         console.log(checkIdinput,"checkIdinput",call_id);
 
@@ -434,7 +432,7 @@
 
                         // Parse the JSON response
                         const data = await response.json();
-                    
+
                         if(response.status == 200){
                             // Render the response for debugging
                             // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
@@ -475,10 +473,10 @@
 <script>
 
 
-    
+
     $(document).ready(() => {
 
-       
+
 
 // Initialize Select2
 $('#multi-select').select2({

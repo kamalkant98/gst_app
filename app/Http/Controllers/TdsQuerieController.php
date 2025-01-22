@@ -126,7 +126,7 @@ class TdsQuerieController extends Controller
             $create = TdsQuerie::create($setData);
         }
 
-        $QueryTypeName =  $QueryTypeName.'- Number of employee '.$getPlan['label'];
+        $QueryTypeName =  ' Annually charge for '.$QueryTypeName.'- Number of employee '.$getPlan['label'];
 
         if($request['no_of_employees'] ==  4){
             commonSendMeassage($create['user_id'],'tds_queries',$create['id']);

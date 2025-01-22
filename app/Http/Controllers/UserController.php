@@ -495,7 +495,7 @@ class UserController extends Controller
         // ]);
 
         $validator = Validator::make($request->all(), [
-            'files.*' => 'required|file|mimes:jpg,jpeg,doc,png,pdf|max:2048',
+            'files.*' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,rtf,csv,odt,ods,odp,jpg,jpeg,png|max:5120',
         ]);
 
         // Check if validation fails
