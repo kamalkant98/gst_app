@@ -106,7 +106,7 @@
                 </a>
             </div>
             <p>96, Arjun Nagar, Behind Dalda Factory
-                Durgapura, Jaipur,Rajasthan, 12345</p>
+                Durgapura, Jaipur,Rajasthan, 302018</p>
             <p>&copy; 2025 PAPERLESS RACK DIGITAL SOLUTIONS PVT
                 LTD. All rights reserved.</p>
             <a href="#">Unsubscribe</a> | <a href="#">Privacy Policy</a>
