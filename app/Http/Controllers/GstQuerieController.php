@@ -8,6 +8,8 @@ use App\Models\GstQuerie;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use App\Models\Coupon;
+use App\Models\Documents;
+use Illuminate\Support\Facades\File;
 
 class GstQuerieController extends Controller
 {
@@ -122,6 +124,27 @@ class GstQuerieController extends Controller
 
             $setData['user_id'] =$data['user_id'];
             $create = GstQuerie::create($setData);
+        }
+
+
+        Documents::where('query_id',$create->id)->where('form_type','gst_queries')->delete();
+        if($request->uploadedFile && count($request->uploadedFile) > 0){
+            foreach ($request->uploadedFile as $file) {
+                $filePath = public_path('tmp_uploads/'. $file); // Set the correct file path
+                $newPath = public_path('uploads/' . $file);
+                if (File::exists($filePath) || File::exists($newPath)) {
+                    if(File::exists($filePath)){
+                        File::move($filePath, $newPath);
+                    }
+
+                    Documents::create([
+                        'query_id' => $create->id,
+                        'file_url' => $file,
+                        'form_type' => 'gst_queries',
+                    ]);
+                }
+
+            }
         }
 
         return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount], 200);

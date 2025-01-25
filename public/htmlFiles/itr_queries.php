@@ -10,9 +10,12 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/css/intlTelInput.css">
+        <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+        <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
 </head>
 <style>
-    
+
         .pad-bg {
             background: #f8f8f8;
             padding: 40px 20px;
@@ -90,6 +93,9 @@
             color: #999;
             text-decoration: line-through;
         }
+        .filepond--credits {
+            display: none !important;
+        }
     </style>
 
 <body>
@@ -99,12 +105,12 @@
                 <!-- Default form -->
                 <form id="itr_queries" method="POST" enctype="multipart/form-data">
                     <input type="hidden" id ="form_type" name="form_type" value="itr_queries">
-                    <input type="hidden" id ="user_id" name="user_id" value="<?= !empty($_GET['user_id'])?$_GET['user_id']:1; ?>">
+                    <input type="hidden" id ="user_id" name="user_id" value="<?= !empty($_GET['user_id'])?$_GET['user_id']:''; ?>">
                     <div class="mb-5 text-center">
                         <h2>Income Tax Returns</h2>
                     </div>
 
-                    <?php 
+                    <?php
                         $incomeType = [
                             '1'  => 'Income form salary',
                             '2'  => 'Income from house property',
@@ -113,9 +119,9 @@
                             '5'  => 'Income from the stock market',
                             '6'  => 'Income from crypto',
                             '7'  => 'Income form other sources',
-                        
+
                         ];
-                        
+
                         ?>
                     <div class="mb-3 m-select-check">
                         <label for="multi-select" class="form-label  w-100">Your Income</label>
@@ -169,8 +175,13 @@
                             <option value="2">No</option>
                         </select>
                     </div>
+                    <div class="mb-3 ">
+                        <label for="document" class="form-label">Select Document</label>
+                        <!-- <input type="file" class="form-control hide-input" id="document" name="document[]" multiple="multiple"  accept=".jpeg,.jpg,.png,.doc,.docx,.xls,.xlsx,.pdf" title="select jpeg,jpg,png,doc,docx,xls,xlsx,pdf"> -->
+                        <input type="file" class="form-control" id="document" name="document[]" multiple="multiple"  requiredInput >
 
-                   
+                    </div>
+
                     <div>
                         <button type="submit" id="submit_button" class="btn btn-primary">Submit</button>
                     </div>
@@ -200,7 +211,93 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+<script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
+<script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
+
 <script>
+
+
+        FilePond.registerPlugin(
+            FilePondPluginFileValidateType,
+            FilePondPluginImagePreview
+        );
+
+        let uploadedFiles = []; // Array to store uploaded file names
+
+        // Initialize FilePond
+        const pond = FilePond.create(document.querySelector('#document'), {
+            allowMultiple: true,
+            server: {
+                process: (fieldName, file, metadata, load, error, progress, abort) => {
+                    const formData = new FormData();
+                    formData.append('files[]', file);
+
+                    fetch('http://127.0.0.1:8000/api/commonUploadFile', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                console.log("asdasd");
+
+                                data.files.forEach(fileInfo => {
+                                    uploadedFiles.push(fileInfo); // Store uploaded file name
+                                });
+                                // console.log('Uploaded Files:', uploadedFiles); // Log the uploaded files array
+                                load(data.files.map(file => file.name)); // Pass file name to FilePond
+                            } else {
+                                error('Upload failed');
+                            }
+                        })
+                        .catch(() => {
+                            error('Upload error');
+                        });
+                }
+            }
+        });
+
+        pond.on('removefile', (error, file) => {
+            if (error) {
+                console.error('Error removing file:', error);
+                return;
+            }
+
+            // Find the file to be deleted by matching originalName and get the uploadedFile
+            const fileToDelete = uploadedFiles.find(uploadedFile => uploadedFile.originalName === file.filename);
+
+            if (fileToDelete) {
+                // Call API to delete the file from the server using uploadedFile (not originalName)
+                fetch('http://127.0.0.1:8000/api/deleteFile', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        uploadedFile: fileToDelete.uploadedFile, // Use the uploadedFile key to delete the file
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        console.log('File deleted from server:', fileToDelete.uploadedFile);
+                    } else {
+                        console.error('Error deleting file:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('API request error:', error);
+                });
+
+                // Remove the file from the uploadedFiles array after deletion
+                uploadedFiles = uploadedFiles.filter(uploadedFile => uploadedFile.originalName !== file.filename);
+
+                console.log('Updated Uploaded Files:', uploadedFiles); // Log the updated array after removal
+            }
+        });
+
         $(document).ready(function (e) {
 
             function isValidGST(gst) {
@@ -215,7 +312,7 @@
                 if(selectedValue == 1){
                     $('.hidden-box-1').show();
                     $('#profit_loss').removeClass('hide-input');
-                    
+
                 }else{
                     $('.hidden-box-1').hide();
                     $('#profit_loss').addClass('hide-input');
@@ -230,10 +327,10 @@
             $('#itr_queries').on('submit', async (e) => {
 
                 // try {
-                    
+
 
                     e.preventDefault(); // Prevent the default form submit
-                    let formElement = document.querySelector('#itr_queries'); 
+                    let formElement = document.querySelector('#itr_queries');
 
                     const errorElements = document.querySelectorAll('.error');
                     // Loop through and remove each element
@@ -242,7 +339,7 @@
                     });
 
                     const inputs = document.querySelectorAll('[requiredInput]');
-                    
+
                     let isValid = true;
 
                     // Loop through each input and validate
@@ -262,7 +359,7 @@
 
                         if (input.name == 'gst_number' && input.value != '') {
                             let checkGST = isValidGST(input.value);
-                           
+
                             if (checkGST == false) {
                                 let errorElement = document.createElement('span');
                                 errorElement.className = 'error'; // Add error class for styling
@@ -275,15 +372,19 @@
 
                     });
                     if(isValid){
-                    
+
                     const formData = new FormData(formElement);
                     // Handle multi-select values
                     const selectedValues = $('#multi-select').val() || [];
                     formData.append("plan", selectedValues);
 
+                    uploadedFiles.forEach((file, index) => {
+                           formData.append('uploadedFile[' + index + ']', file.uploadedFile);
+                    });
+
                     fetchButton.disabled = true;
                     fetchButton.innerHTML = 'Loading <span class="loader"></span>';
-           
+
                     try {
                         const response = await fetch('http://127.0.0.1:8000/api/itr-queries/store', {
                             method: 'POST',
@@ -296,8 +397,8 @@
 
                         const data = await response.json();
                         let checkIdinput =  document.querySelector('#call_id');
-                         
-                            
+
+
                         if(!checkIdinput){
                             let hiddenInput = document.createElement('input');
                             hiddenInput.type = 'hidden';
@@ -307,12 +408,12 @@
                             formElement.appendChild(hiddenInput);
                         }
 
-                        
+
                         call_id =  data.call_id;
                         form_type = formData?.form_type;
                         user_id = formData?.id;
 
-                            
+
 
                         let html=`<div>
                             <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
@@ -323,21 +424,21 @@
                                     <div class="card-body">
                                         <!-- Item 1 -->
                                       <div id='cart-details'>
-         
+
                                         <h6>ITR QUERIES</h6>
                                             <div class=" justify-content-between align-items-center border-top">
- 
+
                                             ${data?.getPlan.map(plan => `
                                                     <div class="d-flex justify-content-between align-items-center border-bottom py-3">
                                                         <div>
-                                                            ${plan?.type && plan?.type === 'income_type' ? 
+                                                            ${plan?.type && plan?.type === 'income_type' ?
                                                                 Object.values(plan?.plan).map(income => `
                                                                     <h6>
-                                                                        ${income?.label} 
+                                                                        ${income?.label}
                                                                         ${income?.url ? `<a href="${income?.url}" target="_blank">Read more</a>` : ''}
                                                                     </h6>
-                                                                `).join('') 
-                                                                : 
+                                                                `).join('')
+                                                                :
                                                                 `
                                                                 <h6>${plan.plan}</h6>
                                                                 <br>
@@ -418,7 +519,7 @@
                 }
 
 
-                    
+
                 // } catch (error) {
                 //     console.error('Error:', error);
                 // }
@@ -438,7 +539,7 @@
                     }
 
                     console.log(call_id,form_type,user_id);
-                    
+
                     if(call_id && form_type && user_id && isValid){
                         console.log(checkIdinput,"checkIdinput",call_id);
 
@@ -455,7 +556,7 @@
 
                         // Parse the JSON response
                         const data = await response.json();
-                    
+
                         if(response.status == 200){
                             // Render the response for debugging
                             // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
@@ -489,17 +590,17 @@
             });
         });
 
-    </script>
+</script>
 
 
 
 <script>
 
 
-    
+
     $(document).ready(() => {
 
-       
+
 
 // Initialize Select2
 $('#multi-select').select2({

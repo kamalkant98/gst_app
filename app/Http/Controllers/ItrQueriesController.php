@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\ItrQuerie;
 use Carbon\Carbon;
 use App\Models\Coupon;
+use App\Models\Documents;
+use Illuminate\Support\Facades\File;
 
 class ItrQueriesController extends Controller
 {
@@ -99,6 +101,26 @@ class ItrQueriesController extends Controller
             $create->update($setData);
         }else{
             $create = ItrQuerie::create($setData);
+        }
+
+        Documents::where('query_id',$create->id)->where('form_type','itr_queries')->delete();
+        if($request->uploadedFile && count($request->uploadedFile) > 0){
+            foreach ($request->uploadedFile as $file) {
+                $filePath = public_path('tmp_uploads/'. $file); // Set the correct file path
+                $newPath = public_path('uploads/' . $file);
+                if (File::exists($filePath) || File::exists($newPath)) {
+                    if(File::exists($filePath)){
+                        File::move($filePath, $newPath);
+                    }
+
+                    Documents::create([
+                        'query_id' => $create->id,
+                        'file_url' => $file,
+                        'form_type' => 'itr_queries',
+                    ]);
+                }
+
+            }
         }
         return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount], 200);
          //dd($plan);

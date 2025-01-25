@@ -11,6 +11,8 @@ use App\Services\WhatsAppService;
 use App\Services\OtpService;
 use Carbon\Carbon;
 use App\Models\Coupon;
+use App\Models\Documents;
+use Illuminate\Support\Facades\File;
 
 class TdsQuerieController extends Controller
 {
@@ -28,6 +30,22 @@ class TdsQuerieController extends Controller
 
     public function tdsQuerieStore(Request $request)
     {
+
+
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|string',
+            'form_type' => 'required|string',
+            'tan_number' => 'required|string',
+         ]);
+
+         // Check if validation fails
+         if($validator->fails()) {
+             return response()->json([
+                 'message' => 'Validation failed',
+                 'errors' => $validator->errors(), // Get the error messages
+             ], 422);
+         }
+
 
         $data = $request->all();
 
@@ -125,6 +143,27 @@ class TdsQuerieController extends Controller
             $setData['user_id'] =    $data['user_id'];
             $create = TdsQuerie::create($setData);
         }
+
+        Documents::where('query_id',$create->id)->where('form_type','tds_queries')->delete();
+        if($request->uploadedFile && count($request->uploadedFile) > 0){
+            foreach ($request->uploadedFile as $file) {
+                $filePath = public_path('tmp_uploads/'. $file); // Set the correct file path
+                $newPath = public_path('uploads/' . $file);
+                if (File::exists($filePath) || File::exists($newPath)) {
+                    if(File::exists($filePath)){
+                        File::move($filePath, $newPath);
+                    }
+
+                    Documents::create([
+                        'query_id' => $create->id,
+                        'file_url' => $file,
+                        'form_type' => 'tds_queries',
+                    ]);
+                }
+
+            }
+        }
+
 
         $QueryTypeName =  ' Annually charge for '.$QueryTypeName.'- Number of employee '.$getPlan['label'];
 

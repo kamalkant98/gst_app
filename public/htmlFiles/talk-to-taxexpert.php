@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Schedule Call</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
@@ -15,7 +15,7 @@
         <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
 
     <style>
-       
+
         .pad-bg {
             background: #f8f8f8;
             padding: 40px 20px;
@@ -97,16 +97,16 @@
             color: #999;
             text-decoration: line-through;
         }
-        
+
         .filepond--credits {
             display: none !important;
         }
     </style>
 
-    
+
 </head>
-<?php 
-    
+<?php
+
     $query_types = [
         ['value'=>'','label' => 'Select Your Query'],
         ['value'=>'1','label' => 'Income Tax Returns'],
@@ -122,12 +122,12 @@
         ['value'=>'1','label' => '10 minutes plan'],
         ['value'=>'2','label' => '20 minutes plan'],
         ['value'=>'3','label' => '30 minutes plan'],
-        
+
     ];
     $language = [
         ['value'=>'Hindi','label' => 'Hindi'],
         ['value'=>'English','label' => 'English'],
-        
+
     ];
 ?>
 
@@ -155,7 +155,7 @@
                         <label for="exampleInputEmail1" class="form-label">Email</label>
                         <input type="text" class="form-control " id="exampleInputEmail1" name="email" requiredInput placeholder="Email">
                     </div>
-                   
+
                     <!-- <div class="mb-3">
                         <label for="mobile" class="form-label">Mobile</label>
                         <input type="mobile" class="form-control" id="mobile" name="mobile" requiredInput placeholder="Mobile">
@@ -192,7 +192,7 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    
+
                     <div class="mb-3 other_query_message_box hidden-box-2">
                         <label for="other_query_message" class="form-label">Description</label>
                         <textarea class="form-control hide-input" id="other_query_message" name="other_query_message" rows="4" placeholder="Enter your message here" requiredInput maxlength="500" title="Message should not exceed 500 characters.">
@@ -201,7 +201,7 @@
 
                     <div class="mb-3 hidden-box-2">
                     <label for="datepicker" class="form-label">Select Date & Time</label>
-                    <input type="text" id="datepicker" name="datetime" class="form-control hide-input" requiredInput placeholder="Y-m-d H:i"> 
+                    <input type="text" id="datepicker" name="datetime" class="form-control hide-input" requiredInput placeholder="Y-m-d H:i">
                     </div>
 
                     <div class="mb-3 hidden-box-2 ">
@@ -209,7 +209,7 @@
                         <select id="plan" class="form-control hide-input" requiredInput name="plan">
                         <option  value="">select value</option>
                             <?php foreach ($plan_types as $type): ?>
-                                
+
                                 <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -219,7 +219,7 @@
                         <select id="language" class="form-control hide-input" requiredInput name="language">
                         <option value="">select value</option>
                             <?php foreach ($language as $type): ?>
-                                
+
                                 <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -227,24 +227,24 @@
                     <div class="mb-3 hidden-box-2">
                         <label for="document" class="form-label">Select Document</label>
                         <!-- <input type="file" class="form-control hide-input" id="document" name="document[]" multiple="multiple"  accept=".jpeg,.jpg,.png,.doc,.docx,.xls,.xlsx,.pdf" title="select jpeg,jpg,png,doc,docx,xls,xlsx,pdf"> -->
-                        <input type="file" class="form-control hide-input" id="document" name="document[]" multiple="multiple"  requiredInput > 
+                        <input type="file" class="form-control hide-input" id="document" name="document[]" multiple="multiple"  requiredInput >
 
                     </div>
-                    
+
                     <div>
                         <button type="submit" id="submit_button" class="btn btn-primary">Sign Up</button>
                     </div>
-                    
+
                     <div class="payment-summary" id ="payment-summary">
-                        
-                    </div>  
+
+                    </div>
                     <div class="mt-4" id ="terms-box">
                         <input type="checkbox" name="terms" class='hide-input' id="terms" value='1'>
                         <a href="http://" target="_blank">T&C apply</a>
                     </div>
 
                 </form>
-                              
+
                 <form action="#" method="POST" name="payuForm">
                 </form>
                 <div class="text-center mt-4">
@@ -260,25 +260,25 @@
 
     <div id="response"></div>
 
-  
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-        
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/intlTelInput.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.0/js/utils.js"></script>
-    
+
     <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
     <script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
     <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
 
 <script>
 
-            
+
         FilePond.registerPlugin(
             FilePondPluginFileValidateType,
             FilePondPluginImagePreview
@@ -302,7 +302,7 @@
                         .then(data => {
                             if (data.status === 'success') {
                                 console.log("asdasd");
-                                
+
                                 data.files.forEach(fileInfo => {
                                     uploadedFiles.push(fileInfo); // Store uploaded file name
                                 });
@@ -318,7 +318,7 @@
                 }
             }
         });
-        
+
         pond.on('removefile', (error, file) => {
             if (error) {
                 console.error('Error removing file:', error);
@@ -365,11 +365,11 @@
         //     const data = await response.json();
         //     let holidays = data?.response?.holidays;
         //     // console.log(holidays);
-            
+
         //     return holidays.map(holiday => holiday.date.iso); // Return array of holiday dates (YYYY-MM-DD)
         // }
 
-        
+
         async function fetchPublicHolidays(year) {
             try {
 
@@ -403,18 +403,18 @@
                             dates.push(start);
                             console.log(`${start} - ${event.summary}`);
                         }
-                        
+
                     });
                     return dates
                     // console.log(dates,"datesdatesdates");
-                    
+
                 } else {
                     console.log(`No public holidays found for ${year}.`);
                 }
             } catch (error) {
                 console.error('Error fetching public holidays:', error.message);
             }
-        }  
+        }
 
         // Disable weekends and public holidays
         async function initDatePicker() {
@@ -478,7 +478,7 @@
         }
 
 
-        
+
         $(document).ready(() => {
 
 
@@ -488,7 +488,7 @@
             let iti;
 
             $(function () {
-              
+
                 if (iti_el.length) {
                     iti.destroy();
                 }
@@ -522,18 +522,18 @@
                     $('#mobile').on("focusout", function (e) {
                         const currentInput = e.target; // Get the current input element
                         const inputNumber = currentInput.value; // Get the input value
-                        
+
                         // Check if the number is valid
                         console.log(iti.isValidNumber());
-                        
+
                         if (iti.isValidNumber()) {
                             const intlNumber = iti.getNumber(); // Get full international number
                             console.log("Valid Number:", intlNumber);
                             validMobileNumber = true;
-                            
+
                         } else {
                             validMobileNumber = false;
-                            
+
                         }
                     });
                 }
@@ -557,17 +557,17 @@
             let call_id=0;
             form_type ='talk_to_tax_expert'
             user_id = 0;
-            
+
             const fetchButton = document.getElementById('submit_button');
             $('#scheduleform').on('submit', async (e) => {
                 e.preventDefault(); // Prevent default form submission
 
                 try {
-                    
+
                     let steps =  document.getElementById('steps');
                     const inputsww = document.getElementById('submit_button');
                     console.log("steps",steps.value);
-                    
+
                     const errorElements = document.querySelectorAll('.error');
                     // Loop through and remove each element
                     errorElements.forEach(element => {
@@ -584,7 +584,7 @@
                             let errorElement = document.createElement('span');
                             errorElement.className = 'error'; // Add error class for styling
                             errorElement.textContent = `${input.name.charAt(0).toUpperCase() + input.name.slice(1)} is required.`;
-                            
+
                             if(input.name == 'mobile'){
                                 let mobilebox = document.getElementById('mobile-box');
                                 mobilebox.after(errorElement);
@@ -593,13 +593,13 @@
                             }
                             input.classList.add('is-invalid');
                             isValid = false;
-                            
-                        } 
-                        
+
+                        }
+
                         if(input.name == 'email' && input.value != '' ){
                             let checkEmail = isValidEmail(input.value)
                                 if(isValidEmail(input.value) == false ){
-                                    
+
                                     let errorElement = document.createElement('span');
                                     errorElement.className = 'error'; // Add error class for styling
                                     errorElement.textContent = `Please enter a valid email address.`;
@@ -608,7 +608,7 @@
                                     isValid = false;
                                 }
                         }
-                        
+
                         if(input.name == 'mobile' && input.value != '' ){
                             // let checkMobile = isValidIndianMobileNumber(input.value)
                                 if(validMobileNumber == false ){
@@ -636,7 +636,7 @@
                         fetchButton.disabled = true;
                         fetchButton.innerHTML = 'Loading <span class="loader"></span>';
                         try {
-                            
+
                             // Send the POST request
                             const response = await fetch('http://127.0.0.1:8000/api/generate_otp', {
                                 method: 'POST',
@@ -650,7 +650,7 @@
 
                             // Parse the JSON response
                             const data = await response.json();
-                            
+
                             if(response.status == 200 && data && data.data > 0){
                                 let checkIdinput =  document.querySelector('#id');
                                 if(!checkIdinput){
@@ -665,7 +665,7 @@
                                 document.querySelector('.hidden-box-1').style.display = 'block';
                                 document.querySelector('#otp').classList.remove('hide-input');
                                 document.querySelector('#otp').classList.add('show-input');
-                                
+
                                 steps.value = '2'
                                 inputsww.textContent = 'Verify OTP'
                             }
@@ -705,7 +705,7 @@
                                 errorElement.textContent = `${data.error}`;
 
                                 // Insert the error message after the input field
-                                otp.after(errorElement);  
+                                otp.after(errorElement);
                                 otp.classList.add('is-invalid');
                                 isValid = false;
                             }else if (response.status == 200){
@@ -716,21 +716,21 @@
                                 let allbox  = document.querySelectorAll('.hidden-box-2');
                                 allbox.forEach(box => {
                                     if(box.classList.contains('m-select-check')){
-                                        
+
                                         box.classList.add('m-select');
                                     }else{
                                         box.style.display = 'block';
                                     }
-                                    
+
                                 })
-                                
+
                                 let inputs  = document.querySelectorAll('.hide-input');
                                 inputs.forEach(input => {
                                     input.classList.remove('hide-input');
                                     input.classList.add('show-input');
-                                    
+
                                 })
-                                
+
                                 steps.value = '3'
                                 inputsww.textContent = 'Schedule Your Call'
                                 isValid = false
@@ -750,10 +750,10 @@
                     }
 
                     if(isValid && steps.value == 3){
-                       
+
                         const formElement = document.querySelector('#scheduleform');
                         const formData = new FormData(formElement);
-                        
+
                         uploadedFiles.forEach((file, index) => {
                            formData.append('uploadedFile[' + index + ']', file.uploadedFile);
                         });
@@ -799,9 +799,9 @@
                                 }
 
                                 call_id =  data.call_id;
-                            
+
                                 // console.log(data.call_id,"==",formData?.form_type,"==",formData?.id);
-                                
+
 
                                 let html=`<div>
                                     <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
@@ -821,7 +821,7 @@
                                                     <div class="fw-bold">₹${data?.getPlan?.value}</div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <!-- Coupon Code -->
                                                 <div class="mt-4 border-bottom pb-3">
                                                     <h6>Have a Coupon Code?</h6>
@@ -854,15 +854,15 @@
                                                     <h6>GST 18%:</h6>
                                                     <span class="fw-bold">₹${data?.gstCharge}</span>
                                                 </div>
-                                                
+
                                                 <!-- Total -->
                                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                                     <h6>Total:</h6>
                                                     <div>
-                                                        
+
                                                         <span class="fw-bold" style="font-size:20px;">₹${data?.amount}</span>
                                                     </div>
-                                                    
+
                                                 </div>
                                             </div>
                                         </div>
@@ -870,12 +870,12 @@
 
 
                                         <!-- Checkout Button -->
-                                        
+
                                     </div>
                                     </div>
                                 </div>`;
 
-                                
+
                                 document.getElementById("checkOutbtn").style.display = 'block'
                                 document.getElementById("payment-summary").innerHTML = html;
                                 document.getElementById("payment-summary").style.display = 'block'
@@ -954,11 +954,11 @@
                     }else{
                         alert(data)
                     }
-                    
+
                 }else{
                     alert("Please fill the from.")
                 }
-                
+
             }
         });
 

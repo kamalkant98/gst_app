@@ -46,7 +46,7 @@ Route::any('/api/payu-callback-success', [PayUMoneyController::class, 'handleCal
 Route::Post('/api/user/store',[UserController::class, 'store']);
 
 Route::post('/api/business-registration/store', [BusinessRegistrationController::class, 'businessStore'])->name('business-registration-store');
-Route::post('/api/get-queries/store', [GstQuerieController::class, 'gstQuerieStore'])->name('gst-querie-store');
+Route::post('/api/gst-queries/store', [GstQuerieController::class, 'gstQuerieStore'])->name('gst-querie-store');
 Route::post('/api/tds-queries/store', [TdsQuerieController::class, 'tdsQuerieStore'])->name('tds-querie-store');
 
 Route::post('/api/itr-queries/store', [ItrQueriesController::class, 'ItrQuerieStore'])->name('itr-querie-store');
