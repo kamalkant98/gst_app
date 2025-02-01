@@ -22,6 +22,9 @@ class TdsQuerie extends Model
         'coupon_id',
         'default_discount',
         'total_amount',
+        'call_when',
+        'call_datetime',
+        'language'
     ];
 }
 

@@ -126,7 +126,7 @@ class UserController extends Controller
         $otp = $this->generateOtp();
         $data = [
             'email' => $request['email'],
-            'name' =>$request['name'],
+            'name' => ucwords($request['name']),
             'mobile' =>$request['mobile'],
             'form_type' => $request['form_type'],
             'otp' => $otp
@@ -321,6 +321,16 @@ class UserController extends Controller
                 'message'=> $request['other_query_message'],
             ];
 
+
+            $formattedDate = $request['datetime'];
+            if($request['datetime']){
+                $formattedDate = date("Y-m-d H:i:s", strtotime($request['datetime']));
+            }else{
+                $formattedDate = null; //date("Y-m-d H:i:s", strtotime($request['datetime']));
+            }
+
+            $setData['call_datetime'] = $formattedDate;
+
             $getCall;
 
 
@@ -395,6 +405,16 @@ class UserController extends Controller
                 'call_when'=>$request['selectTime']
             ];
 
+
+            $formattedDate = $request['datetime'];
+            if($request['datetime']){
+                $formattedDate = date("Y-m-d H:i:s", strtotime($request['datetime']));
+            }else{
+                $formattedDate = null; //date("Y-m-d H:i:s", strtotime($request['datetime']));
+            }
+
+            $setData['call_datetime'] = $formattedDate;
+
             // dd($setData);
             $getCall = ScheduleCall::where('user_id', $data['id'])->first();
             if(isset($data['call_id']) && $data['call_id'] > 0 && $data['call_id'] != 'undefined'){
@@ -420,71 +440,6 @@ class UserController extends Controller
 
     }
 
-    public function commonSendMeassage($userId,$formType,$id){
-
-        $userData = UserInquiry::where('id',$userId)->first();
-
-        $template = EmailTemplate::whereIn('type',[1,2,3])->where('form_type',$formType)->get();
-        // $message = str_replace("{client_name}",$userData->name,$value->description);
-        // dd($template[0]['description']);
-
-        foreach ($template as $key => $value) {
-
-            $message = str_replace("{client_name}",$userData->name,$value->description);
-            $message = str_replace("{mobile_number}",$userData->mobile,$message);
-            if($formType == 'schedule_call'){
-                $getCall = ScheduleCall::where('id',$id)->first();
-                if($getCall && $getCall['call_when'] == 2){
-                    $message = str_replace("{date_time}",$getCall['call_datetime'],$message);
-                }else{
-                    $message = str_replace("{date_time}",'We will call you within the next hour.',$message);
-                }
-
-            }
-
-            if($formType == 'talk_to_tax_expert'){
-
-            }
-
-            // dd($message);
-            // if($value->type == 1){
-
-            // // Send OTP to the provided phone number
-
-            //     $phone = '+91'.$userData->mobile;
-            //     $this->otpService->sendOtp($phone, $message);
-
-            // }elseif($value->type == 2){
-
-            //     $to = '+91'.$userData->mobile; // Recipient's WhatsApp number
-            //     $message = $message; // The message content
-
-            //     try {
-            //         $this->whatsAppService->sendMessage($to, $message);
-            //         // return response()->json(['status' => 'Message sent successfully!'], 200);
-            //     } catch (\Exception $e) {
-            //         // return response()->json(['error' => $e->getMessage()], 500);
-            //     }
-
-            // }else
-
-            if($value->type == 3){
-
-                $data = [
-                    'email' => $userData->email,
-                    'title' => $value->subject,
-                    'message' => $message,
-                ];
-                  // Dispatch the job
-                SendEmailJob::dispatch($data);
-
-            }
-        }
-
-        // dd('done');
-        return 1;
-
-    }
 
 
     public function commonUploadFile(Request $request)

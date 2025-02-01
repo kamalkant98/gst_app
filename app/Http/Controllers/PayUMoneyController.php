@@ -246,13 +246,19 @@ class PayUMoneyController extends Controller
                 $pdfData['sgst'] =  $calculateTaxes['sgst'];
                 $pdfData['totalTax'] =  $calculateTaxes['totalTax'];
 
+
+                // $pdfData['date'] = '1222-20-20';
+                // $pdfData['buyer_name'] = 'kamla kaskh';
+                // return view('invoice_template',['data' => $pdfData]);
                 $pdf = $this->generatePdf($pdfData);
+                //dd('ss');
                 // $fileArr= [];
                 array_push($fileArr,$pdf);
                 $setData['other_details'] = [
                     'service_name' => $QueryTypeName,
                     'duration' => $duration,
                     'amount' => $calculateTaxes['totalAmount'],
+                    'description' => $getCall['message'],
                     'date' => $date,
                 ];
 
@@ -544,8 +550,11 @@ class PayUMoneyController extends Controller
 
             if($formType == 'talk_to_tax_expert'){
                 $message = str_replace("{mobile_number}",$userData['mobile'],$message);
-                $message = str_replace("{date_time}",$updateData['other_details']['date'],$message);
+                $formattedDate = date("Y-m-d h:i A", strtotime($updateData['other_details']['date']));
+                $message = str_replace("{date_time}",$formattedDate,$message);
                 $message = str_replace("{duration}",$updateData['other_details']['duration'],$message);
+                $message = str_replace("{description}",$updateData['other_details']['description'],$message);
+                // {description}
             }
 
 

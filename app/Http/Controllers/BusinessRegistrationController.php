@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use App\Models\Coupon;
 use App\Models\Documents;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Validator;
 
 class BusinessRegistrationController extends Controller
 {
@@ -18,6 +19,20 @@ class BusinessRegistrationController extends Controller
 
     public function businessStore(Request $request)
     {
+
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|string',
+             'form_type' => 'required|string',
+
+         ]);
+
+         // Check if validation fails
+         if($validator->fails()) {
+             return response()->json([
+                 'message' => 'Validation failed',
+                 'errors' => $validator->errors(), // Get the error messages
+             ], 422);
+         }
 
         $data = $request->all();
 

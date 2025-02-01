@@ -185,7 +185,8 @@ function commonSendMeassage($userId,$formType,$id, $filePaths = []){
         if($formType == 'schedule_call'){
             $getCall = ScheduleCall::where('id',$id)->first();
             if($getCall && $getCall['call_when'] == 2){
-                $message = str_replace("{date_time}",$getCall['call_datetime'],$message);
+                $formattedDate = date("Y-m-d h:i A", strtotime($getCall['call_datetime']));
+                $message = str_replace("{date_time}",$formattedDate,$message);
             }else{
                 $message = str_replace("{date_time}",'We will call you within the next hour.',$message);
             }
@@ -426,16 +427,16 @@ function getGstPlanAmount($value){
        $value = $taxpayer.'_'.$fillingFrequency.'_'.$serviceType;
 
         $callPlan =[
-            '1_1_1'  => ['value'=>'3499','label' => 'Regular Quarterly Prepare_only','url'=>'https://www.taxdunia.com/blogs/'],
-            '1_1_2'  => ['value'=>'900','label' => 'Regular Quarterly File only','url'=>'https://www.taxdunia.com/blogs/'],
-            '1_1_3'  => ['value'=>'1999','label' => 'Regular Quarterly Both Prepare and file','url'=>'https://www.taxdunia.com/blogs/'],
+            '1_1_1'  => ['value'=>'2499','label' => 'Regular Quarterly Prepare_only','url'=>'https://www.taxdunia.com/blogs/'],
+            '1_1_2'  => ['value'=>'3499','label' => 'Regular Quarterly File only','url'=>'https://www.taxdunia.com/blogs/'],
+            '1_1_3'  => ['value'=>'4999','label' => 'Regular Quarterly Both Prepare and file','url'=>'https://www.taxdunia.com/blogs/'],
 
-            '1_2_1'  => ['value'=>'1499','label' => 'Regular Monthly Prepare only','url'=>'https://www.taxdunia.com/blogs/'],
-            '1_2_2'  => ['value'=>'2499','label' => 'Regular Monthly File only','url'=>'https://www.taxdunia.com/blogs/'],
-            '1_2_3'  => ['value'=>'4999','label' => 'Regular Monthly Both Prepare and file','url'=>'https://www.taxdunia.com/blogs/'],
+            '1_2_1'  => ['value'=>'999','label' => 'Regular Monthly Prepare only','url'=>'https://www.taxdunia.com/blogs/'],
+            '1_2_2'  => ['value'=>'1499','label' => 'Regular Monthly File only','url'=>'https://www.taxdunia.com/blogs/'],
+            '1_2_3'  => ['value'=>'1999','label' => 'Regular Monthly Both Prepare and file','url'=>'https://www.taxdunia.com/blogs/'],
 
-            '1_3_1'  => ['value'=>'11999','label' => 'Regular Annually Prepare only','url'=>'https://www.taxdunia.com/blogs/'],
-            '1_3_2'  => ['value'=>'7999','label' => 'Regular Annually File only','url'=>'https://www.taxdunia.com/blogs/'],
+            '1_3_1'  => ['value'=>'7999','label' => 'Regular Annually Prepare only','url'=>'https://www.taxdunia.com/blogs/'],
+            '1_3_2'  => ['value'=>'11999','label' => 'Regular Annually File only','url'=>'https://www.taxdunia.com/blogs/'],
             '1_3_3'  => ['value'=>'14999','label' => 'Regular Annually Both Prepare and file','url'=>'https://www.taxdunia.com/blogs/'],
         ];
 
@@ -572,8 +573,8 @@ function getTSDPlanAmount($data){
 
         $callPlan =[
             '1'  => ['value'=>'4000','label' => '1 to 10'],
-            '2'  => ['value'=>'15000','label' => '10 to 50'],
-            '3'  => ['value'=>'25000','label' => '50 to 100'],
+            '2'  => ['value'=>'9999','label' => '10 to 50'],
+            '3'  => ['value'=>'16999','label' => '50 to 100'],
             '4'  => ['value'=>'0','label' => 'More than 100'],
         ];
         return $callPlan[$value];

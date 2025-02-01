@@ -92,6 +92,7 @@ class TdsQuerieController extends Controller
                 $returnType = $data['type_of_return'];
 
                 $QueryTypeName = $typeOfReturnArr[$returnType]['label'];
+                $returnTypeLabel = $typeOfReturnArr[$returnType]['label'];
                 $getPlan['url']= $typeOfReturnArr[$returnType]['url'];
 
                 $subtotal = $amount;
@@ -127,9 +128,17 @@ class TdsQuerieController extends Controller
             'default_discount'=>$defaultOffer_id,
         ];
 
-        if($request['no_of_employees'] ==  4){
+        if($request['no_of_employees'] ==  4 || $data['no_of_entries'] == 4){
+            $formattedDate = $request['datetime'];
+            if($request['datetime']){
+                $formattedDate = date("Y-m-d H:i:s", strtotime($request['datetime']));
+            }else{
+                $formattedDate = null; //date("Y-m-d H:i:s", strtotime($request['datetime']));
+            }
+
+
             $setData['call_when'] =  $request['selectTime'];
-            $setData['call_datetime'] =  $request['datetime'];
+            $setData['call_datetime'] = $formattedDate; // $request['datetime'];
             $setData['language'] =  $request['language'];
         }
 
@@ -167,15 +176,15 @@ class TdsQuerieController extends Controller
 
         $QueryTypeName =  ' Annually charge for '.$QueryTypeName.'- Number of employee '.$getPlan['label'];
 
-        if($request['no_of_employees'] ==  4){
+        if($request['no_of_employees'] ==  4 || $data['no_of_entries'] == 4){
             commonSendMeassage($create['user_id'],'tds_queries',$create['id']);
             // dd("ddd");
             // return redirect(env('CALL_BACK_URL'));
             $redirect_url = env('CALL_BACK_URL');
-            return response()->json(['redirect_url'=>$redirect_url], 200);
+           return response()->json(['redirect_url'=>$redirect_url], 200);
 
         }else{
-            return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount], 200);
+            return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount,'return_type'=>$returnTypeLabel], 200);
 
         }
 
