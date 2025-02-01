@@ -12,6 +12,9 @@
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/css/intlTelInput.css">
 
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-ui-timepicker-addon@1.6.3/dist/jquery-ui-timepicker-addon.min.css">
+
     <style>
         /* input,
         select {
@@ -123,6 +126,15 @@
         }
         .selectTime-group > .form-check {
             margin-right: 10px;
+        }
+        #terms{
+        /* Double-sized Checkboxes */
+        -ms-transform: scale(2); /* IE */
+        -moz-transform: scale(2); /* FF */
+        -webkit-transform: scale(2); /* Safari and Chrome */
+        -o-transform: scale(2); /* Opera */
+        padding: 10px;
+        margin:10px 10px 0px 10px;
         }
     </style>
 
@@ -247,7 +259,7 @@
                     <div class="mb-3 hidden-box-2">
                         <label for="multi-select" class="form-label">Choose Language</label>
                         <select id="language" class="form-control hide-input" requiredInput name="language">
-                        <option value="">select value</option>
+                        <option value="">Select your preference language </option>
                             <?php foreach ($language as $type): ?>
                                 
                                 <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
@@ -272,7 +284,7 @@
                 <form action="#" method="POST" name="payuForm">
                 </form>
                 <div class="text-center mt-4">
-                        <button class="btn btn-primary btn-lg w-100 mt-4"  id ='checkOutbtn' onclick="proceedToCheckout()">Pay Now</button>
+                        <button class="btn btn-primary btn-lg w-100 mt-4"  id ='checkOutbtn' disabled onclick="proceedToCheckout()">Pay Now</button>
                 </div>
             </div>
         </div>
@@ -295,6 +307,9 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/intlTelInput.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.0/js/utils.js"></script>
+
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-ui-timepicker-addon@1.6.3/dist/jquery-ui-timepicker-addon.min.js"></script>
 
     <script>
 
@@ -362,48 +377,48 @@
         } 
 
         // Disable weekends and public holidays
-        async function initDatePicker() {
-            const today = new Date();
-            const nextMonth = new Date();
-            nextMonth.setMonth(today.getMonth() + 1); // Get the date next month
+        // async function initDatePicker() {
+        //     const today = new Date();
+        //     const nextMonth = new Date();
+        //     nextMonth.setMonth(today.getMonth() + 1); // Get the date next month
 
-            // const publicHolidays = await getPublicHolidays(today.getFullYear());
-            const publicHolidays = await fetchPublicHolidays(today.getFullYear());
-            flatpickr("#datepicker", {
-                minDate: today, // Allow dates starting from today
-                maxDate: nextMonth, // Allow dates until the end of next month
-                enableTime: true, // Enable time selection
-                noCalendar: false, // Show calendar for date selection
-                dateFormat: "Y-m-d H:i", // Format the date and time (YYYY-MM-DD HH:mm)
-                time_24hr: true, // 24-hour time format
-                disable: [
-                    // Disable weekends (Saturday and Sunday)
-                    function (date) {
-                        return date.getDay() === 0 || date.getDay() === 6; // 0 is Sunday, 6 is Saturday
-                    },
-                    // Disable public holidays
-                    function (date) {
-                        const dateStr = date.toISOString().split('T')[0]; // Convert date to YYYY-MM-DD format
-                        return publicHolidays.includes(dateStr); // If the date is a holiday, disable it
-                    }
-                ],
-                minTime: "09:00", // Minimum time selectable
-                maxTime: "19:00", // Maximum time selectable
-                onReady: function (selectedDates, dateStr, instance) {
-                    instance.config.minTime = "09:00"; // Set the minimum time
-                    instance.config.maxTime = "19:00"; // Set the maximum time
-                },
-                onValueUpdate: function (selectedDates, dateStr, instance) {
-                    const time = instance.input.value.split(" ")[1]; // Get the selected time (HH:mm)
-                    const [hours, minutes] = time.split(":").map(Number); // Convert to numbers
-                    if (hours < 9 || (hours === 19 && minutes > 0) || hours > 19) {
-                        alert("Please select a time between 9:00 AM and 7:00 PM.");
-                        instance.clear(); // Clear the invalid selection
-                    }
-                }
-            });
-        }
-        initDatePicker();
+        //     // const publicHolidays = await getPublicHolidays(today.getFullYear());
+        //     const publicHolidays = await fetchPublicHolidays(today.getFullYear());
+        //     flatpickr("#datepicker", {
+        //         minDate: today, // Allow dates starting from today
+        //         maxDate: nextMonth, // Allow dates until the end of next month
+        //         enableTime: true, // Enable time selection
+        //         noCalendar: false, // Show calendar for date selection
+        //         dateFormat: "Y-m-d H:i", // Format the date and time (YYYY-MM-DD HH:mm)
+        //         time_24hr: true, // 24-hour time format
+        //         disable: [
+        //             // Disable weekends (Saturday and Sunday)
+        //             function (date) {
+        //                 return date.getDay() === 0 || date.getDay() === 6; // 0 is Sunday, 6 is Saturday
+        //             },
+        //             // Disable public holidays
+        //             function (date) {
+        //                 const dateStr = date.toISOString().split('T')[0]; // Convert date to YYYY-MM-DD format
+        //                 return publicHolidays.includes(dateStr); // If the date is a holiday, disable it
+        //             }
+        //         ],
+        //         minTime: "09:00", // Minimum time selectable
+        //         maxTime: "19:00", // Maximum time selectable
+        //         onReady: function (selectedDates, dateStr, instance) {
+        //             instance.config.minTime = "09:00"; // Set the minimum time
+        //             instance.config.maxTime = "19:00"; // Set the maximum time
+        //         },
+        //         onValueUpdate: function (selectedDates, dateStr, instance) {
+        //             const time = instance.input.value.split(" ")[1]; // Get the selected time (HH:mm)
+        //             const [hours, minutes] = time.split(":").map(Number); // Convert to numbers
+        //             if (hours < 9 || (hours === 19 && minutes > 0) || hours > 19) {
+        //                 alert("Please select a time between 9:00 AM and 7:00 PM.");
+        //                 instance.clear(); // Clear the invalid selection
+        //             }
+        //         }
+        //     });
+        // }
+        // initDatePicker();
         // fetchPublicHolidays();
 
 
@@ -421,8 +436,51 @@
 
 
         
-        $(document).ready(() => {
+        $(document).ready(async () => {
 
+            const today = new Date();
+            var disabledDates = await  fetchPublicHolidays(today.getFullYear());
+            // var disabledDates = ["2025-02-14", "2025-02-20", "2025-03-05"]; // Example disabled dates
+            function disableDates(date) {
+                var maxDate = new Date();
+                var day = date.getDay();
+                maxDate.setMonth(maxDate.getMonth() + 2); // Enable selection up to 2 months
+
+                var formattedDate = $.datepicker.formatDate("yy-mm-dd", date);
+
+                if (day === 0 || day === 6 || disabledDates.includes(formattedDate)) {
+                    return [false, "", "Unavailable"];
+                }
+
+                if (date > maxDate) {
+                    return [false, "", "Future date disabled"];
+                }
+
+                return [true, ""];
+            }
+
+            $("#datepicker").datetimepicker({
+                dateFormat: "yy-mm-dd",
+                timeFormat: "hh:mm TT",
+                minDate: 0, // Allow from today
+                maxDate: "+2M", // Allow up to 2 months ahead
+                beforeShowDay: disableDates, // Disable specific dates
+                minTime: "9:00 AM",
+                maxTime: "7:00 PM",
+                stepMinute: 5, // Minute steps of 5
+                controlType: "select", // Dropdown for hour, minute, AM/PM
+                oneLine: true, // Display time in a single row
+                showButtonPanel: false,
+            });
+
+            const checkbox = document.getElementById('terms');
+            const button = document.getElementById('checkOutbtn');
+
+            // Add an event listener to the checkbox
+            checkbox.addEventListener('change', function() {
+                // Enable or disable the button based on the checkbox state
+                button.disabled = !this.checked; // Disable button if checkbox is not checked
+            });
 
 
             let validMobileNumber = true;
@@ -906,7 +964,7 @@
                     console.log(response.status,'response.status');
                     if(response.status == 200){
                         // Render the response for debugging
-                        document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
+                        // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
 
                         // Select the form and set the action
                         const payuForm = document.forms['payuForm'];

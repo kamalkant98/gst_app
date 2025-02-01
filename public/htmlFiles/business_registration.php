@@ -94,6 +94,17 @@
         .filepond--credits {
             display: none !important;
         }
+        #terms{
+        /* Double-sized Checkboxes */
+        -ms-transform: scale(2); /* IE */
+        -moz-transform: scale(2); /* FF */
+        -webkit-transform: scale(2); /* Safari and Chrome */
+        -o-transform: scale(2); /* Opera */
+        padding: 10px;
+        margin:10px 10px 0px 10px;
+        }
+        
+
     </style>
 
 <body>
@@ -146,7 +157,7 @@
 
 
                     <div class="mb-3">
-                        <label for="document" class="form-label">Document requirements for business registration</label>
+                        <label for="document" class="form-label">Select Document</label>
                         <input type="file" class="form-control " id="document" name="files[]" multiple="multiple"  requiredInput > 
                         <!-- accept=".jpg,.jpeg,.png,.xls,.doc,.pdf" -->
                                 
@@ -170,7 +181,7 @@
                 </form>
                 
                 <div class="text-center mt-4">
-                        <button class="btn btn-primary btn-lg w-100 mt-4"  id ='checkOutbtn' onclick="proceedToCheckout()">Pay Now</button>
+                        <button class="btn btn-primary btn-lg w-100 mt-4"  id ='checkOutbtn' disabled onclick="proceedToCheckout()">Pay Now</button>
                 </div>
             </div>
         </div>
@@ -274,6 +285,16 @@
                 let call_id=0;
                 form_type =''
                 user_id = 0
+
+                const checkbox = document.getElementById('terms');
+                const button = document.getElementById('checkOutbtn');
+
+                // Add an event listener to the checkbox
+                checkbox.addEventListener('change', function() {
+                    // Enable or disable the button based on the checkbox state
+                    button.disabled = !this.checked; // Disable button if checkbox is not checked
+                });
+
                 const fetchButton = document.getElementById('submit_button');
 
                 
@@ -308,168 +329,171 @@
                     }
                 });
 
-                let formElement = document.querySelector('#business_registration'); 
+                if(isValid){
+                    let formElement = document.querySelector('#business_registration'); 
 
-                const fileInput = document.getElementById("document");
-                const files = fileInput.files;
+                    const fileInput = document.getElementById("document");
+                    const files = fileInput.files;
 
-                if (uploadedFiles?.length === 0) {
-                    alert("Please select files to upload.");
-                    return;
-                }
+                    // if (uploadedFiles?.length === 0) {
+                    //     alert("Please select files to upload.");
+                    //     return;
+                    // }
 
-                const formData = new FormData(formElement);
-                for (let i = 0; i < files?.length; i++) {
-                    formData.append("files[]", files[i]); // Append each file to FormData
-                }
+                    const formData = new FormData(formElement);
+                    for (let i = 0; i < files?.length; i++) {
+                        formData.append("files[]", files[i]); // Append each file to FormData
+                    }
 
-                // Handle multi-select values
-                const selectedValues = $('#multi-select').val() || [];
-                formData.append("plan", selectedValues);
-                console.log(uploadedFiles);
-                
-                // let uploadedFiles2 = JSON.stringify(uploadedFiles);
-                // formData.append("uploadedFile", uploadedFiles);
-                uploadedFiles.forEach((file, index) => {
-                    // Append both originalName and uploadedFile to the FormData
-                    formData.append('uploadedFile[' + index + ']', file.uploadedFile);
-                    // formData.append('files[' + index + '][uploadedFile]', file.uploadedFile);
-                });
-                fetchButton.disabled = true;
-                fetchButton.innerHTML = 'Loading <span class="loader"></span>';
-           
-                try {
-                    // Send the POST request
-                    const response = await fetch('http://127.0.0.1:8000/api/business-registration/store', {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // CSRF token
-                        },
-                        body: formData, // Pass the FormData object directly
+                    // Handle multi-select values
+                    const selectedValues = $('#multi-select').val() || [];
+                    formData.append("plan", selectedValues);
+                    console.log(uploadedFiles);
+                    
+                    // let uploadedFiles2 = JSON.stringify(uploadedFiles);
+                    // formData.append("uploadedFile", uploadedFiles);
+                    uploadedFiles.forEach((file, index) => {
+                        // Append both originalName and uploadedFile to the FormData
+                        formData.append('uploadedFile[' + index + ']', file.uploadedFile);
+                        // formData.append('files[' + index + '][uploadedFile]', file.uploadedFile);
                     });
+                    fetchButton.disabled = true;
+                    fetchButton.innerHTML = 'Loading <span class="loader"></span>';
+            
+                    try {
+                        // Send the POST request
+                        const response = await fetch('http://127.0.0.1:8000/api/business-registration/store', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // CSRF token
+                            },
+                            body: formData, // Pass the FormData object directly
+                        });
 
-                    // Parse the JSON response
-                    const data = await response.json();
-                    if(response.status == 200){
-                        // Render the response for debugging
-                        // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
-                        //$('#submit_button').hide();
-                        let checkIdinput =  document.querySelector('#call_id');
-                        
-                        
-                        if(!checkIdinput){
-                            let hiddenInput = document.createElement('input');
-                            hiddenInput.type = 'hidden';
-                            hiddenInput.name = 'call_id';
-                            hiddenInput.id = 'call_id';
-                            hiddenInput.value = data.call_id;
-                            formElement.appendChild(hiddenInput);
-                        }
-
+                        // Parse the JSON response
+                        const data = await response.json();
+                        if(response.status == 200){
+                            // Render the response for debugging
+                            // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
+                            //$('#submit_button').hide();
+                            let checkIdinput =  document.querySelector('#call_id');
                             
-                        call_id =  data.call_id;
-                        form_type = formData?.form_type;
-                        user_id = formData?.id;
+                            
+                            if(!checkIdinput){
+                                let hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name = 'call_id';
+                                hiddenInput.id = 'call_id';
+                                hiddenInput.value = data.call_id;
+                                formElement.appendChild(hiddenInput);
+                            }
 
                                 
+                            call_id =  data.call_id;
+                            form_type = formData?.form_type;
+                            user_id = formData?.id;
 
-                            let html=`<div>
-                                <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
-                                <div class="row justify-content-center">
-                                <div class="col-md-12">
-                                    <!-- Subscription Items -->
-                                    <div class="card shadow-sm">
-                                        <div class="card-body">
-                                            <!-- Item 1 -->
-                                            <div id='cart-details'>
-            
-                                            <h6>Plan List</h6>
-                                                <div class=" justify-content-between align-items-center border-top">
-    
-                                                ${data?.getPlan.map(plan => `
-                                                <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                                    
+
+                                let html=`<div>
+                                    <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
+                                    <div class="row justify-content-center">
+                                    <div class="col-md-12">
+                                        <!-- Subscription Items -->
+                                        <div class="card shadow-sm">
+                                            <div class="card-body">
+                                                <!-- Item 1 -->
+                                                <div id='cart-details'>
+                
+                                                <h6>Plan List</h6>
+                                                    <div class=" justify-content-between align-items-center border-top">
+        
+                                                    ${data?.getPlan.map(plan => `
+                                                    <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                                                        <div>
+                                                            <h6>${plan.label}</h6>
+                                                            ${plan.url && plan.url !='' ? `<a href="${plan.url}" target="_blank">Read more</a>` : ''}
+                                                        </div>
+                                                        <div class="fw-bold">₹${plan.value}</div>
+                                                    
+                                                    </div>
+                                                    `).join('')}
+                                                        </div>
+                                                    </div>
+
+                                                <!-- Coupon Code -->
+                                                <div class="mt-4 border-bottom pb-3">
+                                                    <h6>Have a Coupon Code?</h6>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control" id="coupon-code" name='coupon' placeholder="Enter coupon code" value='${data?.inputCoupon}'>
+                                                        <button class="btn btn-primary" id="apply-coupon">Apply</button>
+                                                        <button class="btn btn-danger" id="remove-coupon">Remove Coupon</button>
+                                                    </div>
+                                                        <p id="coupon-message" class="text-success mt-2 d-none">Coupon applied successfully!</p>
+                                                </div>
+                                            ${data?.coupon && data?.coupon?.id > 0 ? `
+                                                    <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
+                                                        <h6>Coupon Code :: <strong>${data.coupon.code}</strong></h6>
+                                                        <span class="fw-bold">₹${data.lessAmount}</span>
+                                                    </div>
+                                                ` : `${data?.coupon != null ?`
+                                                    <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
+                                                        <h6>Coupon Code :: <strong style="color">${data.coupon}</strong></h6>
+                                                    </div>`:''}
+                                                `}
+
+                                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                                    <h6>Sub Total:</h6>
                                                     <div>
-                                                        <h6>${plan.label}</h6>
-                                                        ${plan.url && plan.url !='' ? `<a href="${plan.url}" target="_blank">Read more</a>` : ''}
-                                                    </div>
-                                                    <div class="fw-bold">₹${plan.value}</div>
-                                                
-                                                </div>
-                                                `).join('')}
+                                                        ${data?.defaultOfferAmount && data?.defaultOfferAmount > 0 ? `<span class="strike">₹${data?.defaultOfferAmount}</span>` :''}
+                                                        <span class="fw-bold">₹${data?.subtotal}</span>
                                                     </div>
                                                 </div>
-
-                                            <!-- Coupon Code -->
-                                            <div class="mt-4 border-bottom pb-3">
-                                                <h6>Have a Coupon Code?</h6>
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control" id="coupon-code" name='coupon' placeholder="Enter coupon code" value='${data?.inputCoupon}'>
-                                                    <button class="btn btn-primary" id="apply-coupon">Apply</button>
-                                                    <button class="btn btn-danger" id="remove-coupon">Remove Coupon</button>
+                                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                                    <h6>GST 18%:</h6>
+                                                    <span class="fw-bold">₹${data?.gstCharge}</span>
                                                 </div>
-                                                    <p id="coupon-message" class="text-success mt-2 d-none">Coupon applied successfully!</p>
-                                            </div>
-                                        ${data?.coupon && data?.coupon?.id > 0 ? `
-                                                <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
-                                                    <h6>Coupon Code :: <strong>${data.coupon.code}</strong></h6>
-                                                    <span class="fw-bold">₹${data.lessAmount}</span>
-                                                </div>
-                                            ` : `${data?.coupon != null ?`
-                                                <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
-                                                    <h6>Coupon Code :: <strong style="color">${data.coupon}</strong></h6>
-                                                </div>`:''}
-                                            `}
-
-                                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                                <h6>Sub Total:</h6>
-                                                <div>
-                                                    ${data?.defaultOfferAmount && data?.defaultOfferAmount > 0 ? `<span class="strike">₹${data?.defaultOfferAmount}</span>` :''}
-                                                    <span class="fw-bold">₹${data?.subtotal}</span>
-                                                </div>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                                <h6>GST 18%:</h6>
-                                                <span class="fw-bold">₹${data?.gstCharge}</span>
-                                            </div>
-                                            <!-- Total -->
-                                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                                <h6>Total:</h6>
-                                                <div>
-                                                
-                                                    <span class="fw-bold" style="font-size:20px;">₹${data?.amount}</span>
+                                                <!-- Total -->
+                                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                                    <h6>Total:</h6>
+                                                    <div>
+                                                    
+                                                        <span class="fw-bold" style="font-size:20px;">₹${data?.amount}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
+
+
+
+                                        <!-- Checkout Button -->
+
                                     </div>
+                                    </div>
+                                </div>`;
 
 
 
-                                    <!-- Checkout Button -->
+                                document.getElementById("checkOutbtn").style.display = 'block'
+                                document.getElementById("payment-summary").innerHTML = html;
+                                document.getElementById("payment-summary").style.display = 'block'
+                                document.getElementById("terms-box").style.display = 'block'
+                                document.querySelector('#terms').classList.remove('hide-input');
 
-                                </div>
-                                </div>
-                            </div>`;
-
-
-
-                            document.getElementById("checkOutbtn").style.display = 'block'
-                            document.getElementById("payment-summary").innerHTML = html;
-                            document.getElementById("payment-summary").style.display = 'block'
-                            document.getElementById("terms-box").style.display = 'block'
-                            document.querySelector('#terms').classList.remove('hide-input');
-
-                    }else{
-                        alert(data)
+                        }else{
+                            alert(data)
+                        }
+                    
+                    } catch (error) {
+                        console.error('Error fetching data:', error);
+                        fetchButton.innerHTML = 'Retry';
+                    } finally {
+                        fetchButton.innerHTML = 'Submit';
+                        fetchButton.disabled = false;
                     }
-                
-                } catch (error) {
-                    console.error('Error fetching data:', error);
-                    fetchButton.innerHTML = 'Retry';
-                } finally {
-                    fetchButton.innerHTML = 'Submit';
-                    fetchButton.disabled = false;
                 }
+                
                 let checkOutbtn = document.getElementById('checkOutbtn');
 
                 checkOutbtn.onclick = async function(){

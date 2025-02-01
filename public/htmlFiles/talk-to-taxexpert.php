@@ -14,8 +14,11 @@
         <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
         <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
 
-    <style>
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-ui-timepicker-addon@1.6.3/dist/jquery-ui-timepicker-addon.min.css">
 
+    <style>
+       
         .pad-bg {
             background: #f8f8f8;
             padding: 40px 20px;
@@ -97,16 +100,26 @@
             color: #999;
             text-decoration: line-through;
         }
-
+        
         .filepond--credits {
             display: none !important;
         }
+
+        #terms{
+        /* Double-sized Checkboxes */
+        -ms-transform: scale(2); /* IE */
+        -moz-transform: scale(2); /* FF */
+        -webkit-transform: scale(2); /* Safari and Chrome */
+        -o-transform: scale(2); /* Opera */
+        padding: 10px;
+        margin:10px 10px 0px 10px;
+        }
     </style>
 
-
+    
 </head>
-<?php
-
+<?php 
+    
     $query_types = [
         ['value'=>'','label' => 'Select Your Query'],
         ['value'=>'1','label' => 'Income Tax Returns'],
@@ -122,12 +135,12 @@
         ['value'=>'1','label' => '10 minutes plan'],
         ['value'=>'2','label' => '20 minutes plan'],
         ['value'=>'3','label' => '30 minutes plan'],
-
+        
     ];
     $language = [
         ['value'=>'Hindi','label' => 'Hindi'],
         ['value'=>'English','label' => 'English'],
-
+        
     ];
 ?>
 
@@ -155,7 +168,7 @@
                         <label for="exampleInputEmail1" class="form-label">Email</label>
                         <input type="text" class="form-control " id="exampleInputEmail1" name="email" requiredInput placeholder="Email">
                     </div>
-
+                   
                     <!-- <div class="mb-3">
                         <label for="mobile" class="form-label">Mobile</label>
                         <input type="mobile" class="form-control" id="mobile" name="mobile" requiredInput placeholder="Mobile">
@@ -192,16 +205,15 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-
+                    
                     <div class="mb-3 other_query_message_box hidden-box-2">
                         <label for="other_query_message" class="form-label">Description</label>
-                        <textarea class="form-control hide-input" id="other_query_message" name="other_query_message" rows="4" placeholder="Enter your message here" requiredInput maxlength="500" title="Message should not exceed 500 characters.">
-                        </textarea>
+                        <textarea class="form-control hide-input" id="other_query_message" name="other_query_message" rows="4" placeholder="Enter your message here" requiredInput maxlength="500" title="Message should not exceed 500 characters."></textarea>
                     </div>
 
                     <div class="mb-3 hidden-box-2">
                     <label for="datepicker" class="form-label">Select Date & Time</label>
-                    <input type="text" id="datepicker" name="datetime" class="form-control hide-input" requiredInput placeholder="Y-m-d H:i">
+                    <input type="text" id="datepicker" name="datetime" class="form-control hide-input" requiredInput placeholder="Y-m-d H:i"> 
                     </div>
 
                     <div class="mb-3 hidden-box-2 ">
@@ -209,7 +221,7 @@
                         <select id="plan" class="form-control hide-input" requiredInput name="plan">
                         <option  value="">select value</option>
                             <?php foreach ($plan_types as $type): ?>
-
+                                
                                 <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -217,9 +229,9 @@
                     <div class="mb-3 hidden-box-2">
                         <label for="multi-select" class="form-label">Choose Language</label>
                         <select id="language" class="form-control hide-input" requiredInput name="language">
-                        <option value="">select value</option>
+                        <option value="">Select your preference language</option>
                             <?php foreach ($language as $type): ?>
-
+                                
                                 <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -227,28 +239,28 @@
                     <div class="mb-3 hidden-box-2">
                         <label for="document" class="form-label">Select Document</label>
                         <!-- <input type="file" class="form-control hide-input" id="document" name="document[]" multiple="multiple"  accept=".jpeg,.jpg,.png,.doc,.docx,.xls,.xlsx,.pdf" title="select jpeg,jpg,png,doc,docx,xls,xlsx,pdf"> -->
-                        <input type="file" class="form-control hide-input" id="document" name="document[]" multiple="multiple"  requiredInput >
+                        <input type="file" class="form-control hide-input" id="document" name="document[]" multiple="multiple"  requiredInput > 
 
                     </div>
-
+                    
                     <div>
                         <button type="submit" id="submit_button" class="btn btn-primary">Sign Up</button>
                     </div>
-
+                    
                     <div class="payment-summary" id ="payment-summary">
-
-                    </div>
+                        
+                    </div>  
                     <div class="mt-4" id ="terms-box">
                         <input type="checkbox" name="terms" class='hide-input' id="terms" value='1'>
                         <a href="http://" target="_blank">T&C apply</a>
                     </div>
 
                 </form>
-
+                              
                 <form action="#" method="POST" name="payuForm">
                 </form>
                 <div class="text-center mt-4">
-                        <button class="btn btn-primary btn-lg w-100 mt-4"  id ='checkOutbtn' onclick="proceedToCheckout()">Pay Now</button>
+                        <button class="btn btn-primary btn-lg w-100 mt-4"  id ='checkOutbtn' disabled onclick="proceedToCheckout()">Pay Now</button>
                 </div>
             </div>
         </div>
@@ -260,25 +272,29 @@
 
     <div id="response"></div>
 
-
+  
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-
+        
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/intlTelInput.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.0/js/utils.js"></script>
-
+    
     <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
     <script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
     <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
 
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-ui-timepicker-addon@1.6.3/dist/jquery-ui-timepicker-addon.min.js"></script>
+    
+
 <script>
 
-
+            
         FilePond.registerPlugin(
             FilePondPluginFileValidateType,
             FilePondPluginImagePreview
@@ -302,7 +318,7 @@
                         .then(data => {
                             if (data.status === 'success') {
                                 console.log("asdasd");
-
+                                
                                 data.files.forEach(fileInfo => {
                                     uploadedFiles.push(fileInfo); // Store uploaded file name
                                 });
@@ -318,7 +334,7 @@
                 }
             }
         });
-
+        
         pond.on('removefile', (error, file) => {
             if (error) {
                 console.error('Error removing file:', error);
@@ -365,11 +381,11 @@
         //     const data = await response.json();
         //     let holidays = data?.response?.holidays;
         //     // console.log(holidays);
-
+            
         //     return holidays.map(holiday => holiday.date.iso); // Return array of holiday dates (YYYY-MM-DD)
         // }
 
-
+        
         async function fetchPublicHolidays(year) {
             try {
 
@@ -391,7 +407,7 @@
                 }
 
                 const data = await response.json();
-                console.log(`Public Holidays for ${year}:`, data);
+                // console.log(`Public Holidays for ${year}:`, data);
 
                 // Display the events in the console
                 if (data.items && data.items.length > 0) {
@@ -401,66 +417,66 @@
                         if (/Public holiday/.test(event.description)) {
                             const start = event.start.date || event.start.dateTime;
                             dates.push(start);
-                            console.log(`${start} - ${event.summary}`);
+                            // console.log(`${start} - ${event.summary}`);
                         }
-
+                        
                     });
                     return dates
                     // console.log(dates,"datesdatesdates");
-
+                    
                 } else {
                     console.log(`No public holidays found for ${year}.`);
                 }
             } catch (error) {
                 console.error('Error fetching public holidays:', error.message);
             }
-        }
+        }  
 
         // Disable weekends and public holidays
-        async function initDatePicker() {
-            const today = new Date();
-            const nextMonth = new Date();
-            nextMonth.setMonth(today.getMonth() + 1); // Get the date next month
+        // async function initDatePicker() {
+        //     const today = new Date();
+        //     const nextMonth = new Date();
+        //     nextMonth.setMonth(today.getMonth() + 1); // Get the date next month
 
-            const publicHolidays = await fetchPublicHolidays(today.getFullYear());
-            // console.log(publicHolidays,'publicHolidays');
-            flatpickr("#datepicker", {
-                minDate: today, // Allow dates starting from today
-                maxDate: nextMonth, // Allow dates until the end of next month
-                enableTime: true, // Enable time selection
-                noCalendar: false, // Show calendar for date selection
-                dateFormat: "Y-m-d H:i", // Format the date and time (YYYY-MM-DD HH:mm)
-                time_24hr: true, // 24-hour time format
-                disable: [
-                    // Disable weekends (Saturday and Sunday)
-                    function (date) {
-                        return date.getDay() === 0 || date.getDay() === 6; // 0 is Sunday, 6 is Saturday
-                    },
-                    // Disable public holidays
-                    function (date) {
-                        const dateStr = date.toISOString().split('T')[0]; // Convert date to YYYY-MM-DD format
-                        return publicHolidays.includes(dateStr); // If the date is a holiday, disable it
-                    }
-                ],
-                minTime: "09:00", // Minimum time selectable
-                maxTime: "19:00", // Maximum time selectable
-                onReady: function (selectedDates, dateStr, instance) {
-                    instance.config.minTime = "09:00"; // Set the minimum time
-                    instance.config.maxTime = "19:00"; // Set the maximum time
-                },
-                onValueUpdate: function (selectedDates, dateStr, instance) {
-                    const time = instance.input.value.split(" ")[1]; // Get the selected time (HH:mm)
-                    const [hours, minutes] = time.split(":").map(Number); // Convert to numbers
-                    if (hours < 9 || (hours === 19 && minutes > 0) || hours > 19) {
-                        alert("Please select a time between 9:00 AM and 7:00 PM.");
-                        instance.clear(); // Clear the invalid selection
-                    }
-                }
-            });
-        }
+        //     const publicHolidays = await fetchPublicHolidays(today.getFullYear());
+        //     // console.log(publicHolidays,'publicHolidays');
+        //     flatpickr("#datepicker", {
+        //         minDate: today, // Allow dates starting from today
+        //         maxDate: nextMonth, // Allow dates until the end of next month
+        //         enableTime: true, // Enable time selection
+        //         noCalendar: false, // Show calendar for date selection
+        //         dateFormat: "Y-m-d H:i", // Format the date and time (YYYY-MM-DD HH:mm)
+        //         time_24hr: true, // 24-hour time format
+        //         disable: [
+        //             // Disable weekends (Saturday and Sunday)
+        //             function (date) {
+        //                 return date.getDay() === 0 || date.getDay() === 6; // 0 is Sunday, 6 is Saturday
+        //             },
+        //             // Disable public holidays
+        //             function (date) {
+        //                 const dateStr = date.toISOString().split('T')[0]; // Convert date to YYYY-MM-DD format
+        //                 return publicHolidays.includes(dateStr); // If the date is a holiday, disable it
+        //             }
+        //         ],
+        //         minTime: "09:00", // Minimum time selectable
+        //         maxTime: "19:00", // Maximum time selectable
+        //         onReady: function (selectedDates, dateStr, instance) {
+        //             instance.config.minTime = "09:00"; // Set the minimum time
+        //             instance.config.maxTime = "19:00"; // Set the maximum time
+        //         },
+        //         onValueUpdate: function (selectedDates, dateStr, instance) {
+        //             const time = instance.input.value.split(" ")[1]; // Get the selected time (HH:mm)
+        //             const [hours, minutes] = time.split(":").map(Number); // Convert to numbers
+        //             if (hours < 9 || (hours === 19 && minutes > 0) || hours > 19) {
+        //                 alert("Please select a time between 9:00 AM and 7:00 PM.");
+        //                 instance.clear(); // Clear the invalid selection
+        //             }
+        //         }
+        //     });
+        // }
 
-        // Initialize the date picker
-        initDatePicker();
+        // // Initialize the date picker
+        // initDatePicker();
         // fetchPublicHolidays();
 
 
@@ -478,8 +494,53 @@
         }
 
 
+        
+        $(document).ready( async () => {
 
-        $(document).ready(() => {
+            const today = new Date();
+            var disabledDates = await  fetchPublicHolidays(today.getFullYear());
+            // var disabledDates = ["2025-02-14", "2025-02-20", "2025-03-05"]; // Example disabled dates
+            function disableDates(date) {
+                var maxDate = new Date();
+                var day = date.getDay();
+                maxDate.setMonth(maxDate.getMonth() + 2); // Enable selection up to 2 months
+
+                var formattedDate = $.datepicker.formatDate("yy-mm-dd", date);
+
+                if (day === 0 || day === 6 || disabledDates.includes(formattedDate)) {
+                    return [false, "", "Unavailable"];
+                }
+
+                if (date > maxDate) {
+                    return [false, "", "Future date disabled"];
+                }
+
+                return [true, ""];
+            }
+
+            $("#datepicker").datetimepicker({
+                dateFormat: "yy-mm-dd",
+                timeFormat: "hh:mm TT",
+                minDate: 0, // Allow from today
+                maxDate: "+2M", // Allow up to 2 months ahead
+                beforeShowDay: disableDates, // Disable specific dates
+                minTime: "9:00 AM",
+                maxTime: "7:00 PM",
+                stepMinute: 5, // Minute steps of 5
+                controlType: "select", // Dropdown for hour, minute, AM/PM
+                oneLine: true, // Display time in a single row
+                showButtonPanel: false,
+            });
+
+
+            const checkbox = document.getElementById('terms');
+            const button = document.getElementById('checkOutbtn');
+
+            // Add an event listener to the checkbox
+            checkbox.addEventListener('change', function() {
+                // Enable or disable the button based on the checkbox state
+                button.disabled = !this.checked; // Disable button if checkbox is not checked
+            });
 
 
             let validMobileNumber = true;
@@ -488,7 +549,7 @@
             let iti;
 
             $(function () {
-
+              
                 if (iti_el.length) {
                     iti.destroy();
                 }
@@ -522,18 +583,18 @@
                     $('#mobile').on("focusout", function (e) {
                         const currentInput = e.target; // Get the current input element
                         const inputNumber = currentInput.value; // Get the input value
-
+                        
                         // Check if the number is valid
                         console.log(iti.isValidNumber());
-
+                        
                         if (iti.isValidNumber()) {
                             const intlNumber = iti.getNumber(); // Get full international number
                             console.log("Valid Number:", intlNumber);
                             validMobileNumber = true;
-
+                            
                         } else {
                             validMobileNumber = false;
-
+                            
                         }
                     });
                 }
@@ -557,17 +618,17 @@
             let call_id=0;
             form_type ='talk_to_tax_expert'
             user_id = 0;
-
+            
             const fetchButton = document.getElementById('submit_button');
             $('#scheduleform').on('submit', async (e) => {
                 e.preventDefault(); // Prevent default form submission
 
                 try {
-
+                    
                     let steps =  document.getElementById('steps');
                     const inputsww = document.getElementById('submit_button');
                     console.log("steps",steps.value);
-
+                    
                     const errorElements = document.querySelectorAll('.error');
                     // Loop through and remove each element
                     errorElements.forEach(element => {
@@ -584,7 +645,7 @@
                             let errorElement = document.createElement('span');
                             errorElement.className = 'error'; // Add error class for styling
                             errorElement.textContent = `${input.name.charAt(0).toUpperCase() + input.name.slice(1)} is required.`;
-
+                            
                             if(input.name == 'mobile'){
                                 let mobilebox = document.getElementById('mobile-box');
                                 mobilebox.after(errorElement);
@@ -593,13 +654,13 @@
                             }
                             input.classList.add('is-invalid');
                             isValid = false;
-
-                        }
-
+                            
+                        } 
+                        
                         if(input.name == 'email' && input.value != '' ){
                             let checkEmail = isValidEmail(input.value)
                                 if(isValidEmail(input.value) == false ){
-
+                                    
                                     let errorElement = document.createElement('span');
                                     errorElement.className = 'error'; // Add error class for styling
                                     errorElement.textContent = `Please enter a valid email address.`;
@@ -608,7 +669,7 @@
                                     isValid = false;
                                 }
                         }
-
+                        
                         if(input.name == 'mobile' && input.value != '' ){
                             // let checkMobile = isValidIndianMobileNumber(input.value)
                                 if(validMobileNumber == false ){
@@ -636,7 +697,7 @@
                         fetchButton.disabled = true;
                         fetchButton.innerHTML = 'Loading <span class="loader"></span>';
                         try {
-
+                            
                             // Send the POST request
                             const response = await fetch('http://127.0.0.1:8000/api/generate_otp', {
                                 method: 'POST',
@@ -650,7 +711,7 @@
 
                             // Parse the JSON response
                             const data = await response.json();
-
+                            
                             if(response.status == 200 && data && data.data > 0){
                                 let checkIdinput =  document.querySelector('#id');
                                 if(!checkIdinput){
@@ -665,7 +726,7 @@
                                 document.querySelector('.hidden-box-1').style.display = 'block';
                                 document.querySelector('#otp').classList.remove('hide-input');
                                 document.querySelector('#otp').classList.add('show-input');
-
+                                
                                 steps.value = '2'
                                 inputsww.textContent = 'Verify OTP'
                             }
@@ -705,7 +766,7 @@
                                 errorElement.textContent = `${data.error}`;
 
                                 // Insert the error message after the input field
-                                otp.after(errorElement);
+                                otp.after(errorElement);  
                                 otp.classList.add('is-invalid');
                                 isValid = false;
                             }else if (response.status == 200){
@@ -716,23 +777,23 @@
                                 let allbox  = document.querySelectorAll('.hidden-box-2');
                                 allbox.forEach(box => {
                                     if(box.classList.contains('m-select-check')){
-
+                                        
                                         box.classList.add('m-select');
                                     }else{
                                         box.style.display = 'block';
                                     }
-
+                                    
                                 })
-
+                                
                                 let inputs  = document.querySelectorAll('.hide-input');
                                 inputs.forEach(input => {
                                     input.classList.remove('hide-input');
                                     input.classList.add('show-input');
-
+                                    
                                 })
-
+                                
                                 steps.value = '3'
-                                inputsww.textContent = 'Schedule Your Call'
+                                inputsww.textContent = 'Book a call with expert'
                                 isValid = false
 
                             }else{
@@ -742,7 +803,7 @@
                             console.error('Error fetching data:', error);
                             fetchButton.innerHTML = 'Retry';
                         }finally {
-                            fetchButton.innerHTML = 'Schedule Your Call';
+                            fetchButton.innerHTML = 'Book a call with expert';
                             fetchButton.disabled = false;
                         }
                         // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
@@ -750,10 +811,10 @@
                     }
 
                     if(isValid && steps.value == 3){
-
+                       
                         const formElement = document.querySelector('#scheduleform');
                         const formData = new FormData(formElement);
-
+                        
                         uploadedFiles.forEach((file, index) => {
                            formData.append('uploadedFile[' + index + ']', file.uploadedFile);
                         });
@@ -799,9 +860,9 @@
                                 }
 
                                 call_id =  data.call_id;
-
+                            
                                 // console.log(data.call_id,"==",formData?.form_type,"==",formData?.id);
-
+                                
 
                                 let html=`<div>
                                     <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
@@ -821,7 +882,7 @@
                                                     <div class="fw-bold">₹${data?.getPlan?.value}</div>
                                                     </div>
                                                 </div>
-
+                                                
                                                 <!-- Coupon Code -->
                                                 <div class="mt-4 border-bottom pb-3">
                                                     <h6>Have a Coupon Code?</h6>
@@ -854,15 +915,15 @@
                                                     <h6>GST 18%:</h6>
                                                     <span class="fw-bold">₹${data?.gstCharge}</span>
                                                 </div>
-
+                                                
                                                 <!-- Total -->
                                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                                     <h6>Total:</h6>
                                                     <div>
-
+                                                        
                                                         <span class="fw-bold" style="font-size:20px;">₹${data?.amount}</span>
                                                     </div>
-
+                                                    
                                                 </div>
                                             </div>
                                         </div>
@@ -870,12 +931,12 @@
 
 
                                         <!-- Checkout Button -->
-
+                                        
                                     </div>
                                     </div>
                                 </div>`;
 
-
+                                
                                 document.getElementById("checkOutbtn").style.display = 'block'
                                 document.getElementById("payment-summary").innerHTML = html;
                                 document.getElementById("payment-summary").style.display = 'block'
@@ -888,7 +949,7 @@
                             console.error('Error fetching data:', error);
                             fetchButton.innerHTML = 'Retry';
                         }finally {
-                            fetchButton.innerHTML = 'Schedule Your Call';
+                            fetchButton.innerHTML = 'Book a call with expert';
                             fetchButton.disabled = false;
                         }
                         // if(formObject.coupon != null  && formObject.coupon != 'null')
@@ -932,7 +993,7 @@
                     console.log(response.status,'response.status');
                     if(response.status == 200){
                         // Render the response for debugging
-                        document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
+                        // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
 
                         // Select the form and set the action
                         const payuForm = document.forms['payuForm'];
@@ -954,11 +1015,11 @@
                     }else{
                         alert(data)
                     }
-
+                    
                 }else{
                     alert("Please fill the from.")
                 }
-
+                
             }
         });
 

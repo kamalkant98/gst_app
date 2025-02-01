@@ -13,9 +13,13 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/css/intlTelInput.css">
         <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
         <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
+        
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-ui-timepicker-addon@1.6.3/dist/jquery-ui-timepicker-addon.min.css">
+        
 </head>
 <style>
-
+    
         .pad-bg {
             background: #f8f8f8;
             padding: 40px 20px;
@@ -109,13 +113,22 @@
         .filepond--credits {
             display: none !important;
         }
+        #terms{
+        /* Double-sized Checkboxes */
+        -ms-transform: scale(2); /* IE */
+        -moz-transform: scale(2); /* FF */
+        -webkit-transform: scale(2); /* Safari and Chrome */
+        -o-transform: scale(2); /* Opera */
+        padding: 10px;
+        margin:10px 10px 0px 10px;
+        }
     </style>
 
     <?php
         $language = [
             ['value'=>'Hindi','label' => 'Hindi'],
             ['value'=>'English','label' => 'English'],
-
+            
         ];
     ?>
 
@@ -126,29 +139,29 @@
                 <!-- Default form -->
                 <form id="tds_queries" method="POST" enctype="multipart/form-data">
                     <input type="hidden" id ="form_type" name="form_type" value="tds_queries">
-                    <input type="hidden" id ="user_id" name="user_id" value="<?= !empty($_GET['user_id'])?$_GET['user_id']:''; ?>">
+                    <input type="hidden" id ="user_id" name="user_id" value="<?= !empty($_GET['user_id'])?$_GET['user_id']:1; ?>">
                     <div class="mb-3 text-center">
                         <h2>CONNECT US FOR TDS/TCS QUERIES</h2>
                     </div>
-                        <?php
-
-
+                        <?php 
+                       
+                        
                         ?>
 
                     <div class="mb-3 ">
                         <label for="type" class="form-label">Tan No.</label>
                         <input type="text" class="form-control " id="tan_number" name="tan_number" requiredInput placeholder="TAN No." show_name='Tan No.'>
 
-
+                        
                     </div>
                     <div class="mb-3 ">
                         <label for="type_of_return" class="form-label w-100">Type of return</label>
                         <select id="type_of_return" class="form-control" name="type_of_return" requiredInput show_name="Type of return">
                             <option  value="">select value</option>
                             <option  value="1">24Q</option>
-                            <option  value="2">26Q</option>
-                            <option  value="3">27Q</option>
-                            <option  value="4">26QB</option>
+                            <option  value="2">26Q</option> 
+                            <option  value="3">27Q</option>   
+                            <option  value="4">26QB</option>   
                         </select>
                     </div>
 
@@ -157,9 +170,9 @@
                         <select id="no_of_employees" class="form-control first_select hide-input selectEmp" name="no_of_employees" requiredInput show_name="No of employees">
                             <option  value="">select value</option>
                             <option  value="1">1 to 10</option>
-                            <option  value="2">10 to 50</option>
-                            <option  value="3">50 to 100</option>
-                            <option  value="4">More than 100</option>
+                            <option  value="2">10 to 50</option> 
+                            <option  value="3">50 to 100</option>   
+                            <option  value="4">100 to More than connect us (TaxDunia)</option>   
                         </select>
                     </div>
 
@@ -168,20 +181,20 @@
                         <select id="tax_planning" class="form-control first_select hide-input" name="tax_planning" requiredInput show_name="Tax planning">
                             <option  value="">select value</option>
                             <option  value="1">Yes</option>
-                            <option  value="2">No</option>
+                            <option  value="2">No</option>   
                         </select>
                     </div>
 
 
                     <div class="mb-3 secend_select hidden-box-2">
                         <label for="no_of_entries" class="form-label w-100">No of entries</label>
-
+                           
                         <select id="no_of_entries" class="form-control secend_select hide-input selectEmp" name="no_of_entries" requiredInput show_name = "No of entries">
                             <option  value="">select value</option>
                             <option  value="1">Up to 100</option>
-                            <option  value="2">100 to 250</option>
-                            <option  value="3">250 to 500</option>
-                            <option  value="4">More than 500</option>
+                            <option  value="2">100 to 250</option> 
+                            <option  value="3">250 to 500</option>   
+                            <option  value="4">More than 500</option>   
                         </select>
                     </div>
 
@@ -190,9 +203,9 @@
                         <select id="no_of_entries_27" class="form-control third_select hide-input selectEmp" name="no_of_entries_27" requiredInput show_name="No of entries">
                             <option  value="">select value</option>
                             <option  value="1">Up to 50</option>
-                            <option  value="2">50 to 100</option>
-                            <option  value="3">100 to 200</option>
-                            <option  value="4">More than 200</option>
+                            <option  value="2">50 to 100</option> 
+                            <option  value="3">100 to 200</option>   
+                            <option  value="4">100 to More than connect us ( TaxDunia)</option>   
                         </select>
                     </div>
 
@@ -213,11 +226,11 @@
                             </div>
                         </div>
                     </div>
-
+                    
 
                     <div class="mb-3 hidden-box-4">
                         <label for="datepicker" class="form-label">Select Date & Time</label>
-                        <input type="text" id="datepicker" name="datetime" class="form-control hide-input" requiredInput placeholder="Y-m-d H:i" show_name="DateTime">
+                        <input type="text" id="datepicker" name="datetime" class="form-control hide-input" requiredInput placeholder="Y-m-d H:i" show_name="DateTime"> 
                     </div>
 
                     <div class="mb-3 hidden-box-3">
@@ -225,7 +238,7 @@
                         <select id="language" class="form-control hide-input" requiredInput name="language" show_name="language">
                         <option value="">select value</option>
                             <?php foreach ($language as $type): ?>
-
+                                
                                 <option value="<?= $type['value']; ?>"><?= $type['label']; ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -234,7 +247,7 @@
                     <div class="mb-3 ">
                         <label for="document" class="form-label">Select Document</label>
                         <!-- <input type="file" class="form-control hide-input" id="document" name="document[]" multiple="multiple"  accept=".jpeg,.jpg,.png,.doc,.docx,.xls,.xlsx,.pdf" title="select jpeg,jpg,png,doc,docx,xls,xlsx,pdf"> -->
-                        <input type="file" class="form-control" id="document" name="document[]" multiple="multiple"  requiredInput >
+                        <input type="file" class="form-control" id="document" name="document[]" multiple="multiple"  requiredInput > 
 
                     </div>
 
@@ -253,7 +266,7 @@
                 <form action="#" method="POST" name="payuForm">
                 </form>
                 <div class="text-center mt-4">
-                        <button class="btn btn-primary btn-lg w-100 mt-4"  id ='checkOutbtn' onclick="proceedToCheckout()">Pay Now</button>
+                        <button class="btn btn-primary btn-lg w-100 mt-4"  id ='checkOutbtn' disabled onclick="proceedToCheckout()" >Pay Now</button>
                 </div>
             </div>
         </div>
@@ -261,15 +274,16 @@
 
     <div id="response"></div>
 
-
+                  
 
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-
+        
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/intlTelInput.min.js"></script>
@@ -278,9 +292,13 @@
     <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
     <script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
     <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
+
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-ui-timepicker-addon@1.6.3/dist/jquery-ui-timepicker-addon.min.js"></script>
+    
 <script>
 
-FilePond.registerPlugin(
+        FilePond.registerPlugin(
             FilePondPluginFileValidateType,
             FilePondPluginImagePreview
         );
@@ -303,7 +321,7 @@ FilePond.registerPlugin(
                         .then(data => {
                             if (data.status === 'success') {
                                 console.log("asdasd");
-
+                                
                                 data.files.forEach(fileInfo => {
                                     uploadedFiles.push(fileInfo); // Store uploaded file name
                                 });
@@ -319,7 +337,7 @@ FilePond.registerPlugin(
                 }
             }
         });
-
+        
         pond.on('removefile', (error, file) => {
             if (error) {
                 console.error('Error removing file:', error);
@@ -359,7 +377,9 @@ FilePond.registerPlugin(
             }
         });
 
-        async function fetchPublicHolidays(year) {
+        async function fetchPublicHolidays(year = 0) {
+            let today = new Date();
+            year = today.getFullYear()
             try {
 
                     const API_KEY = 'AIzaSyD5_j5XtDqu_IBjkAOu8w_FraLVQcDCeKk';
@@ -390,68 +410,112 @@ FilePond.registerPlugin(
                         if (/Public holiday/.test(event.description)) {
                             const start = event.start.date || event.start.dateTime;
                             dates.push(start);
-                            // console.log(`${start} - ${event.summary}`);
+                            console.log(`${start} - ${event.summary}`);
                         }
-
+                        
                     });
                     return dates
-
-
+                    
+                    
                 } else {
                     console.log(`No public holidays found for ${year}.`);
                 }
             } catch (error) {
                 console.error('Error fetching public holidays:', error.message);
             }
-        }
+        } 
 
         // Disable weekends and public holidays
-        async function initDatePicker() {
+        // async function initDatePicker() {
+        //     const today = new Date();
+        //     const nextMonth = new Date();
+        //     nextMonth.setMonth(today.getMonth() + 1); // Get the date next month
+
+        //     // const publicHolidays = await getPublicHolidays(today.getFullYear());
+        //     const publicHolidays = await fetchPublicHolidays(today.getFullYear());
+        //     flatpickr("#datepicker", {
+        //         minDate: today, // Allow dates starting from today
+        //         maxDate: nextMonth, // Allow dates until the end of next month
+        //         enableTime: true, // Enable time selection
+        //         noCalendar: false, // Show calendar for date selection
+        //         dateFormat: "Y-m-d H:i K", // Format the date and time (YYYY-MM-DD HH:mm)
+        //         time_24hr: false, // 24-hour time format
+        //         disable: [
+        //             // Disable weekends (Saturday and Sunday)
+        //             function (date) {
+        //                 return date.getDay() === 0 || date.getDay() === 6; // 0 is Sunday, 6 is Saturday
+        //             },
+        //             // Disable public holidays
+        //             function (date) {
+        //                 const dateStr = date.toISOString().split('T')[0]; // Convert date to YYYY-MM-DD format
+        //                 return publicHolidays.includes(dateStr); // If the date is a holiday, disable it
+        //             }
+        //         ],
+        //         minTime: "09:00", // Minimum time selectable
+        //         maxTime: "19:00", // Maximum time selectable
+        //         onReady: function (selectedDates, dateStr, instance) {
+        //             instance.config.minTime = "09:00"; // Set the minimum time
+        //             instance.config.maxTime = "19:00"; // Set the maximum time
+        //         },
+        //         onValueUpdate: function (selectedDates, dateStr, instance) {
+        //             const time = instance.input.value.split(" ")[1]; // Get the selected time (HH:mm)
+        //             const [hours, minutes] = time.split(":").map(Number); // Convert to numbers
+        //             if (hours < 9 || (hours === 19 && minutes > 0) || hours > 19) {
+        //                 alert("Please select a time between 9:00 AM and 7:00 PM.");
+        //                 instance.clear(); // Clear the invalid selection
+        //             }
+        //         }
+        //     });
+        // }
+        // initDatePicker();
+        
+
+        $(document).ready(async function () {
             const today = new Date();
-            const nextMonth = new Date();
-            nextMonth.setMonth(today.getMonth() + 1); // Get the date next month
+            var disabledDates = await  fetchPublicHolidays(today.getFullYear());
+            // var disabledDates = ["2025-02-14", "2025-02-20", "2025-03-05"]; // Example disabled dates
+            function disableDates(date) {
+                var maxDate = new Date();
+                var day = date.getDay();
+                maxDate.setMonth(maxDate.getMonth() + 2); // Enable selection up to 2 months
 
-            // const publicHolidays = await getPublicHolidays(today.getFullYear());
-            const publicHolidays = await fetchPublicHolidays(today.getFullYear());
-            flatpickr("#datepicker", {
-                minDate: today, // Allow dates starting from today
-                maxDate: nextMonth, // Allow dates until the end of next month
-                enableTime: true, // Enable time selection
-                noCalendar: false, // Show calendar for date selection
-                dateFormat: "Y-m-d H:i", // Format the date and time (YYYY-MM-DD HH:mm)
-                time_24hr: true, // 24-hour time format
-                disable: [
-                    // Disable weekends (Saturday and Sunday)
-                    function (date) {
-                        return date.getDay() === 0 || date.getDay() === 6; // 0 is Sunday, 6 is Saturday
-                    },
-                    // Disable public holidays
-                    function (date) {
-                        const dateStr = date.toISOString().split('T')[0]; // Convert date to YYYY-MM-DD format
-                        return publicHolidays.includes(dateStr); // If the date is a holiday, disable it
-                    }
-                ],
-                minTime: "09:00", // Minimum time selectable
-                maxTime: "19:00", // Maximum time selectable
-                onReady: function (selectedDates, dateStr, instance) {
-                    instance.config.minTime = "09:00"; // Set the minimum time
-                    instance.config.maxTime = "19:00"; // Set the maximum time
-                },
-                onValueUpdate: function (selectedDates, dateStr, instance) {
-                    const time = instance.input.value.split(" ")[1]; // Get the selected time (HH:mm)
-                    const [hours, minutes] = time.split(":").map(Number); // Convert to numbers
-                    if (hours < 9 || (hours === 19 && minutes > 0) || hours > 19) {
-                        alert("Please select a time between 9:00 AM and 7:00 PM.");
-                        instance.clear(); // Clear the invalid selection
-                    }
+                var formattedDate = $.datepicker.formatDate("yy-mm-dd", date);
+
+                if (day === 0 || day === 6 || disabledDates.includes(formattedDate)) {
+                    return [false, "", "Unavailable"];
                 }
+
+                if (date > maxDate) {
+                    return [false, "", "Future date disabled"];
+                }
+
+                return [true, ""];
+            }
+
+            $("#datepicker").datetimepicker({
+                dateFormat: "yy-mm-dd",
+                timeFormat: "hh:mm TT",
+                minDate: 0, // Allow from today
+                maxDate: "+2M", // Allow up to 2 months ahead
+                beforeShowDay: disableDates, // Disable specific dates
+                minTime: "9:00 AM",
+                maxTime: "7:00 PM",
+                stepMinute: 5, // Minute steps of 5
+                controlType: "select", // Dropdown for hour, minute, AM/PM
+                oneLine: true, // Display time in a single row
+                showButtonPanel: false,
             });
-        }
-        initDatePicker();
 
 
-        $(document).ready(function (e) {
+            const checkbox = document.getElementById('terms');
+            const button = document.getElementById('checkOutbtn');
 
+            // Add an event listener to the checkbox
+            checkbox.addEventListener('change', function() {
+                // Enable or disable the button based on the checkbox state
+                button.disabled = !this.checked; // Disable button if checkbox is not checked
+            });
+            
             function isValidTAN(tan) {
                 // Regular expression to validate TAN number format (4 letters, 5 digits, 1 letter)
                 const tanRegex = /^[A-Z]{4}[0-9]{5}[A-Z]{1}$/;
@@ -485,19 +549,19 @@ FilePond.registerPlugin(
                 }
             });
 
+            
 
 
-
-            $('.selectEmp').on('change', function (event) {
+            $('.selectEmp').on('change', function (event) { 
                 var selectedValue = $(this).val();
-
+               
                 const elements = document.querySelectorAll('.selectTimeClass');
                 elements.forEach(element => {
                     element.remove();
                 });
                 let language = document.getElementById('language');
                 let datepicker = document.getElementById('datepicker');
-
+                
                 datepicker.classList.remove('show-input');
                 datepicker.classList.add('hide-input');
                 // const radioButtons = document.querySelectorAll('input[name="selectTime"]');
@@ -515,10 +579,10 @@ FilePond.registerPlugin(
                         input.classList.remove('hide-input');
                         input.checked = false;
                     })
-
+                   
                     language.classList.add('show-input');
                     language.classList.remove('hide-input');
-
+                    
                 }else{
                     $('.hidden-box-3').hide();
                     let inputs = document.querySelectorAll('input[name="selectTime"]');
@@ -530,11 +594,11 @@ FilePond.registerPlugin(
                     let language = document.getElementById('language');
                     language.classList.remove('show-input');
                     language.classList.add('hide-input');
-
+                   
                 }
             })
 
-            // $('#no_of_entries').on('change', function (event) {
+            // $('#no_of_entries').on('change', function (event) { 
             //     var selectedValue = $(this).val();
             //     const elements = document.querySelectorAll('.selectTimeClass');
             //     elements.forEach(element => {
@@ -552,7 +616,7 @@ FilePond.registerPlugin(
             //         let language = document.getElementById('language');
             //         language.classList.add('show-input');
             //         language.classList.remove('hide-input');
-
+                    
             //     }else{
             //         $('.hidden-box-3').hide();
             //         let inputs = document.querySelectorAll('input[name="selectTime"]');
@@ -568,7 +632,7 @@ FilePond.registerPlugin(
 
             // })
 
-            // $('#no_of_entries_27').on('change', function (event) {
+            // $('#no_of_entries_27').on('change', function (event) { 
             //     var selectedValue = $(this).val();
             //     const elements = document.querySelectorAll('.selectTimeClass');
             //     elements.forEach(element => {
@@ -586,7 +650,7 @@ FilePond.registerPlugin(
             //         let language = document.getElementById('language');
             //         language.classList.add('show-input');
             //         language.classList.remove('hide-input');
-
+                    
             //     }else{
             //         $('.hidden-box-3').hide();
             //         let inputs = document.querySelectorAll('input[name="selectTime"]');
@@ -601,7 +665,7 @@ FilePond.registerPlugin(
             //     }
 
             // })
-
+            
 
             let chooseOption = document.querySelector('input[name="selectTime"][value="2"]');
             let dateTimePicker = document.querySelector('#datepicker');
@@ -610,7 +674,7 @@ FilePond.registerPlugin(
                     if (chooseOption.checked) {
                         let allbox  = document.querySelectorAll('.hidden-box-4');
                         allbox.forEach(box => {
-
+                            
                                 box.style.display = 'block';
                         })
                         dateTimePicker.classList.remove('hide-input');
@@ -620,15 +684,15 @@ FilePond.registerPlugin(
                         let allbox  = document.querySelectorAll('.hidden-box-4');
                         allbox.forEach(box => {
                             box.style.display = 'none';
-                        })
+                        }) 
                         dateTimePicker.classList.add('hide-input');
                         dateTimePicker.classList.remove('show-input');
-
+                        
                     }
                 });
             });
 
-
+            
 
             let call_id=0;
             form_type =''
@@ -639,12 +703,12 @@ FilePond.registerPlugin(
                 try {
 
                     e.preventDefault(); // Prevent the default form submit
-                    let formElement = document.querySelector('#tds_queries');
+                    let formElement = document.querySelector('#tds_queries'); 
                     const formData = new FormData(formElement);
                     const formObject = Object.fromEntries(formData.entries());
                     let chooseOptions = document.querySelector('input[name="selectTime"][value="2"]');
                     console.log("chooseOption",formObject);
-
+                    
                     const errorElements = document.querySelectorAll('.error');
                     // Loop through and remove each element
                     errorElements.forEach(element => {
@@ -652,7 +716,7 @@ FilePond.registerPlugin(
                     });
 
                     const inputs = document.querySelectorAll('[requiredInput]');
-
+                    
                     let isValid = true;
 
                     // Loop through each input and validate
@@ -660,10 +724,10 @@ FilePond.registerPlugin(
                     input.classList.remove('is-invalid');
                         if (input.value.trim() === '' && !input.classList.contains('hide-input')  && input.name != 'selectTime') {
                             // console.log(input.show_name);
-                            let showName = input.getAttribute('show_name');
+                            let showName = input.getAttribute('show_name'); 
                             showName = showName && showName!= null ? showName : input.name;
                             console.log(showName);
-
+                            
                             let errorElement = document.createElement('span');
                             errorElement.className = 'error'; // Add error class for styling
                             errorElement.textContent = `${showName.charAt(0).toUpperCase() + showName.slice(1)} is required.`;
@@ -687,7 +751,7 @@ FilePond.registerPlugin(
                         }
 
                     });
-
+                    
                     const selectedOption = document.querySelector('input[name="selectTime"]:checked');
                     const selectedOptionw = document.querySelector('input[name="selectTime"]');
                     if (!selectedOption && !selectedOptionw.classList.contains('hide-input')) {
@@ -699,16 +763,16 @@ FilePond.registerPlugin(
                             // input.classList.add('is-invalid');
                             isValid = false;
                             console.log("false option ");
-
+                            
                     }
 
-
+                    
 
                 if (isValid) {
                     // Send the POST request
                     fetchButton.disabled = true;
                     fetchButton.innerHTML = 'Loading <span class="loader"></span>';
-
+                    
                     uploadedFiles.forEach((file, index) => {
                         formData.append('uploadedFile[' + index + ']', file.uploadedFile);
                     });
@@ -730,9 +794,9 @@ FilePond.registerPlugin(
                     // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
                         if(response.status == 200){
                             if(data?.amount > 0 && !data?.redirect_url){
-
+                            
                                 let checkIdinput =  document.querySelector('#call_id');
-
+                            
                                 if(!checkIdinput){
                                     let hiddenInput = document.createElement('input');
                                     hiddenInput.type = 'hidden';
@@ -741,7 +805,7 @@ FilePond.registerPlugin(
                                     hiddenInput.value = data.call_id;
                                     formElement.appendChild(hiddenInput);
                                 }
-
+                                
                                 call_id =  data.call_id;
                                 form_type = formData?.form_type;
                                 user_id = formData?.id;
@@ -757,8 +821,8 @@ FilePond.registerPlugin(
                                             <div id='cart-details'>
                                                     <div class="d-flex justify-content-between align-items-center border-bottom py-3">
                                                     <div>
-                                                        <h6>TDS/TCS QUERIES</h6>
-                                                        <p class="text-muted mb-1">Regarding ::${data?.regarding}</p>
+                                                        <h6>${data?.return_type || 'TDS/TCS QUERIES'}</h6>
+                                                        <p class="text-muted mb-1">${data?.regarding}</p>
                                                         ${data?.getPlan?.url && data?.getPlan?.url !='' ? `<a href="${data?.getPlan?.url}" target="_blank">Read more</a>` : ''}
 
                                                     </div>
@@ -802,7 +866,7 @@ FilePond.registerPlugin(
                                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                                     <h6>Total:</h6>
                                                     <div>
-
+                                                        
                                                         <span class="fw-bold" style="font-size:20px;">₹${data?.amount}</span>
                                                     </div>
                                                 </div>
@@ -824,8 +888,11 @@ FilePond.registerPlugin(
                                 document.querySelector('#terms').classList.remove('hide-input');
                             }else if(data?.redirect_url !=''){
                                 document.getElementById("tds_queries").reset();
+                                // console.log("redirect_url",data?.redirect_url?.);
+                                
+                                // alert(data?.redirect_url);
                                 window.location.href = `${data?.redirect_url}`;
-
+                                
                                 // alert('Form create successfully');
 
                             }
@@ -840,7 +907,7 @@ FilePond.registerPlugin(
                         fetchButton.disabled = false;
                     }
                 }
-
+                    
                 } catch (error) {
                     console.error('Error:', error);
                 }
@@ -858,7 +925,7 @@ FilePond.registerPlugin(
                     } else {
                         isValid = false;
                     }
-
+                    
                     if(call_id && form_type && user_id && isValid){
                         console.log(checkIdinput,"checkIdinput",call_id);
 
@@ -875,7 +942,7 @@ FilePond.registerPlugin(
 
                         // Parse the JSON response
                         const data = await response.json();
-
+                    
                         if(response.status == 200){
                             // Render the response for debugging
                             // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
@@ -914,7 +981,7 @@ FilePond.registerPlugin(
 
 
 <script>
-
+    
     $(document).ready(() => {
 
 // Initialize Select2

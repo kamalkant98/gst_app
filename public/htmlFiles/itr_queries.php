@@ -15,7 +15,7 @@
         <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
 </head>
 <style>
-
+    
         .pad-bg {
             background: #f8f8f8;
             padding: 40px 20px;
@@ -96,6 +96,16 @@
         .filepond--credits {
             display: none !important;
         }
+        
+        #terms{
+        /* Double-sized Checkboxes */
+        -ms-transform: scale(2); /* IE */
+        -moz-transform: scale(2); /* FF */
+        -webkit-transform: scale(2); /* Safari and Chrome */
+        -o-transform: scale(2); /* Opera */
+        padding: 10px;
+        margin:10px 10px 0px 10px;
+        }
     </style>
 
 <body>
@@ -105,12 +115,12 @@
                 <!-- Default form -->
                 <form id="itr_queries" method="POST" enctype="multipart/form-data">
                     <input type="hidden" id ="form_type" name="form_type" value="itr_queries">
-                    <input type="hidden" id ="user_id" name="user_id" value="<?= !empty($_GET['user_id'])?$_GET['user_id']:''; ?>">
+                    <input type="hidden" id ="user_id" name="user_id" value="<?= !empty($_GET['user_id'])?$_GET['user_id']:1; ?>">
                     <div class="mb-5 text-center">
                         <h2>Income Tax Returns</h2>
                     </div>
 
-                    <?php
+                    <?php 
                         $incomeType = [
                             '1'  => 'Income form salary',
                             '2'  => 'Income from house property',
@@ -119,13 +129,13 @@
                             '5'  => 'Income from the stock market',
                             '6'  => 'Income from crypto',
                             '7'  => 'Income form other sources',
-
+                        
                         ];
-
+                        
                         ?>
                     <div class="mb-3 m-select-check">
-                        <label for="multi-select" class="form-label  w-100">Your Income</label>
-                        <select id="multi-select" class="form-control" name="income_type[]" requiredInput  multiple="multiple">
+                        <label for="multi-select" class="form-label  w-100">Select your income</label>
+                        <select id="multi-select" class="form-control" name="income_type[]" requiredInput  multiple="multiple" placeholder="Select your income">
                             <?php foreach ($incomeType as $key => $value): ?>
                                 <option value="<?= $key; ?>"><?= $value; ?></option>
                             <?php endforeach; ?>
@@ -150,7 +160,7 @@
                         </select>
                     </div>
                     <div class="mb-3 hidden-box-1">
-                        <label for="profit_loss" class="form-label">Do you want us tp prepare profit & loss and balance sheet?</label>
+                        <label for="profit_loss" class="form-label">Do you want us to prepare profit & loss and balance sheet?</label>
                         <select id="profit_loss" class="form-control hide-input" requiredInput name="profit_loss">
                             <option value=''>select your option</option>
                             <option value="1">Yes</option>
@@ -159,7 +169,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="income_tax_forms" class="form-label">Do you want us tp file any income tax forms?</label>
+                        <label for="income_tax_forms" class="form-label">Do you want us to file any income tax forms?</label>
                         <select id="income_tax_forms" class="form-control" requiredInput name="income_tax_forms">
                             <option value=''>select your option</option>
                             <option value="1">Yes</option>
@@ -178,10 +188,10 @@
                     <div class="mb-3 ">
                         <label for="document" class="form-label">Select Document</label>
                         <!-- <input type="file" class="form-control hide-input" id="document" name="document[]" multiple="multiple"  accept=".jpeg,.jpg,.png,.doc,.docx,.xls,.xlsx,.pdf" title="select jpeg,jpg,png,doc,docx,xls,xlsx,pdf"> -->
-                        <input type="file" class="form-control" id="document" name="document[]" multiple="multiple"  requiredInput >
+                        <input type="file" class="form-control" id="document" name="document[]" multiple="multiple"  requiredInput > 
 
                     </div>
-
+                   
                     <div>
                         <button type="submit" id="submit_button" class="btn btn-primary">Submit</button>
                     </div>
@@ -196,7 +206,7 @@
                 <form action="#" method="POST" name="payuForm">
                 </form>
                 <div class="text-center mt-4">
-                        <button class="btn btn-primary btn-lg w-100 mt-4"  id ='checkOutbtn' onclick="proceedToCheckout()">Pay Now</button>
+                        <button class="btn btn-primary btn-lg w-100 mt-4"  id ='checkOutbtn' disabled onclick="proceedToCheckout()">Pay Now</button>
                 </div>
             </div>
         </div>
@@ -242,7 +252,7 @@
                         .then(data => {
                             if (data.status === 'success') {
                                 console.log("asdasd");
-
+                                
                                 data.files.forEach(fileInfo => {
                                     uploadedFiles.push(fileInfo); // Store uploaded file name
                                 });
@@ -258,7 +268,7 @@
                 }
             }
         });
-
+        
         pond.on('removefile', (error, file) => {
             if (error) {
                 console.error('Error removing file:', error);
@@ -300,6 +310,15 @@
 
         $(document).ready(function (e) {
 
+            const checkbox = document.getElementById('terms');
+            const button = document.getElementById('checkOutbtn');
+
+            // Add an event listener to the checkbox
+            checkbox.addEventListener('change', function() {
+                // Enable or disable the button based on the checkbox state
+                button.disabled = !this.checked; // Disable button if checkbox is not checked
+            });
+
             function isValidGST(gst) {
                 // Regular expression to validate GST number format (15 characters: alphanumeric)
                 const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[Z]{1}[0-9A-Z]{1}$/;
@@ -312,7 +331,7 @@
                 if(selectedValue == 1){
                     $('.hidden-box-1').show();
                     $('#profit_loss').removeClass('hide-input');
-
+                    
                 }else{
                     $('.hidden-box-1').hide();
                     $('#profit_loss').addClass('hide-input');
@@ -327,10 +346,10 @@
             $('#itr_queries').on('submit', async (e) => {
 
                 // try {
-
+                    
 
                     e.preventDefault(); // Prevent the default form submit
-                    let formElement = document.querySelector('#itr_queries');
+                    let formElement = document.querySelector('#itr_queries'); 
 
                     const errorElements = document.querySelectorAll('.error');
                     // Loop through and remove each element
@@ -339,7 +358,7 @@
                     });
 
                     const inputs = document.querySelectorAll('[requiredInput]');
-
+                    
                     let isValid = true;
 
                     // Loop through each input and validate
@@ -359,7 +378,7 @@
 
                         if (input.name == 'gst_number' && input.value != '') {
                             let checkGST = isValidGST(input.value);
-
+                           
                             if (checkGST == false) {
                                 let errorElement = document.createElement('span');
                                 errorElement.className = 'error'; // Add error class for styling
@@ -372,19 +391,19 @@
 
                     });
                     if(isValid){
-
+                    
                     const formData = new FormData(formElement);
                     // Handle multi-select values
                     const selectedValues = $('#multi-select').val() || [];
                     formData.append("plan", selectedValues);
-
+                    
                     uploadedFiles.forEach((file, index) => {
                            formData.append('uploadedFile[' + index + ']', file.uploadedFile);
                     });
 
                     fetchButton.disabled = true;
                     fetchButton.innerHTML = 'Loading <span class="loader"></span>';
-
+           
                     try {
                         const response = await fetch('http://127.0.0.1:8000/api/itr-queries/store', {
                             method: 'POST',
@@ -397,8 +416,8 @@
 
                         const data = await response.json();
                         let checkIdinput =  document.querySelector('#call_id');
-
-
+                         
+                            
                         if(!checkIdinput){
                             let hiddenInput = document.createElement('input');
                             hiddenInput.type = 'hidden';
@@ -408,12 +427,12 @@
                             formElement.appendChild(hiddenInput);
                         }
 
-
+                        
                         call_id =  data.call_id;
                         form_type = formData?.form_type;
                         user_id = formData?.id;
 
-
+                            
 
                         let html=`<div>
                             <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
@@ -424,21 +443,21 @@
                                     <div class="card-body">
                                         <!-- Item 1 -->
                                       <div id='cart-details'>
-
+         
                                         <h6>ITR QUERIES</h6>
                                             <div class=" justify-content-between align-items-center border-top">
-
+ 
                                             ${data?.getPlan.map(plan => `
                                                     <div class="d-flex justify-content-between align-items-center border-bottom py-3">
                                                         <div>
-                                                            ${plan?.type && plan?.type === 'income_type' ?
+                                                            ${plan?.type && plan?.type === 'income_type' ? 
                                                                 Object.values(plan?.plan).map(income => `
                                                                     <h6>
-                                                                        ${income?.label}
+                                                                        ${income?.label} 
                                                                         ${income?.url ? `<a href="${income?.url}" target="_blank">Read more</a>` : ''}
                                                                     </h6>
-                                                                `).join('')
-                                                                :
+                                                                `).join('') 
+                                                                : 
                                                                 `
                                                                 <h6>${plan.plan}</h6>
                                                                 <br>
@@ -446,7 +465,7 @@
                                                                 `
                                                             }
                                                         </div>
-                                                        <div class="fw-bold">₹${plan.amount}</div>
+                                                        <div class="fw-bold">${plan.amount > 0 ? '₹'+plan.amount : ''}</div>
                                                     </div>
                                                 `).join('')}
                                                 </div>
@@ -519,7 +538,7 @@
                 }
 
 
-
+                    
                 // } catch (error) {
                 //     console.error('Error:', error);
                 // }
@@ -539,7 +558,7 @@
                     }
 
                     console.log(call_id,form_type,user_id);
-
+                    
                     if(call_id && form_type && user_id && isValid){
                         console.log(checkIdinput,"checkIdinput",call_id);
 
@@ -556,7 +575,7 @@
 
                         // Parse the JSON response
                         const data = await response.json();
-
+                    
                         if(response.status == 200){
                             // Render the response for debugging
                             // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
@@ -597,10 +616,10 @@
 <script>
 
 
-
+    
     $(document).ready(() => {
 
-
+       
 
 // Initialize Select2
 $('#multi-select').select2({

@@ -97,6 +97,17 @@
         .filepond--credits {
             display: none !important;
         }
+
+        #terms{
+        /* Double-sized Checkboxes */
+        -ms-transform: scale(2); /* IE */
+        -moz-transform: scale(2); /* FF */
+        -webkit-transform: scale(2); /* Safari and Chrome */
+        -o-transform: scale(2); /* Opera */
+        padding: 10px;
+        margin:10px 10px 0px 10px;
+        }
+
     </style>
 
 <body>
@@ -124,7 +135,7 @@
                     </div>
 
                     <div class="mb-3 hidden-box-2 composition">
-                        <label for="type" class="form-label">Plan's</label>
+                        <label for="type" class="form-label">Select your plan</label>
                         <select class="form-control composition" id="plan_name" name="plan_name" requiredInput>
                             <option  value="">select plan</option>
                             <option  value="1">Quarterly</option>
@@ -133,13 +144,12 @@
                     </div>
 
                     <div class="mb-3 hidden-box-2 regular">
-                        <label for="type" class="form-label">Return filling frequency</label>
+                        <label for="type" class="form-label">Select your plan</label>
                         <select class="form-control regular" id="return_filling_frequency" name="return_filling_frequency" requiredInput>
-                            <option  value="">select frequency</option>
-                            <option  value="3">Annually</option>
+                            <option  value="">select your plan</option>
                             <option  value="2">Monthly</option>   
                             <option  value="1">Quarterly</option>
-                              
+                            <option  value="3">Annually</option>
                         </select>
                     </div>
                     <!-- <div class="mb-3 hidden-box-2 regular m-select-check">
@@ -182,7 +192,7 @@
                 <form action="#" method="POST" name="payuForm">
                 </form>
                 <div class="text-center mt-4">
-                        <button class="btn btn-primary btn-lg w-100 mt-4"  id ='checkOutbtn' onclick="proceedToCheckout()">Pay Now</button>
+                        <button class="btn btn-primary btn-lg w-100 mt-4"  id ='checkOutbtn' disabled onclick="proceedToCheckout()">Pay Now</button>
                 </div>
             </div>
         </div>
@@ -283,6 +293,15 @@
         });
 
         $(document).ready(function (e) {
+
+            const checkbox = document.getElementById('terms');
+            const button = document.getElementById('checkOutbtn');
+
+            // Add an event listener to the checkbox
+            checkbox.addEventListener('change', function() {
+                // Enable or disable the button based on the checkbox state
+                button.disabled = !this.checked; // Disable button if checkbox is not checked
+            });
 
             function isValidGST(gst) {
                 // Regular expression to validate GST number format (15 characters: alphanumeric)
