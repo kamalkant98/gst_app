@@ -53,4 +53,4 @@ Route::post('/api/itr-queries/store', [ItrQueriesController::class, 'ItrQuerieSt
 
 Route::get('/api/generatePdf',[PayUMoneyController::class,'generatePdf'])->name('generatePdf');
 Route::post('/api/commonUploadFile',[UserController::class, 'commonUploadFile'])->name('commonUploadFile');
-Route::delete('/api/deleteFile',[UserController::class, 'deleteFile'])->name('deleteFile');
+Route::post('/api/deleteFile',[UserController::class, 'deleteFile'])->name('deleteFile');

@@ -290,7 +290,9 @@ class UserController extends Controller
             $amount = $subtotal + $gstCharge;
             $amount = number_format((float)$amount, 2, '.', '');
 
-
+            $r_value = roundOffAmount($amount);
+            $roundOff = $r_value['difference'];
+            $amount = $r_value['roundedValue'];
             // dd($getDefaulOffer);
 
             // return response()->json(['coupon'=>$coupon]);
@@ -394,7 +396,7 @@ class UserController extends Controller
                 }
             }
 
-            return response()->json(['call_id'=>$getCall->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount], 200);
+            return response()->json(['call_id'=>$getCall->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>number_format($amount,2),'lessAmount'=>number_format($lessAmount,2),'inputCoupon'=>$inputCoupon,'subtotal'=>number_format($subtotal,2),'gstCharge'=>number_format($gstCharge,2),'defaultOfferAmount'=>number_format($defaultOfferAmount,2),'roundOff'=>$roundOff], 200);
         }else{
 
             $setData = [

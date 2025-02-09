@@ -11,7 +11,90 @@ use Illuminate\Support\Str;
 
 
 
-function numberToWords($number)
+function numberToWords($num) {
+    $ones = [
+        '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+        'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen',
+        'Seventeen', 'Eighteen', 'Nineteen'
+    ];
+
+    $tens = [
+        '', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'
+    ];
+
+    // Format the number to two decimal places
+    $num = number_format($num, 2, '.', '');
+    list($whole, $decimal) = explode('.', $num);
+
+    // Convert whole number to words
+    $wholeNumber = convertNumberToWords($whole, $ones, $tens);
+
+    // Convert decimal part (paise) to words
+    $decimalNumber = (int)$decimal > 0 ? convertNumberToWords($decimal, $ones, $tens) . ' Paise Only' : '';
+
+    $wholeNumber = $wholeNumber . ' Rupees ';
+
+     if($decimalNumber != ''){
+        $wholeNumber.= ' and '.$decimalNumber;
+     }else{
+        $wholeNumber.='Only';
+     }
+    return $wholeNumber;
+
+}
+
+function convertNumberToWords($num, $ones, $tens) {
+    if ($num == 0) return "Zero";
+
+    $words = '';
+
+    if ($num < 20) {
+        $words .= $ones[$num];
+    } elseif ($num < 100) {
+        $words .= $tens[(int)($num / 10)];
+        if ($num % 10 != 0) {
+            $words .= ' ' . $ones[$num % 10];
+        }
+    } elseif ($num < 1000) {
+        $words .= $ones[(int)($num / 100)] . " Hundred";
+        if ($num % 100 != 0) {
+            $words .= " " . convertNumberToWords($num % 100, $ones, $tens);
+        }
+    } elseif ($num < 100000) {
+        $words .= convertNumberToWords((int)($num / 1000), $ones, $tens) . " Thousand";
+        if ($num % 1000 != 0) {
+            $words .= " " . convertNumberToWords($num % 1000, $ones, $tens);
+        }
+    } elseif ($num < 10000000) {
+        $words .= convertNumberToWords((int)($num / 100000), $ones, $tens) . " Lakh";
+        if ($num % 100000 != 0) {
+            $words .= " " . convertNumberToWords($num % 100000, $ones, $tens);
+        }
+    } else {
+        $words .= convertNumberToWords((int)($num / 10000000), $ones, $tens) . " Crore";
+        if ($num % 10000000 != 0) {
+            $words .= " " . convertNumberToWords($num % 10000000, $ones, $tens);
+        }
+    }
+
+    return $words;
+}
+
+
+function roundOffAmount($amount) {
+    // Round the amount to the nearest integer
+    $roundedAmount = round($amount);
+
+    // Calculate the difference
+    $difference = $roundedAmount - $amount;
+
+    return [
+        'difference' => number_format($difference, 2),
+        'roundedValue' => $roundedAmount
+    ];
+}
+
+function numberToWords_old($number)
 {
     $hyphen = '-';
     $conjunction = ' and ';
@@ -571,13 +654,31 @@ function getTSDPlanAmount($data){
        $noOfEmployees = $data['no_of_employees'];
        $value = $noOfEmployees;
 
+
         $callPlan =[
             '1'  => ['value'=>'4000','label' => '1 to 10'],
             '2'  => ['value'=>'9999','label' => '10 to 50'],
             '3'  => ['value'=>'16999','label' => '50 to 100'],
             '4'  => ['value'=>'0','label' => 'More than 100'],
         ];
-        return $callPlan[$value];
+        $amount = 0;
+        $computation = 0;
+        if($noOfEmployees >= 1 && $noOfEmployees <= 10){
+            $amount = 4000;
+        }else if($noOfEmployees > 10 && $noOfEmployees <= 50){
+            $amount = 9999;
+        }else if($noOfEmployees > 50 && $noOfEmployees <= 100){
+            $amount = 16999;
+        }else if($noOfEmployees > 100){
+            $amount = 0;
+        }
+
+        if($data['tax_planning'] == 1){
+            $computation= 299 * $noOfEmployees;
+        }
+
+        return ['value'=>$amount,'label' => $noOfEmployees,'computation' => $computation];
+        // return $callPlan[$value];
     }elseif($typeOfReturn == 2){
 
         $noOfEntries = $data['no_of_entries'];

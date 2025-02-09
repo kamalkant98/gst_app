@@ -125,11 +125,20 @@
             <td width="20%" colspan="3">Amount</td>
         </tr>
         @php
-             $count = 8;
+                $count = 7;
+                 if (isset($data['coupon']) && $data['coupon'] !=""){
+                    $count = 6;
+                 }
+                if(count($data['plans']) > $count){
+                    $count = count($data['plans']);
+                }
+
+                $r_value = roundOffAmount($data['totalAmount']);
+                $roundOff = $r_value['difference'];
+                $amount = $r_value['roundedValue'];
+                // $amount = $data['totalAmount'];
         @endphp
-        @if (isset($data['coupon']) && $data['coupon'] !="")
-            $count = 7;
-        @endif
+
         @for ($i = 0; $i < $count; $i++)
             @if(isset($data['plans'][$i]['name']))
                 <tr class= "jk">
@@ -147,28 +156,35 @@
         @endfor
         @if (isset($data['lessAmount']) && $data['lessAmount'] > 0)
             <tr style="height: 25px; border:non;">
-                <td  colspan="4" width="60%" style="text-align: right;">Coupon Discount / Round OFF</td>
+                <td  colspan="4" width="60%" style="text-align: right;">Coupon Discount</td>
                 <td width="20%" colspan="1"></td>
-                <td width="20%" colspan="3"><strong>{{$data['lessAmount']}}</strong></td>
+                <td width="20%" colspan="3"><strong>{{number_format($data['lessAmount'],2)}}</strong></td>
             </tr>
         @endif
         <tr style="height: 25px;">
-            <td  colspan="4" width="60%" style="text-align: right;"><b>CGST</b></td>
+            <td  colspan="4" width="60%" style="text-align: right;"><b>CGST (9%)</b></td>
             <td width="20%" colspan="1"></td>
-            <td width="20%" colspan="3"><strong>{{$data['cgst']}}</strong></td>
+            <td width="20%" colspan="3"><strong>{{number_format($data['cgst'],2)}}</strong></td>
         </tr>
         <tr style="height: 25px;">
-            <td  colspan="4" width="60%" style="text-align: right;"><b>SGST</b></td>
+            <td  colspan="4" width="60%" style="text-align: right;"><b>SGST (9%)</b></td>
             <td width="20%" colspan="1"></td>
-            <td width="20%" colspan="3"><strong>{{$data['sgst']}}</strong></td>
+            <td width="20%" colspan="3"><strong>{{number_format($data['sgst'],2)}}</strong></td>
         </tr>
+        @if (isset($roundOff) && $roundOff != '0.00')
+            <tr style="height: 25px; border:non;">
+                <td  colspan="4" width="60%" style="text-align: right;">Round OFF</td>
+                <td width="20%" colspan="1"></td>
+                <td width="20%" colspan="3"><strong>{{$roundOff}}</strong></td>
+            </tr>
+        @endif
         <tr style="height: 25px;">
             <td  colspan="4" width="60%" style="text-align: right;">Total</td>
             <td width="20%" colspan="1"></td>
-            <td width="20%" colspan="3"><strong>{{$data['totalAmount']}}</strong></td>
+            <td width="20%" colspan="3"><strong>{{number_format($amount,2)}}</strong></td>
         </tr>
         <tr style="height: 50px;">
-            <td colspan="5"  style="text-align: left;border-left: none;border-right: none; padding: 5px;">Amount Chargeable (in words) <br><strong>{{numberToWords($data['totalAmount'])}} Rupee Only</strong> </td>
+            <td colspan="5"  style="text-align: left;border-left: none;border-right: none; padding: 5px;">Amount Chargeable (in words) <br><strong>{{numberToWords($amount)}} </strong> </td>
             <td colspan="3" style="text-align: right;border-left: none;border-right: none; padding: 5px;">E. & O.E</td>
         </tr>
         <tr style="">
@@ -187,25 +203,25 @@
         </tr>
         <tr style="">
             <td style="width:0%;">998396</td>
-            <td>{{$data['totalAmount']}}</td>
+            <td>{{number_format($amount,2)}}</td>
             <td>9%</td>
-            <td>{{$data['cgst']}}</td>
+            <td>{{number_format($data['cgst'],2)}}</td>
             <td>9%</td>
-            <td>{{$data['sgst']}}</td>
-            <td colspan="2">{{$data['totalTax']}}</td>
+            <td>{{number_format($data['sgst'],2)}}</td>
+            <td colspan="2">{{number_format($data['totalTax'],2)}}</td>
         </tr>
         <tr style="">
             <td style="width:0%; text-align: right;"><strong>Total</strong></td>
-            <td><strong>{{$data['totalAmount']}}</strong></td>
+            <td><strong>{{number_format($amount,2)}}</strong></td>
             <td></td>
-            <td> <strong>{{$data['cgst']}}</strong></td>
+            <td> <strong>{{number_format($data['cgst'],2)}}</strong></td>
             <td></td>
-            <td> <strong>{{$data['sgst']}}</strong></td>
-            <td colspan="2"> <strong>{{$data['totalTax']}}</strong></td>
+            <td> <strong>{{number_format($data['sgst'],2)}}</strong></td>
+            <td colspan="2"> <strong>{{number_format($data['totalTax'],2)}}</strong></td>
         </tr>
         <tr>
             <td colspan="8" style="padding: 5px;">
-                Tax Amount (in words)  : <strong> {{numberToWords($data['totalTax'])}} Rupee Only</strong><br>
+                Tax Amount (in words)  : <strong> {{numberToWords($data['totalTax'])}}</strong><br>
                 Company’s Bank Details :<br>
                 Bank Name:   <b>Kotak Bank</b><br>
                 A/c No. :  <b>9849146481</b> <br>

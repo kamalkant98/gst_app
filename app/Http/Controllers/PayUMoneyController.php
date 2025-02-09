@@ -461,6 +461,7 @@ class PayUMoneyController extends Controller
                     '4' => ['label'=>'26QB','url'=>'1'],
                 ];
                 $QueryTypeName = $typeOfReturnArr[$getplanDetails->type_of_return]['label'];
+                $getplanDetails['tax_planning'] =  $getplanDetails['tax_planning_of_employees'];
                 $getPlan = getTSDPlanAmount($getplanDetails);
 
                 // dd($getPlan);
@@ -468,7 +469,12 @@ class PayUMoneyController extends Controller
                 $QueryTypeName = 'TDS FEES AS PER FORM ATTACHED'; //$QueryTypeName.'- Number of employee '.$getPlan['label'];
 
                 $pdfData['plans']=[];
+                $computationQuery ='Computation & Tax Planning Service Fee for '.$getplanDetails['no_of_employees'].' Employees';
                 array_push( $pdfData['plans'], ["name"=>$QueryTypeName,"amount" =>$getPlan['value']]);
+                if($getplanDetails['type_of_return'] ==1 ){
+                    array_push( $pdfData['plans'], ["name"=>$computationQuery,"amount" =>$getPlan['computation']]);
+                }
+
                 $pdfData['paid_amount'] = $updateData['amount'];
                 $pdfData['coupon'] =  $updateData['coupon_code'];
                 $pdfData['default_discount'] =  $updateData['default_discount'];
@@ -509,7 +515,6 @@ class PayUMoneyController extends Controller
                 $pdf = $this->generatePdf($pdfData);
 
                 array_push($fileArr,$pdf);
-
 
                 $setData['other_details'] = [
                     'service_name' => $QueryTypeName,

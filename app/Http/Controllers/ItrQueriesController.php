@@ -80,6 +80,9 @@ class ItrQueriesController extends Controller
         $amount = $subtotal + $gstCharge;
         $amount = number_format((float)$amount, 2, '.', '');
 
+        $r_value = roundOffAmount($amount);
+        $roundOff = $r_value['difference'];
+        $amount = $r_value['roundedValue'];
 
         $income_type = implode(',', $data['income_type']);
 
@@ -122,7 +125,7 @@ class ItrQueriesController extends Controller
 
             }
         }
-        return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount], 200);
+        return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'coupon'=>$coupon,'amount'=>number_format($amount,2),'lessAmount'=>number_format($lessAmount,2),'inputCoupon'=>$inputCoupon,'subtotal'=>number_format($subtotal,2),'gstCharge'=>number_format($gstCharge,2),'defaultOfferAmount'=>number_format($defaultOfferAmount,2),'roundOff' => $roundOff], 200);
          //dd($plan);
         //  getCallPlanAmount
     }

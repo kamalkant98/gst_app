@@ -41,6 +41,7 @@ class BusinessRegistrationController extends Controller
         $defaultOfferAmount = 0;
         $subtotal = 0;
         $gstCharge = 0;
+        $roundOff ='';
         $defaultOffer_id = null;
         $getPlan = [];
         foreach($plan as $value){
@@ -90,6 +91,9 @@ class BusinessRegistrationController extends Controller
         $amount = $subtotal + $gstCharge;
         $amount = number_format((float)$amount, 2, '.', '');
 
+        $r_value = roundOffAmount($amount);
+        $roundOff = $r_value['difference'];
+        $amount = $r_value['roundedValue']; // number_format($r_value['roundedValue'], 2);
 
         $QueryType = $data['plan'];
         $queryTypeArr = explode(",",$QueryType);
@@ -153,7 +157,7 @@ class BusinessRegistrationController extends Controller
             }
         }
 
-        return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount], 200);
+        return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>number_format($amount,2),'lessAmount'=>number_format($lessAmount,2),'inputCoupon'=>$inputCoupon,'subtotal'=>number_format($subtotal,2),'gstCharge'=>number_format($gstCharge,2),'defaultOfferAmount'=>number_format($defaultOfferAmount,2),"roundOff"=>$roundOff], 200);
 
     }
 

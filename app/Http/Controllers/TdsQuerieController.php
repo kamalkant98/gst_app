@@ -50,19 +50,22 @@ class TdsQuerieController extends Controller
         $data = $request->all();
 
         $typeOfReturnArr=[
-            '1' =>['label'=>'24Q','url'=>'1'],
-            '2' => ['label'=>'26Q','url'=>'1'],
-            '3' =>['label'=>'27Q','url'=>'1'] ,
-            '4' => ['label'=>'26QB','url'=>'1'],
+            '1' =>['label'=>'24Q','url'=>'1' ,'computation_url'=> '112121'],
+            '2' => ['label'=>'26Q','url'=>'1','computation_url'=> '112121'],
+            '3' =>['label'=>'27Q','url'=>'1','computation_url'=> '112121'] ,
+            '4' => ['label'=>'26QB','url'=>'1','computation_url'=> '112121'],
         ];
         $typeOfReturn = $data['type_of_return'];
         if($typeOfReturn == 3){
             $data['no_of_entries'] = $data['no_of_entries_27'];
         }
-
+        $computation =0;
         $getPlan = getTSDPlanAmount($data);
+        // dd($getPlan);
         $amount =$getPlan['value'];
         $defaultOfferAmount = 0;
+        $computation = isset($getPlan['computation']) ? $getPlan['computation'] :0;
+        $amount += $computation;
         $coupon=null;
         $coupon_id = null;
         $defaultOffer_id= null;
@@ -94,6 +97,7 @@ class TdsQuerieController extends Controller
                 $QueryTypeName = $typeOfReturnArr[$returnType]['label'];
                 $returnTypeLabel = $typeOfReturnArr[$returnType]['label'];
                 $getPlan['url']= $typeOfReturnArr[$returnType]['url'];
+                $getPlan['computation_url']= $typeOfReturnArr[$returnType]['computation_url'];
 
                 $subtotal = $amount;
 
@@ -115,6 +119,10 @@ class TdsQuerieController extends Controller
                 $amount = $subtotal + $gstCharge;
                 $amount = number_format((float)$amount, 2, '.', '');
 
+
+                $r_value = roundOffAmount($amount);
+                $roundOff = $r_value['difference'];
+                $amount = $r_value['roundedValue'];
 
 
         $setData = [
@@ -175,8 +183,9 @@ class TdsQuerieController extends Controller
 
 
         $QueryTypeName =  ' Annually charge for '.$QueryTypeName.'- Number of employee '.$getPlan['label'];
+        $computationQuery ='Computation & Tax Planning Service Fee for '.$getPlan['label'].' Employees';
 
-        if($request['no_of_employees'] ==  4 || $data['no_of_entries'] == 4){
+        if($request['type_of_return'] != 1 && ($request['no_of_employees'] ==  4 || $data['no_of_entries'] == 4)){
             commonSendMeassage($create['user_id'],'tds_queries',$create['id']);
             // dd("ddd");
             // return redirect(env('CALL_BACK_URL'));
@@ -184,7 +193,7 @@ class TdsQuerieController extends Controller
            return response()->json(['redirect_url'=>$redirect_url], 200);
 
         }else{
-            return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount,'return_type'=>$returnTypeLabel], 200);
+            return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>number_format($amount,2),'lessAmount'=>number_format($lessAmount,2),'inputCoupon'=>$inputCoupon,'subtotal'=>number_format($subtotal,2),'gstCharge'=>number_format($gstCharge,2),'defaultOfferAmount'=>number_format($defaultOfferAmount,2),'return_type'=>$returnTypeLabel,'roundOff'=>$roundOff,'computation'=>$computation,'computationQuery'=>$computationQuery], 200);
 
         }
 

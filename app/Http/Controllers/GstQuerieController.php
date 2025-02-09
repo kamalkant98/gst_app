@@ -105,6 +105,10 @@ class GstQuerieController extends Controller
         $amount = number_format((float)$amount, 2, '.', '');
 
 
+        $r_value = roundOffAmount($amount);
+        $roundOff = $r_value['difference'];
+        $amount = $r_value['roundedValue'];
+
         $setData = [
             'gst_number' => $request['gst_number'],
             'type_of_taxpayer' => $request['type_of_taxpayer'],
@@ -147,7 +151,7 @@ class GstQuerieController extends Controller
             }
         }
 
-        return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge,'defaultOfferAmount'=>$defaultOfferAmount], 200);
+        return response()->json(['call_id'=>$create->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>number_format($amount,2),'lessAmount'=>number_format($lessAmount,2),'inputCoupon'=>$inputCoupon,'subtotal'=>number_format($subtotal,2),'gstCharge'=>number_format($gstCharge,2),'defaultOfferAmount'=>number_format($defaultOfferAmount,2),'roundOff'=>$roundOff], 200);
 
     }
 
