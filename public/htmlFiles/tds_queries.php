@@ -167,13 +167,14 @@
 
                     <div class="mb-3 first_select hidden-box-2">
                         <label for="no_of_employees" class="form-label w-100">No of employees</label>
-                        <select id="no_of_employees" class="form-control first_select hide-input selectEmp" name="no_of_employees" requiredInput show_name="No of employees">
+                        <!-- <select id="no_of_employees" class="form-control first_select hide-input selectEmp" name="no_of_employees" requiredInput show_name="No of employees">
                             <option  value="">select value</option>
                             <option  value="1">1 to 10</option>
                             <option  value="2">10 to 50</option> 
                             <option  value="3">50 to 100</option>   
                             <option  value="4">100 to More than connect us (TaxDunia)</option>   
-                        </select>
+                        </select> -->
+                        <input type="number" class="form-control first_select hide-input selectEmp" id="no_of_employees" name="no_of_employees" requiredInput placeholder="No of employees" show_name="No of employees">
                     </div>
 
                     <div class="mb-3 first_select hidden-box-2">
@@ -350,7 +351,7 @@
             if (fileToDelete) {
                 // Call API to delete the file from the server using uploadedFile (not originalName)
                 fetch('http://127.0.0.1:8000/api/deleteFile', {
-                    method: 'DELETE',
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -410,7 +411,7 @@
                         if (/Public holiday/.test(event.description)) {
                             const start = event.start.date || event.start.dateTime;
                             dates.push(start);
-                            console.log(`${start} - ${event.summary}`);
+                            // console.log(`${start} - ${event.summary}`);
                         }
                         
                     });
@@ -526,6 +527,7 @@
                 $('#no_of_employees').val('').trigger('change');
                 $('#no_of_entries').val('').trigger('change');
                 $('#no_of_entries_27').val('').trigger('change');
+                
                 // triggerChange('1')
                 var selectedValue = $(this).val();
                 if(selectedValue == 1){
@@ -554,7 +556,8 @@
 
             $('.selectEmp').on('change', function (event) { 
                 var selectedValue = $(this).val();
-               
+                var getId = $(this).attr('id');
+
                 const elements = document.querySelectorAll('.selectTimeClass');
                 elements.forEach(element => {
                     element.remove();
@@ -564,14 +567,10 @@
                 
                 datepicker.classList.remove('show-input');
                 datepicker.classList.add('hide-input');
-                // const radioButtons = document.querySelectorAll('input[name="selectTime"]');
-
-                // // Iterate through each radio button and uncheck them
-                // radioButtons.forEach(radio => {
-                //     radio.checked = false;
-                // });
+                
+                
                 $('.hidden-box-4').hide();
-                if(selectedValue == 4){
+                if((selectedValue == 4 && getId !='no_of_employees') || ( getId =='no_of_employees' && selectedValue > 100)){
                     $('.hidden-box-3').show();
                     let inputs = document.querySelectorAll('input[name="selectTime"]');
                     inputs.forEach(input => {
@@ -707,7 +706,6 @@
                     const formData = new FormData(formElement);
                     const formObject = Object.fromEntries(formData.entries());
                     let chooseOptions = document.querySelector('input[name="selectTime"][value="2"]');
-                    console.log("chooseOption",formObject);
                     
                     const errorElements = document.querySelectorAll('.error');
                     // Loop through and remove each element
@@ -789,12 +787,12 @@
 
                         // Parse the JSON response
                         const data = await response.json();
+                        
+                        // Render the response for debugging
+                        // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
 
-                            // Render the response for debugging
-                    // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
                         if(response.status == 200){
-                            if(data?.amount > 0 && !data?.redirect_url){
-                            
+                            if(data?.amount != '0.00' && !data?.redirect_url){
                                 let checkIdinput =  document.querySelector('#call_id');
                             
                                 if(!checkIdinput){
@@ -828,6 +826,17 @@
                                                     </div>
                                                     <div class="fw-bold">₹${data?.getPlan?.value}</div>
                                                     </div>
+
+                                                    ${ data?.computation && data?.computation > 0 && data?.computationQuery ? `<div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                                                    <div>
+                                                        <h6>${data?.return_type || 'TDS/TCS QUERIES'}</h6>
+                                                        <p class="text-muted mb-1">${data?.computationQuery}</p>
+                                                        ${data?.getPlan?.computation_url && data?.getPlan?.computation_url !='' ? `<a href="${data?.getPlan?.computation_url}" target="_blank">Read more</a>` : ''}
+
+                                                    </div>
+                                                    <div class="fw-bold">₹${data?.computation}</div>
+                                                    </div>` : ''}
+                                                    
                                                 </div>
 
                                                 <!-- Coupon Code -->
@@ -854,7 +863,7 @@
                                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                                     <h6>Sub Total:</h6>
                                                     <div>
-                                                        ${data?.defaultOfferAmount && data?.defaultOfferAmount > 0 ? `<span class="strike">₹${data?.defaultOfferAmount}</span>` :''}
+                                                        ${data?.defaultOfferAmount && data?.defaultOfferAmount  != '0.00' ? `<span class="strike">₹${data?.defaultOfferAmount}</span>` :''}
                                                         <span class="fw-bold">₹${data?.subtotal}</span>
                                                     </div>
                                                 </div>
@@ -862,6 +871,12 @@
                                                     <h6>GST 18%:</h6>
                                                     <span class="fw-bold">₹${data?.gstCharge}</span>
                                                 </div>
+
+                                                 ${data?.roundOff && data?.roundOff != '0.00' ? ` <div class="d-flex justify-content-between align-items-center mt-3">
+                                                    <h6>Round Off:</h6>
+                                                    <span class="fw-bold">₹${data?.roundOff}</span>
+                                                </div>` : ''}
+                                                
                                                 <!-- Total -->
                                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                                     <h6>Total:</h6>
@@ -891,7 +906,7 @@
                                 // console.log("redirect_url",data?.redirect_url?.);
                                 
                                 // alert(data?.redirect_url);
-                                window.location.href = `${data?.redirect_url}`;
+                                // window.location.href = `${data?.redirect_url}`;
                                 
                                 // alert('Form create successfully');
 

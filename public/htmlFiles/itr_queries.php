@@ -15,7 +15,7 @@
         <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
 </head>
 <style>
-    
+
         .pad-bg {
             background: #f8f8f8;
             padding: 40px 20px;
@@ -96,7 +96,7 @@
         .filepond--credits {
             display: none !important;
         }
-        
+
         #terms{
         /* Double-sized Checkboxes */
         -ms-transform: scale(2); /* IE */
@@ -120,7 +120,7 @@
                         <h2>Income Tax Returns</h2>
                     </div>
 
-                    <?php 
+                    <?php
                         $incomeType = [
                             '1'  => 'Income form salary',
                             '2'  => 'Income from house property',
@@ -129,9 +129,9 @@
                             '5'  => 'Income from the stock market',
                             '6'  => 'Income from crypto',
                             '7'  => 'Income form other sources',
-                        
+
                         ];
-                        
+
                         ?>
                     <div class="mb-3 m-select-check">
                         <label for="multi-select" class="form-label  w-100">Select your income</label>
@@ -188,10 +188,10 @@
                     <div class="mb-3 ">
                         <label for="document" class="form-label">Select Document</label>
                         <!-- <input type="file" class="form-control hide-input" id="document" name="document[]" multiple="multiple"  accept=".jpeg,.jpg,.png,.doc,.docx,.xls,.xlsx,.pdf" title="select jpeg,jpg,png,doc,docx,xls,xlsx,pdf"> -->
-                        <input type="file" class="form-control" id="document" name="document[]" multiple="multiple"  requiredInput > 
+                        <input type="file" class="form-control" id="document" name="document[]" multiple="multiple"  requiredInput >
 
                     </div>
-                   
+
                     <div>
                         <button type="submit" id="submit_button" class="btn btn-primary">Submit</button>
                     </div>
@@ -252,7 +252,7 @@
                         .then(data => {
                             if (data.status === 'success') {
                                 console.log("asdasd");
-                                
+
                                 data.files.forEach(fileInfo => {
                                     uploadedFiles.push(fileInfo); // Store uploaded file name
                                 });
@@ -268,7 +268,7 @@
                 }
             }
         });
-        
+
         pond.on('removefile', (error, file) => {
             if (error) {
                 console.error('Error removing file:', error);
@@ -281,7 +281,7 @@
             if (fileToDelete) {
                 // Call API to delete the file from the server using uploadedFile (not originalName)
                 fetch('http://127.0.0.1:8000/api/deleteFile', {
-                    method: 'DELETE',
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -331,7 +331,7 @@
                 if(selectedValue == 1){
                     $('.hidden-box-1').show();
                     $('#profit_loss').removeClass('hide-input');
-                    
+
                 }else{
                     $('.hidden-box-1').hide();
                     $('#profit_loss').addClass('hide-input');
@@ -346,10 +346,10 @@
             $('#itr_queries').on('submit', async (e) => {
 
                 // try {
-                    
+
 
                     e.preventDefault(); // Prevent the default form submit
-                    let formElement = document.querySelector('#itr_queries'); 
+                    let formElement = document.querySelector('#itr_queries');
 
                     const errorElements = document.querySelectorAll('.error');
                     // Loop through and remove each element
@@ -358,7 +358,7 @@
                     });
 
                     const inputs = document.querySelectorAll('[requiredInput]');
-                    
+
                     let isValid = true;
 
                     // Loop through each input and validate
@@ -378,7 +378,7 @@
 
                         if (input.name == 'gst_number' && input.value != '') {
                             let checkGST = isValidGST(input.value);
-                           
+
                             if (checkGST == false) {
                                 let errorElement = document.createElement('span');
                                 errorElement.className = 'error'; // Add error class for styling
@@ -391,19 +391,19 @@
 
                     });
                     if(isValid){
-                    
+
                     const formData = new FormData(formElement);
                     // Handle multi-select values
                     const selectedValues = $('#multi-select').val() || [];
                     formData.append("plan", selectedValues);
-                    
+
                     uploadedFiles.forEach((file, index) => {
                            formData.append('uploadedFile[' + index + ']', file.uploadedFile);
                     });
 
                     fetchButton.disabled = true;
                     fetchButton.innerHTML = 'Loading <span class="loader"></span>';
-           
+
                     try {
                         const response = await fetch('http://127.0.0.1:8000/api/itr-queries/store', {
                             method: 'POST',
@@ -416,117 +416,125 @@
 
                         const data = await response.json();
                         let checkIdinput =  document.querySelector('#call_id');
-                         
-                            
-                        if(!checkIdinput){
-                            let hiddenInput = document.createElement('input');
-                            hiddenInput.type = 'hidden';
-                            hiddenInput.name = 'call_id';
-                            hiddenInput.id = 'call_id';
-                            hiddenInput.value = data.call_id;
-                            formElement.appendChild(hiddenInput);
-                        }
 
-                        
-                        call_id =  data.call_id;
-                        form_type = formData?.form_type;
-                        user_id = formData?.id;
+                        if(response.status == 200){
+                            if(!checkIdinput){
+                                let hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name = 'call_id';
+                                hiddenInput.id = 'call_id';
+                                hiddenInput.value = data.call_id;
+                                formElement.appendChild(hiddenInput);
+                            }
 
-                            
 
-                        let html=`<div>
-                            <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
-                            <div class="row justify-content-center">
-                            <div class="col-md-12">
-                                <!-- Subscription Items -->
-                                <div class="card shadow-sm">
-                                    <div class="card-body">
-                                        <!-- Item 1 -->
-                                      <div id='cart-details'>
-         
-                                        <h6>ITR QUERIES</h6>
-                                            <div class=" justify-content-between align-items-center border-top">
- 
-                                            ${data?.getPlan.map(plan => `
-                                                    <div class="d-flex justify-content-between align-items-center border-bottom py-3">
-                                                        <div>
-                                                            ${plan?.type && plan?.type === 'income_type' ? 
-                                                                Object.values(plan?.plan).map(income => `
-                                                                    <h6>
-                                                                        ${income?.label} 
-                                                                        ${income?.url ? `<a href="${income?.url}" target="_blank">Read more</a>` : ''}
-                                                                    </h6>
-                                                                `).join('') 
-                                                                : 
-                                                                `
-                                                                <h6>${plan.plan}</h6>
-                                                                <br>
-                                                                <span>${plan.answer}</span>
-                                                                `
-                                                            }
+                            call_id =  data.call_id;
+                            form_type = formData?.form_type;
+                            user_id = formData?.id;
+
+
+
+                            let html=`<div>
+                                <h4 class="text-left mb-4 mt-4">Payment Summary</h4>
+                                <div class="row justify-content-center">
+                                <div class="col-md-12">
+                                    <!-- Subscription Items -->
+                                    <div class="card shadow-sm">
+                                        <div class="card-body">
+                                            <!-- Item 1 -->
+                                        <div id='cart-details'>
+
+                                            <h6>ITR QUERIES</h6>
+                                                <div class=" justify-content-between align-items-center border-top">
+
+                                                ${data?.getPlan.map(plan => `
+                                                        <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                                                            <div>
+                                                                ${plan?.type && plan?.type === 'income_type' ?
+                                                                    Object.values(plan?.plan).map(income => `
+                                                                        <h6>
+                                                                            ${income?.label}
+                                                                            ${income?.url ? `<a href="${income?.url}" target="_blank">Read more</a>` : ''}
+                                                                        </h6>
+                                                                    `).join('')
+                                                                    :
+                                                                    `
+                                                                    <h6>${plan.plan}</h6>
+                                                                    <br>
+                                                                    <span>${plan.answer}</span>
+                                                                    `
+                                                                }
+                                                            </div>
+                                                            <div class="fw-bold">${plan.amount > 0 ? '₹'+plan.amount : ''}</div>
                                                         </div>
-                                                        <div class="fw-bold">${plan.amount > 0 ? '₹'+plan.amount : ''}</div>
+                                                    `).join('')}
                                                     </div>
-                                                `).join('')}
+                                                </div>
+
+                                            <!-- Coupon Code -->
+                                            <div class="mt-4 border-bottom pb-3">
+                                                <h6>Have a Coupon Code?</h6>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" id="coupon-code" name='coupon' placeholder="Enter coupon code" value='${data?.inputCoupon}'>
+                                                    <button class="btn btn-primary" id="apply-coupon">Apply</button>
+                                                    <button class="btn btn-danger" id="remove-coupon">Remove Coupon</button>
+                                                </div>
+                                                    <p id="coupon-message" class="text-success mt-2 d-none">Coupon applied successfully!</p>
+                                            </div>
+                                        ${data?.coupon && data?.coupon?.id > 0 ? `
+                                                <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
+                                                    <h6>Coupon Code :: <strong>${data.coupon.code}</strong></h6>
+                                                    <span class="fw-bold">₹${data.lessAmount}</span>
+                                                </div>
+                                            ` : `${data?.coupon != null ?`
+                                                <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
+                                                    <h6>Coupon Code :: <strong style="color">${data.coupon}</strong></h6>
+                                                </div>`:''}
+                                            `}
+
+                                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                                <h6>Sub Total:</h6>
+                                                <div>
+                                                    ${data?.defaultOfferAmount && data?.defaultOfferAmount != '0.00' ? `<span class="strike">₹${data?.defaultOfferAmount}</span>` :''}
+                                                    <span class="fw-bold">₹${data?.subtotal}</span>
                                                 </div>
                                             </div>
-
-                                        <!-- Coupon Code -->
-                                        <div class="mt-4 border-bottom pb-3">
-                                            <h6>Have a Coupon Code?</h6>
-                                            <div class="input-group">
-                                                <input type="text" class="form-control" id="coupon-code" name='coupon' placeholder="Enter coupon code" value='${data?.inputCoupon}'>
-                                                <button class="btn btn-primary" id="apply-coupon">Apply</button>
-                                                <button class="btn btn-danger" id="remove-coupon">Remove Coupon</button>
+                                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                                <h6>GST 18%:</h6>
+                                                <span class="fw-bold">₹${data?.gstCharge}</span>
                                             </div>
-                                                <p id="coupon-message" class="text-success mt-2 d-none">Coupon applied successfully!</p>
-                                        </div>
-                                       ${data?.coupon && data?.coupon?.id > 0 ? `
-                                            <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
-                                                <h6>Coupon Code :: <strong>${data.coupon.code}</strong></h6>
-                                                <span class="fw-bold">₹${data.lessAmount}</span>
-                                            </div>
-                                        ` : `${data?.coupon != null ?`
-                                             <div class="d-flex justify-content-between align-items-center mt-3 border-bottom pb-3">
-                                                <h6>Coupon Code :: <strong style="color">${data.coupon}</strong></h6>
-                                            </div>`:''}
-                                        `}
 
-                                        <div class="d-flex justify-content-between align-items-center mt-3">
-                                            <h6>Sub Total:</h6>
-                                            <div>
-                                                ${data?.defaultOfferAmount && data?.defaultOfferAmount > 0 ? `<span class="strike">₹${data?.defaultOfferAmount}</span>` :''}
-                                                <span class="fw-bold">₹${data?.subtotal}</span>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center mt-3">
-                                            <h6>GST 18%:</h6>
-                                            <span class="fw-bold">₹${data?.gstCharge}</span>
-                                        </div>
+                                            ${data?.roundOff && data?.roundOff != '0.00' ? ` <div class="d-flex justify-content-between align-items-center mt-3">
+                                                <h6>Round Off:</h6>
+                                                <span class="fw-bold">₹${data?.roundOff}</span>
+                                            </div>` : ''}
 
-                                        <!-- Total -->
-                                        <div class="d-flex justify-content-between align-items-center mt-3">
-                                            <h6>Total:</h6>
-                                            <div>
-                                                <span class="fw-bold" style="font-size:20px;">₹${data?.amount}</span>
+                                            <!-- Total -->
+                                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                                <h6>Total:</h6>
+                                                <div>
+                                                    <span class="fw-bold" style="font-size:20px;">₹${data?.amount}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+
+
+
+                                    <!-- Checkout Button -->
+
                                 </div>
+                                </div>
+                            </div>`;
 
-
-
-                                <!-- Checkout Button -->
-
-                            </div>
-                            </div>
-                        </div>`;
-
-                        document.getElementById("checkOutbtn").style.display = 'block'
-                        document.getElementById("payment-summary").innerHTML = html;
-                        document.getElementById("payment-summary").style.display = 'block'
-                        document.getElementById("terms-box").style.display = 'block'
-                        document.querySelector('#terms').classList.remove('hide-input');
+                            document.getElementById("checkOutbtn").style.display = 'block'
+                            document.getElementById("payment-summary").innerHTML = html;
+                            document.getElementById("payment-summary").style.display = 'block'
+                            document.getElementById("terms-box").style.display = 'block'
+                            document.querySelector('#terms').classList.remove('hide-input');
+                        }else{
+                            alert('Something went wrong');
+                        }
 
                     } catch (error) {
                         console.error('Error fetching data:', error);
@@ -538,7 +546,7 @@
                 }
 
 
-                    
+
                 // } catch (error) {
                 //     console.error('Error:', error);
                 // }
@@ -558,7 +566,7 @@
                     }
 
                     console.log(call_id,form_type,user_id);
-                    
+
                     if(call_id && form_type && user_id && isValid){
                         console.log(checkIdinput,"checkIdinput",call_id);
 
@@ -575,7 +583,7 @@
 
                         // Parse the JSON response
                         const data = await response.json();
-                    
+
                         if(response.status == 200){
                             // Render the response for debugging
                             // document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
@@ -616,10 +624,10 @@
 <script>
 
 
-    
+
     $(document).ready(() => {
 
-       
+
 
 // Initialize Select2
 $('#multi-select').select2({

@@ -265,7 +265,7 @@
             if (fileToDelete) {
                 // Call API to delete the file from the server using uploadedFile (not originalName)
                 fetch('http://127.0.0.1:8000/api/deleteFile', {
-                    method: 'DELETE',
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -471,7 +471,7 @@
                                                 <div class="d-flex justify-content-between align-items-center mt-3 ">
                                                     <h6>Sub Total:</h6>
                                                     <div>
-                                                        ${data?.defaultOfferAmount && data?.defaultOfferAmount > 0 ? `<span class="strike">₹${data?.defaultOfferAmount}</span>` :''}
+                                                        ${data?.defaultOfferAmount && data?.defaultOfferAmount != '0.00' ? `<span class="strike">₹${data?.defaultOfferAmount}</span>` :''}
                                                         <span class="fw-bold">₹${data?.subtotal}</span>
                                                     </div>
                                                 </div>
@@ -479,6 +479,10 @@
                                                     <h6>GST 18%:</h6>
                                                     <span class="fw-bold">₹${data?.gstCharge}</span>
                                                 </div>
+                                                ${data?.roundOff && data?.roundOff != '0.00' ? ` <div class="d-flex justify-content-between align-items-center mt-3">
+                                                    <h6>Round Off:</h6>
+                                                    <span class="fw-bold">₹${data?.roundOff}</span>
+                                                </div>` : ''}
                                                 
                                                 <!-- Total -->
                                                 <div class="d-flex justify-content-between align-items-center mt-3">
