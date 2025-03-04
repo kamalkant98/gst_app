@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
 use App\Jobs\SendEmailJob;
-use App\Services\WhatsAppService;
+// use App\Services\WhatsAppService;
 use App\Services\OtpService;
 use App\Models\ScheduleCall;
 use App\Models\Coupon;
@@ -22,12 +22,13 @@ use App\Models\Documents;
 
 class UserController extends Controller
 {
-    protected $whatsAppService;
+    // protected $whatsAppService;
     protected $otpService;
 
 
-    public function __construct(WhatsAppService $whatsAppService,OtpService $otpService)
+    public function __construct(OtpService $otpService)
     {
+        //WhatsAppService $whatsAppService
         // $this->whatsAppService = $whatsAppService;
         $this->otpService = $otpService;
     }
@@ -222,7 +223,7 @@ class UserController extends Controller
 
             return response()->json(['error' => 'OTP has expired.'], 404);
         }
-        dd(now()->gt($userInquiry->otp_expires_at));
+        // dd(now()->gt($userInquiry->otp_expires_at));
         // Check if the OTP matches the one in the database
         if ($userInquiry->otp == $request->otp) {
 
