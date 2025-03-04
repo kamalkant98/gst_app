@@ -26,11 +26,11 @@ class UserController extends Controller
     protected $otpService;
 
 
-    // public function __construct(WhatsAppService $whatsAppService,OtpService $otpService)
-    // {
-    //     $this->whatsAppService = $whatsAppService;
-    //     $this->otpService = $otpService;
-    // }
+    public function __construct(WhatsAppService $whatsAppService,OtpService $otpService)
+    {
+        // $this->whatsAppService = $whatsAppService;
+        $this->otpService = $otpService;
+    }
 
     public function index(){
 
@@ -129,7 +129,8 @@ class UserController extends Controller
             'name' => ucwords($request['name']),
             'mobile' =>$request['mobile'],
             'form_type' => $request['form_type'],
-            'otp' => $otp
+            'otp' => $otp,
+            'otp_expires_at'=> now()->addMinutes(5),
         ];
 
 
@@ -143,10 +144,12 @@ class UserController extends Controller
 
             // if($value->type == 1){
 
-            // // Send OTP to the provided phone number
+            // Send OTP to the provided phone number
+            $mg = "##var## is your one-time password for verification at TaxDunia. Valid for 5 minutes.";
+            $mg = str_replace("##var##", $data['otp'], $mg);
 
-            //     $phone = '+91'.$data['mobile'];
-            //     $this->otpService->sendOtp($phone, $message);
+            $phone = $data['mobile'];
+            // $this->otpService->sendOtp($phone, $mg);
 
 
             //     $to = '+91'.$data['mobile']; // Recipient's WhatsApp number
@@ -179,9 +182,6 @@ class UserController extends Controller
             $inquiry = UserInquiry::where('id', $request->id)->first();
             $inquiry->update($data);
 
-
-
-
             return response()->json(['message' => 'OTP generated successfully!','data'=> $inquiry->id]); //'insertData'=>$data
         }else{
             $insertData = UserInquiry::create($data);
@@ -206,7 +206,7 @@ class UserController extends Controller
 
         // Check if validation fails
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
+            return response()->json(['errors' => $validator->errors()], 200);
         }
 
         // Find the user inquiry record by email
@@ -218,9 +218,11 @@ class UserController extends Controller
 
         // Check if OTP has expired
         // if ($userInquiry->otp_expires_at && now()->gt($userInquiry->otp_expires_at)) {
-        //     return response()->json(['error' => 'OTP has expired.'], 400);
-        // }
+        if (now()->gt(Carbon::parse($userInquiry->otp_expires_at))) {
 
+            return response()->json(['error' => 'OTP has expired.'], 404);
+        }
+        dd(now()->gt($userInquiry->otp_expires_at));
         // Check if the OTP matches the one in the database
         if ($userInquiry->otp == $request->otp) {
 
