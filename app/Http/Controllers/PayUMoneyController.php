@@ -124,7 +124,7 @@ class PayUMoneyController extends Controller
 
 
             $data = [
-                'key' => env('PAYU_MERCHANT_KEY'),
+                'key' => config('app.PAYU_MERCHANT_KEY'),
                 'txnid' =>  uniqid(),
                 'amount' => $amount,
                 'productinfo' => 'API Product', // Example: Replace with actual product info
@@ -158,7 +158,7 @@ class PayUMoneyController extends Controller
         // dd("as");
         // Return the payment data as a JSON response
         return response()->json([
-            'url' => env('PAYU_URL'),
+            'url' => config('app.PAYU_URL'),
             'data' => $data,
         ]);
     }
@@ -166,7 +166,7 @@ class PayUMoneyController extends Controller
     public function generateHash($data)
     {
         $hashString = $data['key'] . '|' . $data['txnid'] . '|' . $data['amount'] . '|' .
-            $data['productinfo'] . '|' . $data['firstname'] . '|' . $data['email'] . '|||||||||||' . env('PAYU_MERCHANT_SALT');
+            $data['productinfo'] . '|' . $data['firstname'] . '|' . $data['email'] . '|||||||||||' . config('app.PAYU_MERCHANT_SALT');
 
         return strtolower(hash('sha512', $hashString));
 
@@ -533,10 +533,10 @@ class PayUMoneyController extends Controller
 
             $this->sendMeassage($setData, $updateData->form_type,$fileArr);
 
-            return redirect(env('CALL_BACK_URL'));
+            return redirect(config('app.CALL_BACK_URL'));
         }
 
-        return redirect(env('CALL_BACK_ERROR_URL'));
+        return redirect(config('app.CALL_BACK_ERROR_URL'));
     }
 
     public function sendMeassage($updateData,$formType,$filePaths = []){
@@ -597,7 +597,7 @@ class PayUMoneyController extends Controller
                 SendEmailJob::dispatch($data);
 
                 $data = [
-                    'email' => env('ADMIN_EMAIL'),
+                    'email' => config('app.ADMIN_EMAIL'),
                     'title' => $value->subject.'-'.$userData->name.'('.$userData['mobile'].')',
                     'message' => $message,
                     'filePaths' => $filePaths
@@ -623,7 +623,7 @@ class PayUMoneyController extends Controller
         $updateData  =  Transactions::where('txnid',$request['txnid'])->first();
         $updateData->update(["status"=>'failed']);
 
-        return redirect(env('CALL_BACK_ERROR_URL'));
+        return redirect(config('app.CALL_BACK_ERROR_URL'));
     }
 
 

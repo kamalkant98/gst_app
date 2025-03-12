@@ -433,7 +433,7 @@ class UserController extends Controller
             }
 
             commonSendMeassage($data['id'],'schedule_call',$getCall['id']);
-            $redirect_url = env('CALL_BACK_URL');
+            $redirect_url = config('app.CALL_BACK_URL');
             return response()->json(['redirect_url'=>$redirect_url], 200);
 
             // return response()->json(['call_id'=>$getCall->id,'getPlan'=>$getPlan,'regarding'=>$QueryTypeName,'coupon'=>$coupon,'amount'=>$amount,'lessAmount'=>$lessAmount,'inputCoupon'=>$inputCoupon,'subtotal'=>$subtotal,'gstCharge'=>$gstCharge], 200);

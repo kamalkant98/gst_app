@@ -17,6 +17,14 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'PAYU_URL'=> env('PAYU_URL', 'https://secure.payu.in/_payment'),
+    'CALL_BACK_URL'=> env('CALL_BACK_URL'),
+    'CALL_BACK_ERROR_URL'=> env('CALL_BACK_ERROR_URL'),
+    'PAYU_MERCHANT_KEY'=> env('PAYU_MERCHANT_KEY'),
+    'PAYU_MERCHANT_SALT'=> env('PAYU_MERCHANT_SALT'),
+
+  	'ADMIN_EMAIL' => env('ADMIN_EMAIL','info@taxdunia.com'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

@@ -188,8 +188,8 @@ class TdsQuerieController extends Controller
         if($request['type_of_return'] != 1 && ($request['no_of_employees'] ==  4 || $data['no_of_entries'] == 4)){
             commonSendMeassage($create['user_id'],'tds_queries',$create['id']);
             // dd("ddd");
-            // return redirect(env('CALL_BACK_URL'));
-            $redirect_url = env('CALL_BACK_URL');
+            // return redirect(config('app.CALL_BACK_URL'));
+            $redirect_url = config('app.CALL_BACK_URL');
            return response()->json(['redirect_url'=>$redirect_url], 200);
 
         }else{
